@@ -11,9 +11,15 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
+
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
+
+/**
+ * Cuando la aplicacion este lista ejecutara este proceso
+ */
+app.on('ready', () => { createWindow() })
 
 function createWindow () {
   /**
@@ -22,7 +28,8 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 563,
     useContentSize: true,
-    width: 1000
+    width: 1000,
+    center: true
   })
 
   mainWindow.loadURL(winURL)
@@ -31,8 +38,6 @@ function createWindow () {
     mainWindow = null
   })
 }
-
-app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

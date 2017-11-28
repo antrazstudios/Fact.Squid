@@ -13,6 +13,11 @@ export default new Router({
     {
       path: '*',
       redirect: '/'
+    },
+    {
+      path: '/systeminformation',
+      name: 'system-information',
+      component: require('@/components/LandingPage/SystemInformation').default
     }
   ]
 })

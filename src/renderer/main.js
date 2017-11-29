@@ -6,13 +6,14 @@ import router from './router'
 import store from './store'
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
+import locale from 'iview/dist/locale/es-ES'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
-Vue.use(iView)
+Vue.use(iView, { locale })
 new Vue({
   components: { App },
   router,

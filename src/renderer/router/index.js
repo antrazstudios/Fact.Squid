@@ -18,6 +18,11 @@ export default new Router({
       path: '/systeminformation',
       name: 'system-information',
       component: require('@/components/LandingPage/SystemInformation').default
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: require('@/components/Profiles/login').default
     }
   ]
 })

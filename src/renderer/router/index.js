@@ -23,6 +23,11 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: require('@/components/Profiles/login').default
+    },
+    {
+      path: '/sql/connectionsassistant',
+      name: 'connections-assistant',
+      component: require('@/components/sql/ConnectionsAssistant').default
     }
   ]
 })

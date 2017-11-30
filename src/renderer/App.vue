@@ -17,6 +17,9 @@
   .content {
     align-items: center;
     align-content: stretch;
+    position: absolute;
+    top: 60px;
+    bottom: 30px;
   }
   .layout-logo{
       width: 30px;
@@ -44,8 +47,8 @@
 
 <template>
   <div id="app">
-    <Affix>
-      <Menu id="menufix" mode="horizontal" active-name="1" theme="light" style="visibility: hidden">
+    <Affix ref="menufix">
+      <Menu mode="horizontal" active-name="1" theme="light">
         <div class="layout-logo"></div>
         <div class="layout-nav">
           <MenuItem name="1">

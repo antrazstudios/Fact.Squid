@@ -1,7 +1,8 @@
 <style scoped>
   .content{
     width: 100%;
-    padding: 0px 60px;
+    min-height: 100%;
+    padding: 20px;
     background-image: url('~@/assets/images/BaseTheme_Background.png');
     background-size: cover;
     background-repeat: no-repeat;
@@ -10,6 +11,22 @@
   }
   .layout-text-item{
     margin: 8px 0px;
+  }
+  .form-text{
+    text-align: center;
+  }
+  .form-object{
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  .layout-image{
+    background-image: url('~@/assets/images/login_form.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-width: 150px;
+    min-height: 150px;
   }
 </style>
 <template>
@@ -28,85 +45,117 @@
           </span>
         </Alert>
         <div>
-          <div class="layout-text-item">
-            <label>Conexion: </label>
-            <i-select v-model="model" style="width: 250px" clearable>
-              <i-option value="localhost">localhost</i-option>
-              <i-option value="localhost">remote</i-option>
+          <div id="divConexionChange" class="layout-text-item" style="display: none">
+            <h4 style="display: inline">Conexion: </h4>
+            <i-select v-model="connectionSelected" style="width: 250px" clearable>
+              <i-option v-for="item in connectionsList" :value="item.name" :key="item.id">{{ item.name }}</i-option>
             </i-select>
-            <i-button>OK</i-button>
+            <i-button @click="changeViewConnection('divConexionActual', 'divConexionChange', 'yes')">OK</i-button>
           </div>
-          <div class="layout-text-item">
-            <label>Conexion Selecionada: </label>
-            <i-button>Cambiar conexion</i-button>
+          <div id="divConexionActual" class="layout-text-item">
+            <h4 style="display: inline">Conexion seleccionada: </h4>
+            <label style="margin: 0px 20px 0px 0px">{{ connectionSelected }}</label>
+            <i-button @click="changeViewConnection('divConexionChange', 'divConexionActual')">Cambiar conexion</i-button>
           </div>
-          <Button>Asistente de Conexiones</Button>
+          <Button @click="ConnectionsAssitantShow()">Asistente de Conexiones</Button>
         </div>
       </i-col>
       <i-col span="10">
-        <div></div>
-        <h1>Inicio de sesion</h1>
-        <h2>Ingrese sus credenciales de inicio de sesion</h2>
-        <Form ref="formInline" :model="formInline" :rules="ruleInline" style="width: 250px">
-          <FormItem prop="user">
-              <Input type="text" v-model="formInline.user" placeholder="Usuario o Identificacion">
-                  <Icon type="ios-person-outline" slot="prepend"></Icon>
-              </Input>
-          </FormItem>
-          <FormItem prop="password">
-              <Input type="password" v-model="formInline.password" placeholder="Contraseña">
-                  <Icon type="ios-locked-outline" slot="prepend"></Icon>
-              </Input>
-          </FormItem>
-          <FormItem>
-              <Button type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
-              <Button>Cancelar</Button>
-          </FormItem>
-          <FormItem>
-              <Button type="text">He olvidado mi contraseña</Button>
-          </FormItem>
-        </Form>
+        <Card>
+          <div>
+            <div class="layout-image form-object"></div>
+            <h1 class="layout-text-item form-text">Inicio de sesion</h1>
+            <h2 class="layout-text-item form-text">Ingrese sus credenciales</h2>
+            <Form ref="formInline" :model="formInline" :rules="ruleInline" style="width: 300px" class="layout-text-item form-object">
+              <FormItem prop="user" style="margin: 20px 0px 5px 0px">
+                  <Input type="text" v-model="formInline.user" placeholder="Usuario o Identificacion">
+                      <Icon type="ios-person-outline" slot="prepend"></Icon>
+                  </Input>
+              </FormItem>
+              <FormItem prop="password" style="margin: 20px 0px 5px 0px">
+                  <Input type="password" v-model="formInline.password" placeholder="Contraseña">
+                      <Icon type="ios-locked-outline" slot="prepend"></Icon>
+                  </Input>
+              </FormItem>
+              <FormItem style="margin: 25px 0px 5px 0px">
+                  <Button class="form-object" style="margin: 0px auto 10px auto" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
+                  <Button class="form-object">Cancelar</Button>
+              </FormItem>
+              <FormItem>
+                  <Button class="form-object" type="text">He olvidado mi contraseña</Button>
+              </FormItem>
+            </Form>
+        </div>
+        </Card>
       </i-col>
     </Row>
-    <div>
-
-
-    </div>
-    <div>
-
-
-    </div>
   </div>
 </template>
 <script>
   export default {
+    name: 'login',
+    created: function () {
+      // let Base = require('../../App.vue')
+      console.log(this.$parent.$refs.menufix.$el.style.display = 'none')
+      let settings = require('../../libs/settings.js') // Instaciacion de la libreria de configuracion
+      let defaultConnName = settings.getContentFromLocalKey('defaultConn')
+      let i = 0
+      this.connectionsList = settings.getContentFromLocalKey('connections')
+      for (i; i <= this.connectionsList.length - 1; i++) {
+        if (this.connectionsList[i].id === defaultConnName) {
+          this.connectionSelected = this.connectionsList[i].name
+        }
+      }
+    },
     data () {
       return {
+        connectionsList: [],
         formInline: {
           user: '',
           password: ''
         },
         ruleInline: {
           user: [
-            { required: true, message: 'Please fill in the user name', trigger: 'blur' }
+            { required: true, message: 'Este campo no puede ser nulo', trigger: 'blur' }
           ],
           password: [
-            { required: true, message: 'Please fill in the password', trigger: 'blur' },
-            { type: 'string', min: 6, message: 'The password length cannot be less than 6 bits', trigger: 'blur' }
+            { required: true, message: 'Este campo no puede ser nulo', trigger: 'blur' },
+            { type: 'string', min: 8, message: 'La contraseña no puede ser menos de 8 caracteres', trigger: 'blur' }
           ]
         },
-        model: []
+        connectionSelected: ''
       }
     },
     methods: {
-      handleSubmit (name) {
+      handleSubmit (name) { // Metodo de testeo --pendiente a eliminar
         this.$refs[name].validate((valid) => {
           if (valid) {
             this.$Message.success('Success!')
+            this.$router.push('/')
+            console.log(document.getElementById('menufix').style.visibility = 'visible')
           } else {
             this.$Message.error('Fail!')
           }
         })
+      },
+      changeViewConnection (idShow, idHide, changeDefault = 'none') { // Funcion que cambia la visualizacion de los controles de cambio de conexion
+        document.getElementById(idShow).style.display = ''
+        document.getElementById(idHide).style.display = 'none'
+        if (changeDefault === 'yes') {
+          this.changeDefaultConnection()
+        }
+      },
+      changeDefaultConnection () {
+        let i = 0
+        let id
+        for (i; this.connectionsList.length - 1; i++) {
+          if (this.connectionsList[i].name === this.connectionSelected) {
+            require('../../libs/settings.js').addContentToLocalKey('defaultConn', id)
+          }
+        }
+      },
+      ConnectionsAssitantShow () {
+        this.$router.push('/sql/connectionsassistant')
       }
     }
   }

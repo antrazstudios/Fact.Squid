@@ -47,7 +47,7 @@
 
 <template>
   <div id="app">
-    <Affix ref="menufix">
+    <Affix ref="menufix" style="display: none">
       <Menu mode="horizontal" active-name="1" theme="light">
         <div class="layout-logo"></div>
         <div class="layout-nav">
@@ -90,7 +90,7 @@
       </Menu>
     </Affix>
     <router-view class="content"></router-view>
-    <footer id="footer-fix" style="visibility: hidden">
+    <footer ref="footerfix" style="display: none">
         <h4>BETA 3.0.0.0</h4>
     </footer>
   </div>

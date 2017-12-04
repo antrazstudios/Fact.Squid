@@ -130,9 +130,24 @@
       handleSubmit (name) { // Metodo de testeo --pendiente a eliminar
         this.$refs[name].validate((valid) => {
           if (valid) {
-            this.$Message.success('Success!')
-            this.$router.push('/')
-            console.log(document.getElementById('menufix').style.visibility = 'visible')
+            this.$parent.handleSpinShow()
+            require('../../libs/storage.js')._database_LoginWithUsernamePass(this.formInline.user, this.formInline.password, (rta) => {
+              if (rta.user !== undefined) {
+                console.log('test')
+                require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
+                this.$parent.$refs.menufix.$el.style.display = ''
+                console.log(this.$parent.$refs.footerfix.style.display = '')
+                this.$router.push('/')
+              }
+              this.$Message[rta.message.type]({
+                content: rta.message.message,
+                duration: 6
+              })
+              this.$parent.handleSpinHide()
+            })
+            // this.$Message.success('Success!')
+            // this.$router.push('/')
+            // console.log(document.getElementById('menufix').style.visibility = 'visible')
           } else {
             this.$Message.error('Fail!')
           }
@@ -146,7 +161,6 @@
         }
       },
       changeDefaultConnection () {
-        console.log(this.connectionSelected)
         for (let i = 0; i < this.connectionsList.length; i++) {
           console.log(this.connectionsList[i].name)
           if (this.connectionsList[i].name === this.connectionSelected) {
@@ -158,7 +172,7 @@
         this.$router.push('/sql/connectionsassistant')
       },
       CancelLogin () {
-        console.log(require('electron').remote.getCurrentWindow().close())
+        require('electron').remote.getCurrentWindow().close()
       }
     }
   }

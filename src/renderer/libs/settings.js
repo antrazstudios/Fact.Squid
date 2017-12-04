@@ -14,12 +14,8 @@ const fs = require('fs')
  * @param {string} userpass
  *  Clave del usuario
  */
-exports.createSesion = (userid, userpass, userconcat, username, email, connectionName) => {
-  sesion.set('id', userid)
-  sesion.set('pwd', userpass)
-  sesion.set('concat', userconcat)
-  sesion.set('username', username)
-  sesion.set('email', email)
+exports.createSesion = (user, connectionName) => {
+  sesion.set('user', user)
   sesion.set('connectionName', connectionName)
 }
 
@@ -150,6 +146,16 @@ exports.getKeyConnectionbyName = (name) => {
   for (i; i <= connections.length - 1; i++) {
     if (connections[i].name === name) {
       return connections[i].id
+    }
+  }
+}
+
+exports.getConnectionbyId = (id) => {
+  let connections = this.getContentFromLocalKey('connections')
+  let i = 0
+  for (i; i <= connections.length - 1; i++) {
+    if (connections[i].id === id) {
+      return connections[i]
     }
   }
 }

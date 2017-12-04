@@ -14,12 +14,13 @@ const fs = require('fs')
  * @param {string} userpass
  *  Clave del usuario
  */
-exports.createSesion = (userid, userpass, userconcat, username, email) => {
+exports.createSesion = (userid, userpass, userconcat, username, email, connectionName) => {
   sesion.set('id', userid)
   sesion.set('pwd', userpass)
   sesion.set('concat', userconcat)
   sesion.set('username', username)
   sesion.set('email', email)
+  sesion.set('connectionName', connectionName)
 }
 
 exports.endSesion = () => {
@@ -127,16 +128,16 @@ exports.createConnectionLocalFile = (nameConn, hostConn, databaseConn, usdConn, 
   let i = 0
   for (i; i <= connections.length - 1; i++) {
     if (connections[i].name === nameConn) {
-      return {'message': 'El nombre de perfil de conexion ya esta siendo utilizado'}
+      return {'type': 'error', 'message': 'El nombre de perfil de conexion ya esta siendo utilizado'}
     }
     if (connections[i].host === hostConn && connections[i].database === databaseConn && connections[i].usd === usdConn && connections[i].pwd === pwdConn && connections[i].port === portConn) {
-      return {'message': 'La conexion ya existe con los parametros que usted especifico'}
+      return {'type': 'error', 'message': 'Ya existe una conexion con los parametros que usted especifico'}
     }
   }
   // luego de la verificacion procede a realizar el alamcenamiento de los datos
   connections.push({id: connections.length, name: nameConn, host: hostConn, database: databaseConn, port: portConn, usd: usdConn, pwd: pwdConn})
   this.addContentToLocalKey('connections', connections)
-  return {'message': 'Se ha creado el item de conexion con exito'}
+  return {'type': 'info', 'message': 'Se ha creado el item de conexion con exito'}
 }
 
 /**
@@ -151,4 +152,33 @@ exports.getKeyConnectionbyName = (name) => {
       return connections[i].id
     }
   }
+}
+
+exports.editConnectionWithName = (name, connection) => {
+  let connections = config.get('connections')
+  let i = 0
+  for (i; i <= connections.length - 1; i++) {
+    if (connections[i].name === name) {
+      connections[i].host = connection.host
+      connections[i].port = connection.port
+      connections[i].database = connection.database
+      connections[i].usd = connection.usd
+      connections[i].pwd = connection.pwd
+      config.set('connections', connections)
+      return {'type': 'info', 'message': 'Se ha modificado el item de conexion con exito'}
+    }
+  }
+  return {'type': 'error', 'message': 'No ha sido posible modificar la conexion, no existe una conexion bajo el nombre de perfil: ' + name}
+}
+
+exports.removeConnectionWithName = (name) => {
+  let connections = config.get('connections')
+  let i = 0
+  for (i; i <= connections.length - 1; i++) {
+    if (connections[i].name === name) {
+      require('./miscelanius.js').removeObjectinArray(connections, 'name', name)
+    }
+  }
+  config.set('connections', connections)
+  return {'type': 'info', 'message': 'Se ha modificado el item de conexion con exito'}
 }

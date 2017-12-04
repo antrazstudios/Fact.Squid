@@ -14,6 +14,7 @@ Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 Vue.use(iView, { locale })
+
 new Vue({
   components: { App },
   router,

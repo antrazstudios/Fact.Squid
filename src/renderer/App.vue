@@ -93,7 +93,6 @@
     <footer id="footer-fix" style="visibility: hidden">
         <h4>BETA 3.0.0.0</h4>
     </footer>
-
   </div>
 </template>
 
@@ -101,6 +100,7 @@
   export default {
     name: 'billsdelivery-vue',
     created: function () {
+      // this.handleSpinShow()
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
       // Se crea el archivo de configuracion general
@@ -118,6 +118,13 @@
     },
     methods: {
       verifySesion () {
+        console.log(this.$Spin)
+      },
+      handleSpinShow () {
+        this.$Spin.show()
+      },
+      handleSpinHide () {
+        this.$Spin.hide()
       }
     }
   }

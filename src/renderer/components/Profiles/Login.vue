@@ -79,7 +79,7 @@
               </FormItem>
               <FormItem style="margin: 25px 0px 5px 0px">
                   <Button class="form-object" style="margin: 0px auto 10px auto" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
-                  <Button class="form-object">Cancelar</Button>
+                  <Button class="form-object" @click="CancelLogin()">Cancelar</Button>
               </FormItem>
               <FormItem>
                   <Button class="form-object" type="text">He olvidado mi contraseña</Button>
@@ -96,7 +96,7 @@
     name: 'login',
     created: function () {
       // let Base = require('../../App.vue')
-      console.log(this.$parent.$refs.menufix.$el.style.display = 'none')
+      this.$parent.$refs.menufix.$el.style.display = 'none'
       let settings = require('../../libs/settings.js') // Instaciacion de la libreria de configuracion
       let defaultConnName = settings.getContentFromLocalKey('defaultConn')
       let i = 0
@@ -146,16 +146,19 @@
         }
       },
       changeDefaultConnection () {
-        let i = 0
-        let id
-        for (i; this.connectionsList.length - 1; i++) {
+        console.log(this.connectionSelected)
+        for (let i = 0; i < this.connectionsList.length; i++) {
+          console.log(this.connectionsList[i].name)
           if (this.connectionsList[i].name === this.connectionSelected) {
-            require('../../libs/settings.js').addContentToLocalKey('defaultConn', id)
+            require('../../libs/settings.js').addContentToLocalKey('defaultConn', this.connectionsList[i].id)
           }
         }
       },
       ConnectionsAssitantShow () {
         this.$router.push('/sql/connectionsassistant')
+      },
+      CancelLogin () {
+        console.log(require('electron').remote.getCurrentWindow().close())
       }
     }
   }

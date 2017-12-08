@@ -347,7 +347,7 @@
         })
       },
       testClick (connection) {
-        this.$parent.handleSpinShow()
+        this.$parent.handleSpinShow('Conectando con el servidor, verificando conexion')
         require('../../libs/storage.js').testConnection(connection.host, connection.port, connection.usd, connection.pwd, connection.database, (rta) => {
           if (rta === null) {
             this.$Notice.success({

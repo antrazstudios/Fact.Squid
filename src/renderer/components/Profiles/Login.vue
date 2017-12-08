@@ -130,7 +130,7 @@
       handleSubmit (name) { // Metodo de testeo --pendiente a eliminar
         this.$refs[name].validate((valid) => {
           if (valid) {
-            this.$parent.handleSpinShow()
+            this.$parent.handleSpinShow('Esperando respuesta del servidor')
             require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass(this.formInline.user, this.formInline.password, (rta) => {
               if (rta.user !== undefined) {
                 require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
@@ -144,11 +144,8 @@
               })
               this.$parent.handleSpinHide()
             })
-            // this.$Message.success('Success!')
-            // this.$router.push('/')
-            // console.log(document.getElementById('menufix').style.visibility = 'visible')
           } else {
-            this.$Message.error('Fail!')
+            this.$Message.error('Verifique el formulario!')
           }
         })
       },

@@ -43,6 +43,40 @@
     position: relative;
     right: 20px;
   }
+  .modal {
+      display: '';
+      position:   fixed;
+      z-index:    1000;
+      top:        0;
+      left:       0;
+      height:     100%;
+      width:      100%;
+      background: rgba( 255, 255, 255, .94 )
+
+                  50% 50%
+                  no-repeat;
+      background-size: 10%;
+  }
+  .modal-contenedor{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+  }
+  .modal-contenedor--img{
+      display: block;
+      margin: auto;
+      width: 60px;
+      height: 60px;
+      background-image: url("~@/assets/images/ajax-loader.gif");
+      background-size: contain;
+  }
+  .modal-contenedor--label{
+      display: block;
+      margin: 4%;
+      text-align: center;
+      color: rgba(41, 41, 41, 0.6);
+  }
 </style>
 
 <template>
@@ -93,14 +127,27 @@
     <footer ref="footerfix" style="display: none">
         <h4>BETA 3.0.0.0</h4>
     </footer>
+    <div ref="loaderfix" class="modal">
+      <div class="modal-contenedor">
+        <div class="modal-contenedor--img"></div>
+        <label class="modal-contenedor--label">{{loaderMessage}}</label>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
   export default {
     name: 'billsdelivery-vue',
+    data () {
+      return {
+        loaderMessage: '...'
+      }
+    },
+    mounted () {
+      this.handleSpinHide()
+    },
     created: function () {
-      // this.handleSpinShow()
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
       // Se crea el archivo de configuracion general
@@ -120,11 +167,12 @@
       verifySesion () {
         console.log(this.$Spin)
       },
-      handleSpinShow () {
-        this.$Spin.show()
+      handleSpinShow (message = 'Espere un momento por favor') {
+        this.$refs.loaderfix.style.display = ''
+        this.loaderMessage = message
       },
       handleSpinHide () {
-        this.$Spin.hide()
+        this.$refs.loaderfix.style.display = 'none'
       }
     }
   }

@@ -25,3 +25,35 @@ exports.createUser = (vid, videntificacion, vtipoidentificacion, vprimernombre, 
     }
   }
 }
+
+exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions) => {
+  return {
+    // Propiedades
+    id: vid,
+    identificacion: videntificacion,
+    tipoidentificacion: vtipoidentificacion,
+    primernombre: vprimernombre,
+    segundonombre: vsegundonombre,
+    primerapellido: vprimerapellido,
+    segundoapellido: vsegundoapellido,
+    username: vusername,
+    cargo: vcargo,
+    fechanacimiento: vfechanacimiento,
+    imagenperfil: vimagenperfil,
+    oficina: voficina,
+    isactive: visactive,
+    permissions: vpermissions,
+    // Procedimientos
+    getFullName () {
+      return this.primernombre + ' ' + this.segundonombre + ' ' + this.primerapellido + ' ' + this.segundoapellido
+    }
+  }
+}
+
+exports.createPermissionsToken = (vnombre, vdescription) => {
+  return {
+    // Propiedades
+    nombre: vnombre,
+    description: vdescription
+  }
+}

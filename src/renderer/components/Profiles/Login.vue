@@ -131,9 +131,8 @@
         this.$refs[name].validate((valid) => {
           if (valid) {
             this.$parent.handleSpinShow()
-            require('../../libs/storage.js')._database_LoginWithUsernamePass(this.formInline.user, this.formInline.password, (rta) => {
+            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass(this.formInline.user, this.formInline.password, (rta) => {
               if (rta.user !== undefined) {
-                console.log('test')
                 require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
                 this.$parent.$refs.menufix.$el.style.display = ''
                 console.log(this.$parent.$refs.footerfix.style.display = '')
@@ -162,7 +161,7 @@
       },
       changeDefaultConnection () {
         for (let i = 0; i < this.connectionsList.length; i++) {
-          console.log(this.connectionsList[i].name)
+          console.log(this.connectionsList[i])
           if (this.connectionsList[i].name === this.connectionSelected) {
             require('../../libs/settings.js').addContentToLocalKey('defaultConn', this.connectionsList[i].id)
           }

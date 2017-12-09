@@ -77,10 +77,28 @@
       text-align: center;
       color: rgba(41, 41, 41, 0.6);
   }
+  .img-circle{
+    border-radius: 80%;
+    width: 100px;
+    height: 100px;
+    display: block;
+    margin: 0 auto;
+  }
+  .button-center{
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    margin-top: 5px;
+  }
+  .text-highlight{
+    color: #a3a3a3;
+    margin: 5px 0px;
+    text-align: center;
+  }
 </style>
 
 <template>
-  <div id="app">
+  <div id="app" style="user-select: none">
     <Affix ref="menufix" style="display: none">
       <Menu mode="horizontal" active-name="1" theme="light">
         <div class="layout-logo"></div>
@@ -117,7 +135,17 @@
         <div class="layout-buttons">
           <i-button title="Buscar" shape="circle" icon="search" @click="verifySesion()"></i-button>
           <i-button title="Ayuda" shape="circle" icon="help"></i-button>
-          <i-button title="Ver mi perfil" shape="circle" icon="ios-person"></i-button>
+          <Poptip placement="bottom-end" trigger="hover" title="Mi perfil">
+            <i-button shape="circle" icon="ios-person"></i-button>
+            <div slot="content">
+              <img ref="imgProfile" class="img-circle" src=""/>
+              <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
+              <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
+              <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
+              <i-button class="button-center">Editar perfil</i-button>
+              <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+            </div>
+          </Poptip>
           <i-button title="Conexion" shape="circle" icon="wifi"></i-button>
           <i-button title="Configuracion Sistema" shape="circle" icon="wrench"></i-button>
         </div>
@@ -141,7 +169,9 @@
     name: 'billsdelivery-vue',
     data () {
       return {
-        loaderMessage: '...'
+        loaderMessage: '...',
+        actualProfile: '',
+        developerMode: true
       }
     },
     mounted () {
@@ -165,7 +195,16 @@
     },
     methods: {
       verifySesion () {
-        console.log(this.$Spin)
+        this.actualProfile = require('./libs/settings.js').getSesionProfile()
+        this.$refs.imgProfile.src = 'data:image/png;base64, ' + this.actualProfile.imagenperfil
+      },
+      closeSesion () {
+        require('./libs/settings.js').endSesion()
+        this.$Message.info({
+          content: 'Se ha finalizado la sesion correctamente',
+          duration: 6
+        })
+        this.$router.push('/login')
       },
       handleSpinShow (message = 'Espere un momento por favor') {
         this.$refs.loaderfix.style.display = ''

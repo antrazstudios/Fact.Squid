@@ -38,6 +38,10 @@ exports.endSesion = () => {
   }
 }
 
+exports.getSesionProfile = () => {
+  return sesion.get('user')
+}
+
 /**
  * Obtiene la ubicacion actual del archivo de configuracion cifrado
  */

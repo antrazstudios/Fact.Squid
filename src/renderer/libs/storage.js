@@ -59,7 +59,7 @@ exports._database_usersLoginWithNicknameAndPass = (username, pass, _callback) =>
         permissionsConsult.push(require('./objects.js').createPermissionsToken(resultData3[i].tb_permission_content, resultData3[i].tb_permission_description))
       }
       // Se obtienen los datos del usuario, y se agregan los permisos obtenidos
-      userConsult = require('./objects.js').createUserToken(resultData2[0].idtb_users, resultData2[0].tb_users_identificacion, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil, resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, permissionsConsult)
+      userConsult = require('./objects.js').createUserToken(resultData2[0].idtb_users, resultData2[0].tb_users_identificacion, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil.toString('base64'), resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, permissionsConsult)
     } else if (results.length === 3) {
       messageConsult = {
         type: 'alert',

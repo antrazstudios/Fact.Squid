@@ -129,14 +129,15 @@
     methods: {
       handleSubmit (name) { // Metodo de testeo --pendiente a eliminar
         this.$refs[name].validate((valid) => {
-          if (valid) {
-            this.$parent.handleSpinShow('Esperando respuesta del servidor')
-            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass(this.formInline.user, this.formInline.password, (rta) => {
+          if (this.$parent.developerMode === true) {
+            this.$parent.handleSpinShow('Esperando respuesta del servidor, en modo desarrollador')
+            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass('LCV', 'gata1125', (rta) => {
               if (rta.user !== undefined) {
                 require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
                 this.$parent.$refs.menufix.$el.style.display = ''
-                console.log(this.$parent.$refs.footerfix.style.display = '')
+                this.$parent.$refs.footerfix.style.display = ''
                 this.$router.push('/')
+                this.$parent.verifySesion()
               }
               this.$Message[rta.message.type]({
                 content: rta.message.message,
@@ -145,7 +146,25 @@
               this.$parent.handleSpinHide()
             })
           } else {
-            this.$Message.error('Verifique el formulario!')
+            if (valid) {
+              this.$parent.handleSpinShow('Esperando respuesta del servidor')
+              require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass(this.formInline.user, this.formInline.password, (rta) => {
+                if (rta.user !== undefined) {
+                  require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
+                  this.$parent.$refs.menufix.$el.style.display = ''
+                  this.$parent.$refs.footerfix.style.display = ''
+                  this.$router.push('/')
+                  this.$parent.verifySesion()
+                }
+                this.$Message[rta.message.type]({
+                  content: rta.message.message,
+                  duration: 6
+                })
+                this.$parent.handleSpinHide()
+              })
+            } else {
+              this.$Message.error('Verifique el formulario!')
+            }
           }
         })
       },

@@ -3,7 +3,6 @@
     width: 100%;
     min-height: 100%;
     padding: 20px;
-    background-image: url('~@/assets/images/BaseTheme_Background.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: right;

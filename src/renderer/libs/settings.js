@@ -39,7 +39,8 @@ exports.endSesion = () => {
 }
 
 exports.getSesionProfile = () => {
-  return sesion.get('user')
+  let userfile = sesion.get('user')
+  return require('./objects.js').createUserToken(userfile.id, userfile.identificacion, userfile.tipoidentificacion, userfile.primernombre, userfile.segundonombre, userfile.primerapellido, userfile.segundoapellido, userfile.username, userfile.cargo, userfile.fechanacimiento, userfile.imagenperfil, userfile.oficina, userfile.isactive, userfile.permissions)
 }
 
 /**

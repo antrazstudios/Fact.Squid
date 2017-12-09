@@ -1,35 +1,4 @@
-<style scoped>
-  .content{
-    width: 100%;
-    min-height: 100%;
-    padding: 20px;
-    background-image: url('~@/assets/images/BaseTheme_Background.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: right;
-    user-select: none;
-  }
-  .layout-text-item{
-    margin: 8px 0px;
-  }
-  .form-text{
-    text-align: center;
-  }
-  .form-object{
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-  .layout-image{
-    background-image: url('~@/assets/images/login_form.gif');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    min-width: 150px;
-    min-height: 150px;
-  }
-</style>
-<template>
+<template lang="html">
   <div class="content">
     <Row :gutter="32">
       <i-col span="14">
@@ -91,6 +60,7 @@
     </Row>
   </div>
 </template>
+
 <script>
   export default {
     name: 'login',
@@ -131,11 +101,10 @@
         this.$refs[name].validate((valid) => {
           if (this.$parent.developerMode === true) {
             this.$parent.handleSpinShow('Esperando respuesta del servidor, en modo desarrollador')
-            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass('LCV', 'gata1125', (rta) => {
+            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass('ROOT', '1234567890', (rta) => {
               if (rta.user !== undefined) {
                 require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
                 this.$parent.$refs.menufix.$el.style.display = ''
-                this.$parent.$refs.footerfix.style.display = ''
                 this.$router.push('/')
                 this.$parent.verifySesion()
               }
@@ -152,7 +121,6 @@
                 if (rta.user !== undefined) {
                   require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
                   this.$parent.$refs.menufix.$el.style.display = ''
-                  this.$parent.$refs.footerfix.style.display = ''
                   this.$router.push('/')
                   this.$parent.verifySesion()
                 }
@@ -192,3 +160,33 @@
     }
   }
 </script>
+
+<style lang="css" scoped>
+  .content{
+    width: 100%;
+    min-height: 100%;
+    padding: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: right;
+  }
+  .layout-text-item{
+    margin: 8px 0px;
+  }
+  .form-text{
+    text-align: center;
+  }
+  .form-object{
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  .layout-image{
+    background-image: url('~@/assets/images/login_form.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-width: 150px;
+    min-height: 150px;
+  }
+</style>

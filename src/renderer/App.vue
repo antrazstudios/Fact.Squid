@@ -1,47 +1,175 @@
-<style scoped>
+<template lang="html">
+  <div id="app" style="user-select: none">
+    <!-- <Affix ref="menufix" style="display: none;"> -->
+      <Menu ref="menufix" mode="horizontal" active-name="1" style="background: white !important;">
+        <div class="layout-fixed">
+          <div class="layout-nav">
+            <MenuItem name="1">
+              <router-link style="color: inherit" :to="{ name: 'landing-page'}">
+                <icon type="ios-home"/>
+                Inicio
+              </router-link>
+            </MenuItem>
+            <MenuItem name="2">
+              <router-link style="color: inherit" :to="{ name: 'system-information' }">
+                <icon type="ios-body"/>
+                Terceros
+              </router-link>
+            </MenuItem>
+            <MenuItem name="3">
+              <icon type="social-usd"/>
+              Facturacion
+            </MenuItem>
+            <MenuItem name="4">
+              <icon type="paper-airplane"/>
+              Radicacion
+            </MenuItem>
+            <MenuItem name="5">
+              <icon type="cash"/>
+              Cartera
+            </MenuItem>
+            <MenuItem name="6">
+              <icon type="ios-analytics"/>
+              Reporteador
+            </MenuItem>
+          </div>
+          <div class="layout-buttons">
+            <Poptip placement="bottom-start" trigger="click" title="Buscar" v-model="visibleSearch">
+              <div slot="content">
+                <Input style="margin: 10px 0px">
+                  <i-button slot="append" icon="search"></i-button>
+                </Input>
+              </div>
+            </Poptip>
+            <ButtonGroup>
+              <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
+              <i-button title="Ayuda" type="text" icon="help"></i-button>
+              <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
+              <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
+            </ButtonGroup>
+            <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
+              <div slot="content">
+                <img class="img-circle" :src="actualProfile.imagenperfil"/>
+                <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
+                <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
+                <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
+                <i-button class="button-center">Editar perfil</i-button>
+                <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+              </div>
+            </Poptip>
+          </div>
+        </div>
+      </Menu>
+    <!-- </Affix> -->
+    <router-view class="content"></router-view>
+    <div ref="loaderfix" class="modal">
+      <div class="modal-contenedor">
+        <div class="modal-contenedor--img"></div>
+        <label class="modal-contenedor--label">{{loaderMessage}}</label>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'billsdelivery-vue',
+    data () {
+      return {
+        loaderMessage: '...',
+        actualProfile: '',
+        developerMode: true,
+        visibleProfile: false,
+        visibleSearch: false
+      }
+    },
+    mounted () {
+      this.handleSpinHide()
+    },
+    created: function () {
+      // Se crea una nueva instancia de la libreria de configuracion
+      let settings = require('./libs/settings.js')
+      // Se crea el archivo de configuracion general
+      console.log(settings.createConfigContent())
+      // Se elimina cualquier sesion que pueda existir
+      console.log(settings.endSesion())
+      // Se notifica al usuario que se reiniciaron las credenciales y que debe suministrarlas de nuevo
+      this.$Message.warning({
+        content: 'Se han reiniciado todas las sesiones, es necesario que proporcione sus credenciales',
+        duration: 6
+      })
+      // Se modifica la vista actual y el app
+      // document.getElementById('menufix').style.visibility = 'hidden'
+      this.$router.push('/login')
+    },
+    methods: {
+      verifySesion () {
+        this.actualProfile = require('./libs/settings.js').getSesionProfile()
+      },
+      closeSesion () {
+        require('./libs/settings.js').endSesion()
+        this.$Message.info({
+          content: 'Se ha finalizado la sesion correctamente',
+          duration: 6
+        })
+        this.$router.push('/login')
+      },
+      handleSpinShow (message = 'Espere un momento por favor') {
+        this.$refs.loaderfix.style.display = ''
+        this.loaderMessage = message
+      },
+      handleSpinHide () {
+        this.$refs.loaderfix.style.display = 'none'
+      },
+      gotoSettings () {
+        if (this.actualProfile.verifyPermission('SETTINGS_INDEX') === true) {
+          this.$router.push('/Settings/index')
+        } else {
+          this.$Message.error({
+            content: 'Usted no tiene los permisos suficientes para ir a esa seccion del sistema',
+            duration: 6
+          })
+        }
+      },
+      profileClick () {
+        this.visibleProfile = !this.visibleProfile
+      },
+      searchClick () {
+        this.visibleSearch = !this.visibleSearch
+      }
+    }
+  }
+</script>
+
+<style lang="css">
   /* CSS */
   body {
-    font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-seri;
+    font-family: "Helvetica Neue",Arial;
     height:100%;
     margin:0;
     padding:0;
-  }
-  footer {
-    position: fixed;
-    bottom: 0;
-    background-color: #dadada;
-    color: gray;
-    text-align: right;
-    width: 100%;
+    background-color: rgba(245, 241, 241, 0.2);
   }
   .content {
-    align-items: center;
-    align-content: stretch;
-    position: absolute;
-    top: 60px;
-    bottom: 30px;
-  }
-  .layout-logo{
-      width: 30px;
-      height: 30px;
-      background-image: url("~@/assets/images/favicon.png");
-      background-size: contain;
-      background-repeat: no-repeat;
-      border-radius: 3px;
-      float: left;
-      position: relative;
-      top: 15px;
-      left: 20px;
-      opacity: 2%;
+    position: relative;
+    height: 100%;
   }
   .layout-nav{
-      width: 800px;
-      margin: 0 auto;
+      display: block;
+      margin: auto;
+  }
+  .layout-fixed{
+    width: 100%;
+    background-color: white;
+    position: fixed;
+    -webkit-box-shadow: 0 4px 6px -6px #222;
+    -moz-box-shadow: 0 4px 6px -6px #222;
+    box-shadow: 0 4px 6px -6px #222;
   }
   .layout-buttons{
     float: right;
     position: relative;
-    right: 20px;
+    right: 0px;
   }
   .modal {
       display: '';
@@ -96,123 +224,3 @@
     text-align: center;
   }
 </style>
-
-<template>
-  <div id="app" style="user-select: none">
-    <Affix ref="menufix" style="display: none">
-      <Menu mode="horizontal" active-name="1" theme="light">
-        <div class="layout-logo"></div>
-        <div class="layout-nav">
-          <MenuItem name="1">
-            <router-link style="color: inherit" :to="{ name: 'landing-page'}">
-              <icon type="ios-home"/>
-              Inicio
-            </router-link>
-          </MenuItem>
-          <MenuItem name="2">
-            <router-link style="color: inherit" :to="{ name: 'system-information' }">
-              <icon type="ios-body"/>
-              Terceros
-            </router-link>
-          </MenuItem>
-          <MenuItem name="3">
-            <icon type="social-usd"/>
-            Facturacion
-          </MenuItem>
-          <MenuItem name="4">
-            <icon type="paper-airplane"/>
-            Radicacion
-          </MenuItem>
-          <MenuItem name="5">
-            <icon type="cash"/>
-            Cartera
-          </MenuItem>
-          <MenuItem name="6">
-            <icon type="ios-analytics"/>
-            Reporteador
-          </MenuItem>
-        </div>
-        <div class="layout-buttons">
-          <i-button title="Buscar" shape="circle" icon="search" @click="verifySesion()"></i-button>
-          <i-button title="Ayuda" shape="circle" icon="help"></i-button>
-          <Poptip placement="bottom-end" trigger="hover" title="Mi perfil">
-            <i-button shape="circle" icon="ios-person"></i-button>
-            <div slot="content">
-              <img ref="imgProfile" class="img-circle" src=""/>
-              <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
-              <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
-              <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
-              <i-button class="button-center">Editar perfil</i-button>
-              <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
-            </div>
-          </Poptip>
-          <i-button title="Conexion" shape="circle" icon="wifi"></i-button>
-          <i-button title="Configuracion Sistema" shape="circle" icon="wrench"></i-button>
-        </div>
-      </Menu>
-    </Affix>
-    <router-view class="content"></router-view>
-    <footer ref="footerfix" style="display: none">
-        <h4>BETA 3.0.0.0</h4>
-    </footer>
-    <div ref="loaderfix" class="modal">
-      <div class="modal-contenedor">
-        <div class="modal-contenedor--img"></div>
-        <label class="modal-contenedor--label">{{loaderMessage}}</label>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
-  export default {
-    name: 'billsdelivery-vue',
-    data () {
-      return {
-        loaderMessage: '...',
-        actualProfile: '',
-        developerMode: true
-      }
-    },
-    mounted () {
-      this.handleSpinHide()
-    },
-    created: function () {
-      // Se crea una nueva instancia de la libreria de configuracion
-      let settings = require('./libs/settings.js')
-      // Se crea el archivo de configuracion general
-      console.log(settings.createConfigContent())
-      // Se elimina cualquier sesion que pueda existir
-      console.log(settings.endSesion())
-      // Se notifica al usuario que se reiniciaron las credenciales y que debe suministrarlas de nuevo
-      this.$Message.warning({
-        content: 'Se han reiniciado todas las sesiones, es necesario que proporcione sus credenciales',
-        duration: 6
-      })
-      // Se modifica la vista actual y el app
-      // document.getElementById('menufix').style.visibility = 'hidden'
-      this.$router.push('/login')
-    },
-    methods: {
-      verifySesion () {
-        this.actualProfile = require('./libs/settings.js').getSesionProfile()
-        this.$refs.imgProfile.src = 'data:image/png;base64, ' + this.actualProfile.imagenperfil
-      },
-      closeSesion () {
-        require('./libs/settings.js').endSesion()
-        this.$Message.info({
-          content: 'Se ha finalizado la sesion correctamente',
-          duration: 6
-        })
-        this.$router.push('/login')
-      },
-      handleSpinShow (message = 'Espere un momento por favor') {
-        this.$refs.loaderfix.style.display = ''
-        this.loaderMessage = message
-      },
-      handleSpinHide () {
-        this.$refs.loaderfix.style.display = 'none'
-      }
-    }
-  }
-</script>

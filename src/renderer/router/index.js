@@ -28,6 +28,11 @@ export default new Router({
       path: '/sql/connectionsassistant',
       name: 'connections-assistant',
       component: require('@/components/sql/ConnectionsAssistant').default
+    },
+    {
+      path: '/Settings/index',
+      name: 'settings-index',
+      component: require('@/components/Settings/index').default
     }
   ]
 })

@@ -17,3 +17,7 @@ exports.filterMethod = (obj, columns, value) => {
     }
   })
 }
+
+exports.getEmojiURL = (code) => {
+  return '/assets/images/emoji-72x72/' + code + '.png'
+}

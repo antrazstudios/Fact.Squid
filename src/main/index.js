@@ -27,7 +27,7 @@ function createWindow () {
    */
   let titleBarStylev
   if (process.platform !== 'darwin') {
-    titleBarStylev = 'hiddenInset'
+    titleBarStylev = 'customButtonsOnHover'
   } else if (process.platform === 'darwin') {
     titleBarStylev = 'hidden'
   }
@@ -40,9 +40,10 @@ function createWindow () {
     minWidth: 1000,
     center: true,
     autoHideMenuBar: true,
-    titleBarStyle: titleBarStylev
+    titleBarStyle: titleBarStylev,
+    enableLargerThanScreen: true
   })
-
+  mainWindow.maximize()
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {

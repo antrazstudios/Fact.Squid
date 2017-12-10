@@ -2,7 +2,7 @@
   <div id="app" style="user-select: none">
     <!-- Menu superior fixed-->
     <Menu ref="menufix" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" style="background: white !important;">
-      <div class="layout-fixed">
+      <div class="layout-fixed" v-bind:style="{marginTop: margintop + 'px'}">
         <div class="layout-return" v-bind:style="{ visibility: visibleReturnButton }">
           <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
             <i-button type="text" @click="returnPath()">
@@ -69,7 +69,7 @@
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
-    <router-view class="content"></router-view>
+    <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
     <!-- Footer-->
     <div class="footer">
       <Row type="flex" justify="space-between">
@@ -94,7 +94,7 @@
       </div>
     </div>
     <!-- Titlebar - Barra de titulo -->
-    <Row>
+    <Row v-if="platform === 'darwin'">
       <div class="titlebar">
         <label class="titlebar-title">Bills
           <div class="titlebar-icon">
@@ -119,6 +119,8 @@
         visibleSearch: false,
         visibleReturnButton: 'hidden',
         activeName: '1',
+        platform: 'win32',
+        margintop: 0,
         routeIndexes: [
           {
             id: '1',
@@ -147,6 +149,13 @@
       this.handleSpinHide()
     },
     created: function () {
+      // Carga la plataforma
+      this.platform = process.platform
+      if (this.platform === 'win32') {
+        this.margintop = 0
+      } else {
+        this.margintop = 20
+      }
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
       // Define el color dependiendo del tipo de Deploy
@@ -297,7 +306,7 @@
     border-radius: 4px;
   }
   .titlebar{
-    -webkit-user-select: none;
+    user-select: none;
     -webkit-app-region: drag;
     position: fixed;
     padding-top: 4px;
@@ -342,7 +351,6 @@
     overflow-y: scroll;
     position: relative;
     height: 100%;
-    top: 30px;
     bottom: 30px;
   }
   .layout-nav{
@@ -350,13 +358,14 @@
       margin: auto;
   }
   .layout-fixed{
-    margin-top: 20px;
+    margin-top: 0px;
     width: 100%;
     background-color: white;
     position: fixed;
     -webkit-box-shadow: 0 4px 6px -6px #222;
     -moz-box-shadow: 0 4px 6px -6px #222;
     box-shadow: 0 4px 6px -6px #222;
+    z-index: 999;
   }
   .layout-buttons{
     float: right;

@@ -33,6 +33,11 @@ export default new Router({
       path: '/Settings/index',
       name: 'settings-index',
       component: require('@/components/Settings/index').default
+    },
+    {
+      path: '/Settings/about/:id',
+      name: 'settings-about',
+      component: require('@/components/Settings/about/').default
     }
   ]
 })

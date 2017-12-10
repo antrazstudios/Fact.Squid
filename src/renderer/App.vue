@@ -1,67 +1,92 @@
 <template lang="html">
   <div id="app" style="user-select: none">
-    <!-- <Affix ref="menufix" style="display: none;"> -->
-      <Menu ref="menufix" mode="horizontal" active-name="1" style="background: white !important;">
-        <div class="layout-fixed">
-          <div class="layout-nav">
-            <MenuItem name="1">
-              <router-link style="color: inherit" :to="{ name: 'landing-page'}">
-                <icon type="ios-home"/>
-                Inicio
-              </router-link>
-            </MenuItem>
-            <MenuItem name="2">
-              <router-link style="color: inherit" :to="{ name: 'system-information' }">
-                <icon type="ios-body"/>
-                Terceros
-              </router-link>
-            </MenuItem>
-            <MenuItem name="3">
-              <icon type="social-usd"/>
-              Facturacion
-            </MenuItem>
-            <MenuItem name="4">
-              <icon type="paper-airplane"/>
-              Radicacion
-            </MenuItem>
-            <MenuItem name="5">
-              <icon type="cash"/>
-              Cartera
-            </MenuItem>
-            <MenuItem name="6">
-              <icon type="ios-analytics"/>
-              Reporteador
-            </MenuItem>
-          </div>
-          <div class="layout-buttons">
-            <Poptip placement="bottom-start" trigger="click" title="Buscar" v-model="visibleSearch">
-              <div slot="content">
-                <Input style="margin: 10px 0px">
-                  <i-button slot="append" icon="search"></i-button>
-                </Input>
-              </div>
-            </Poptip>
-            <ButtonGroup>
-              <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
-              <i-button title="Ayuda" type="text" icon="help"></i-button>
-              <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
-              <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
-            </ButtonGroup>
-            <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
-              <div slot="content">
-                <img class="img-circle" :src="actualProfile.imagenperfil"/>
-                <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
-                <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
-                <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
-                <i-button class="button-center">Editar perfil</i-button>
-                <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
-              </div>
-            </Poptip>
+    <!-- Menu superior fixed-->
+    <Menu ref="menufix" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" style="background: white !important;">
+      <div class="layout-fixed">
+        <div class="layout-return" v-bind:style="{ visibility: visibleReturnButton }">
+          <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
+            <i-button type="text" @click="returnPath()">
+              <Icon type="chevron-left"></Icon>
+            </i-button>
+          </Tooltip>
+        </div>
+        <div class="layout-nav">
+          <MenuItem name="1" @click="changePath('/')">
+            <router-link style="color: inherit" :to="{ name: 'landing-page'}">
+              <icon type="ios-home"/>
+              Inicio
+            </router-link>
+          </MenuItem>
+          <MenuItem name="2">
+            <router-link style="color: inherit" :to="{ name: 'system-information' }">
+              <icon type="ios-body"/>
+              Terceros
+            </router-link>
+          </MenuItem>
+          <MenuItem name="3">
+            <icon type="social-usd"/>
+            Facturacion
+          </MenuItem>
+          <MenuItem name="4">
+            <icon type="paper-airplane"/>
+            Radicacion
+          </MenuItem>
+          <MenuItem name="5">
+            <icon type="cash"/>
+            Cartera
+          </MenuItem>
+          <MenuItem name="6">
+            <icon type="ios-analytics"/>
+            Reporteador
+          </MenuItem>
+        </div>
+        <div class="layout-buttons">
+          <Poptip placement="bottom-start" trigger="click" title="Buscar" v-model="visibleSearch">
+            <div slot="content">
+              <Input style="margin: 10px 0px">
+                <i-button slot="append" icon="search"></i-button>
+              </Input>
+            </div>
+          </Poptip>
+          <ButtonGroup>
+            <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
+            <i-button title="Ayuda" type="text" icon="help" @click="gotoDocumentation()"></i-button>
+            <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
+            <i-button title="Notificaciones" type="text" icon="android-notifications" @click="profileClick()"></i-button>
+            <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
+          </ButtonGroup>
+          <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
+            <div slot="content">
+              <img class="img-circle" :src="actualProfile.imagenperfil"/>
+              <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
+              <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
+              <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
+              <i-button class="button-center">Editar perfil</i-button>
+              <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+            </div>
+          </Poptip>
+        </div>
+      </div>
+    </Menu>
+    <!-- Contenido del complement actual -->
+    <router-view class="content"></router-view>
+    <!-- Footer-->
+    <div class="footer">
+      <Row type="flex" justify="space-between">
+        <div class="footer-release" v-bind:style="{ backgroundColor: colorVersion}" @click="gotoAbout()">
+          <h4>{{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}</h4>
+        </div>
+        <div v-if="actualProfile !== ''" class="footer-connection">
+          <Icon style="display: inline-block" type="link"/>
+          <h4 style="display: inline-block">Conectado a: {{require('./libs/settings.js').getConnectionName()}}</h4>
+          <h4 style="display: inline-block; margin-left: 10px">Usuario actaul: {{actualProfile.username}}</h4>
+          <div v-if="developerMode === true" class="footer-release" style="background-color: #444444; cursor: inherit">
+            <h4>Modo desarrollador</h4>
           </div>
         </div>
-      </Menu>
-    <!-- </Affix> -->
-    <router-view class="content"></router-view>
+      </Row>
+    </div>
+    <!-- Interfaz de carga -->
     <div ref="loaderfix" class="modal">
       <div class="modal-contenedor">
         <div class="modal-contenedor--img"></div>
@@ -76,11 +101,36 @@
     name: 'billsdelivery-vue',
     data () {
       return {
+        colorVersion: '',
         loaderMessage: '...',
         actualProfile: '',
         developerMode: true,
         visibleProfile: false,
-        visibleSearch: false
+        visibleSearch: false,
+        visibleReturnButton: 'hidden',
+        activeName: '1',
+        routeIndexes: [
+          {
+            id: '1',
+            name: 'login',
+            buttonReturn: false
+          },
+          {
+            id: '1',
+            name: 'landing-page',
+            buttonReturn: false
+          },
+          {
+            id: null,
+            name: 'settings-about',
+            buttonReturn: true
+          },
+          {
+            id: null,
+            name: 'settings-index',
+            buttonReturn: true
+          }
+        ]
       }
     },
     mounted () {
@@ -89,6 +139,21 @@
     created: function () {
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
+      // Define el color dependiendo del tipo de Deploy
+      switch (settings.getDeployVersionApp()) {
+        case 'ALPHA':
+          this.colorVersion = '#bf0000'
+          break
+        case 'BETA':
+          this.colorVersion = '#f09e00'
+          break
+        case 'RELEASE CANDIDATE':
+          this.colorVersion = '#dac400'
+          break
+        case 'STABLE':
+          this.colorVersion = '#2ccb04'
+          break
+      }
       // Se crea el archivo de configuracion general
       console.log(settings.createConfigContent())
       // Se elimina cualquier sesion que pueda existir
@@ -100,13 +165,39 @@
       })
       // Se modifica la vista actual y el app
       // document.getElementById('menufix').style.visibility = 'hidden'
-      this.$router.push('/login')
+      this.changePath('/login')
     },
     methods: {
+      changePath (to) {
+        this.$router.push(to)
+        for (let i = 0; i < this.routeIndexes.length; i++) {
+          if (this.routeIndexes[i].name === this.$route.name) {
+            this.activeName = this.routeIndexes[i].id
+          }
+        }
+        this.getPathButtonVisibility()
+      },
+      returnPath () {
+        this.$router.go(-1)
+        this.getPathButtonVisibility()
+      },
+      getPathButtonVisibility (name = this.$route.name) {
+        for (let i = 0; i < this.routeIndexes.length; i++) {
+          if (this.routeIndexes[i].name === name) {
+            if (this.routeIndexes[i].buttonReturn === true) {
+              this.visibleReturnButton = 'visible'
+            } else {
+              this.visibleReturnButton = 'hidden'
+            }
+            return this.visibleReturnButton
+          }
+        }
+      },
       verifySesion () {
         this.actualProfile = require('./libs/settings.js').getSesionProfile()
       },
       closeSesion () {
+        this.actualProfile = ''
         require('./libs/settings.js').endSesion()
         this.$Message.info({
           content: 'Se ha finalizado la sesion correctamente',
@@ -121,9 +212,15 @@
       handleSpinHide () {
         this.$refs.loaderfix.style.display = 'none'
       },
+      profileClick () {
+        this.visibleProfile = !this.visibleProfile
+      },
+      searchClick () {
+        this.visibleSearch = !this.visibleSearch
+      },
       gotoSettings () {
         if (this.actualProfile.verifyPermission('SETTINGS_INDEX') === true) {
-          this.$router.push('/Settings/index')
+          this.changePath('/Settings/index')
         } else {
           this.$Message.error({
             content: 'Usted no tiene los permisos suficientes para ir a esa seccion del sistema',
@@ -131,28 +228,82 @@
           })
         }
       },
-      profileClick () {
-        this.visibleProfile = !this.visibleProfile
+      gotoAbout () {
+        if (this.$route.path === '/Settings/about/2') {
+          this.returnPath()
+        } else {
+          this.changePath('/Settings/about/2')
+        }
       },
-      searchClick () {
-        this.visibleSearch = !this.visibleSearch
+      gotoDocumentation () {
+        this.changePath('/Settings/about/1')
       }
     }
   }
 </script>
 
 <style lang="css">
-  /* CSS */
+/* Scrollbars */
+  ::-webkit-scrollbar {
+    background-color: rgba(255, 255, 255, 0);
+    width: .2em;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(143, 143, 143);
+  }
+  ::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
+  ::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+  /* Body */
   body {
     font-family: "Helvetica Neue",Arial;
     height:100%;
     margin:0;
     padding:0;
     background-color: rgba(245, 241, 241, 0.2);
+    overflow-x: hidden;
+  }
+  .footer{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: rgb(228, 228, 228);
+    color: rgba(0, 0, 0, 0.43);
+  }
+  .footer-release{
+    display: inline-block;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 2px;
+    margin-left: 10px;
+    font-size: 10px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+  .footer-connection{
+    display: inline-block;
+    color: rgb(117, 117, 117);
+    font-size: 12px;
+    cursor: not-allowed;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 2.5px;
   }
   .content {
+    overflow-y: scroll;
     position: relative;
     height: 100%;
+    top: 10px;
+    bottom: 30px;
   }
   .layout-nav{
       display: block;
@@ -170,6 +321,11 @@
     float: right;
     position: relative;
     right: 0px;
+  }
+  .layout-return{
+    float: left;
+    position: relative;
+    left: 0px;
   }
   .modal {
       display: '';

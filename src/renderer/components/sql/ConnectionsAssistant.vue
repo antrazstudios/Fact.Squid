@@ -249,7 +249,7 @@
     },
     methods: {
       returnView () {
-        this.$router.go(-1)
+        this.$parent.returnPath()
       },
       loadConnections () {
         let settings = require('../../libs/settings.js')

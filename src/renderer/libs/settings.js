@@ -8,12 +8,14 @@ const sesion = new Config({
 })
 const fs = require('fs')
 
-/**
- * @param {int} userid
- *  Llave del usuario
- * @param {string} userpass
- *  Clave del usuario
- */
+exports.getVersionApp = () => {
+  return require('../../../package.json').version
+}
+
+exports.getDeployVersionApp = () => {
+  return require('../../../package.json').deployVersion
+}
+
 exports.createSesion = (user, connectionName) => {
   sesion.set('user', user)
   sesion.set('connectionName', connectionName)
@@ -41,6 +43,10 @@ exports.endSesion = () => {
 exports.getSesionProfile = () => {
   let userfile = sesion.get('user')
   return require('./objects.js').createUserToken(userfile.id, userfile.identificacion, userfile.tipoidentificacion, userfile.primernombre, userfile.segundonombre, userfile.primerapellido, userfile.segundoapellido, userfile.username, userfile.cargo, userfile.fechanacimiento, userfile.imagenperfil, userfile.oficina, userfile.isactive, userfile.permissions)
+}
+
+exports.getConnectionName = () => {
+  return sesion.get('connectionName')
 }
 
 /**

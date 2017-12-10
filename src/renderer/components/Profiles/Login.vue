@@ -30,7 +30,7 @@
         </div>
       </i-col>
       <i-col span="10">
-        <Card>
+        <Card style="background-color: rgb(242, 242, 242)">
           <div>
             <div class="layout-image form-object"></div>
             <h1 class="layout-text-item form-text">Inicio de sesion</h1>
@@ -105,7 +105,7 @@
               if (rta.user !== undefined) {
                 require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
                 this.$parent.$refs.menufix.$el.style.display = ''
-                this.$router.push('/')
+                this.$parent.changePath('/')
                 this.$parent.verifySesion()
               }
               this.$Message[rta.message.type]({
@@ -121,7 +121,7 @@
                 if (rta.user !== undefined) {
                   require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
                   this.$parent.$refs.menufix.$el.style.display = ''
-                  this.$router.push('/')
+                  this.$parent.changePath('/')
                   this.$parent.verifySesion()
                 }
                 this.$Message[rta.message.type]({
@@ -152,7 +152,7 @@
         }
       },
       ConnectionsAssitantShow () {
-        this.$router.push('/sql/connectionsassistant')
+        this.$parent.changePath('/sql/connectionsassistant')
       },
       CancelLogin () {
         require('electron').remote.getCurrentWindow().close()

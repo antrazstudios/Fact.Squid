@@ -7,15 +7,28 @@
         <hr/>
         <Row v-if="list_shortcuts.length !== 0 || list_shortcuts.length !== null">
           <ButtonGroup vertical style="width: 100%;">
-            <i-button v-for="shortcut in list_shortcuts" :key="shortcut.key" type="ghost" style="text-align: left;">
-              <Icon v-if="shortcut.icon_type !== 'profileimage'" :type="shortcut.icon_type"/>
-              <img v-if="shortcut.icon_type === 'profileimage'" :src="$parent.actualProfile.imagenperfil" style="width: 12px;"/>
-              <label>{{shortcut.title}}</label>
+            <i-button v-for="shortcut in list_shortcuts" :key="shortcut.key" type="text" style="text-align: left;">
+              <div class="slides-shortcut--icon" v-bind:style="{ backgroundColor : shortcut.icon_color}">
+                <Icon v-bind:style="{ color : shortcut.icon_fontColor }" v-if="shortcut.icon_type !== 'profileimage'" :type="shortcut.icon_type"/>
+              </div>
+              <Avatar v-if="shortcut.icon_type === 'profileimage'" :src="$parent.actualProfile.imagenperfil" style="width: 19px; height: 20px; cursor: pointer;"></Avatar>
+              <!-- <img class="slides-shortcut-img" v-if="shortcut.icon_type === 'profileimage'" :src="$parent.actualProfile.imagenperfil"/> -->
+              <label style="cursor: pointer; font-weight: bold;">{{shortcut.title}}</label>
+
             </i-button>
           </ButtonGroup>
         </Row>
-        <Row v-else-if="list_shortcuts.length === 0 || list_shortcuts.length === null">
+        <Row v-if="list_shortcuts.length == 0 || list_shortcuts.length == null">
+          <label style="margin: 4px 0px 4px; font-size: 14px; opacity: 0.3">No tienes accesos directos</label>
         </Row>
+        <Row>
+          <i-button type="text" style="width: 100%; margin: 8px 0px; text-align: left; font-weight: bold;">Añadir acceso</i-button>
+        </Row>
+      </Card>
+      <Card class="slides">
+        <h3>Periodo de trabajo: {{periodo}}</h3>
+        <hr>
+        <p>Actualmente en el sistema, todo se almacena dentro del periodo de trabajo {{periodo}}, es importante que esta informacion concuerde con la de sus sistema principal de gestion de cuentas medicas, motivo por el que le pedimos ingrese la informacion que pertenezca a este periodo.</p>
       </Card>
     </i-col>
     <!-- Area del Feed -->
@@ -77,12 +90,13 @@
       </div>
     </i-col>
     <!-- Area de notificacion -->
-    <i-col span="6">
+    <i-col span="6" style="visibility: hidden">
       <Card class="slides">
         <h3>Notificaciones</h3>
         <hr/>
       </Card>
     </i-col>
+    <!-- Boton de regresar al top -->
     <BackTop>
       <div class="top">
         <Icon type="arrow-up-b"></Icon>
@@ -99,6 +113,7 @@
         value1: 0,
         value2: 0,
         height: 677,
+        periodo: 'diciembre-2017',
         list_notice: [
           {
             origin: 'antrazstudios.com',
@@ -133,6 +148,7 @@
             goto: '/login',
             icon_type: 'profileimage',
             icon_color: null,
+            icon_fontColor: null,
             isDeletable: false
           },
           {
@@ -140,14 +156,33 @@
             goto: '/Settings/index',
             icon_type: 'plus-round',
             icon_color: '#2ecc71',
+            icon_fontColor: '#fff',
+            isDeletable: true
+          },
+          {
+            title: 'Cargar masivo glosas',
+            goto: '/Settings/index',
+            icon_type: 'upload',
+            icon_color: '#3498db',
+            icon_fontColor: '#fff',
+            isDeletable: true
+          },
+          {
+            title: 'Estados de cartera',
+            goto: '/Settings/index',
+            icon_type: 'android-download',
+            icon_color: '#d35400',
+            icon_fontColor: '#fff',
             isDeletable: true
           }
+        ],
+        list_notifications: [
+
         ]
       }
     },
     mounted () {
       // do something after mounting vue instance
-      console.log(this.$parent.actualProfile.imagenperfil)
     },
     methods: {
       clickMoreInfo (link) {
@@ -160,14 +195,29 @@
 
 <style lang="css">
   .content{
-    font-family: "Helvetica Neue",Arial;
     width: 100%;
-    min-height: 100%;
+    height: 100% !important;
     padding: 0px;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: right;
     user-select: none;
+  }
+  .slides-shortcut--img{
+    display: inline;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+  .slides-shortcut--icon{
+    display: inline;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 5px;
+    background-color: yellow;
+    border-radius: 3px;
+    cursor: pointer;
   }
   .slides-text--title{
     margin-bottom: 10px;
@@ -239,7 +289,7 @@
     padding: 0;
   }
   .top{
-    padding: 2.5px;
+    padding: 1px;
     background: rgba(84, 84, 84, 0.7);
     color: #fff;
     text-align: center;

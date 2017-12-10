@@ -25,11 +25,22 @@ function createWindow () {
   /**
    * Initial window options
    */
+  let titleBarStylev
+  if (process.platform !== 'darwin') {
+    titleBarStylev = 'hiddenInset'
+  } else if (process.platform === 'darwin') {
+    titleBarStylev = 'hidden'
+  }
+
   mainWindow = new BrowserWindow({
-    height: 563,
-    useContentSize: true,
+    title: 'BillsDelivery+',
+    height: 650,
     width: 1000,
-    center: true
+    minHeight: 650,
+    minWidth: 1000,
+    center: true,
+    autoHideMenuBar: true,
+    titleBarStyle: titleBarStylev
   })
 
   mainWindow.loadURL(winURL)

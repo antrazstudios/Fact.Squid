@@ -93,6 +93,16 @@
         <label class="modal-contenedor--label">{{loaderMessage}}</label>
       </div>
     </div>
+    <!-- Titlebar - Barra de titulo -->
+    <Row>
+      <div class="titlebar">
+        <label class="titlebar-title">Bills
+          <div class="titlebar-icon">
+            Delivery
+          </div>
+        </label>
+      </div>
+    </Row>
   </div>
 </template>
 
@@ -265,8 +275,38 @@
     height:100%;
     margin:0;
     padding:0;
-    background-color: rgba(245, 241, 241, 0.2);
+    background-color: rgb(250, 250, 250);
     overflow-x: hidden;
+  }
+  .titlebar-title{
+    font-weight: bold;
+    opacity: 0.8;
+    font-size: 14px;
+    vertical-align: middle;
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif;
+  }
+  .titlebar-icon{
+    display: inline;
+    padding-left: 7px;
+    padding-top: 3px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    vertical-align: middle;
+    background-color: rgb(73, 80, 96);
+    color: white;
+    border-radius: 4px;
+  }
+  .titlebar{
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+    position: fixed;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    text-align: center;
+    width: 100%;
+    top: 0px;
+    z-index: 1000;
+    background-color: white;
   }
   .footer{
     position: fixed;
@@ -302,7 +342,7 @@
     overflow-y: scroll;
     position: relative;
     height: 100%;
-    top: 10px;
+    top: 30px;
     bottom: 30px;
   }
   .layout-nav{
@@ -310,6 +350,7 @@
       margin: auto;
   }
   .layout-fixed{
+    margin-top: 20px;
     width: 100%;
     background-color: white;
     position: fixed;

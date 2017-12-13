@@ -256,6 +256,57 @@
       },
       gotoDocumentation () {
         this.changePath('/Settings/about/1')
+      },
+      // Funciones adicionales
+      downloadFunction (configuracion) {
+        return new Promise((resolve, reject) => {
+          let receivedBytes = 0
+          let totalBytes = 0
+          let req = require('request')({
+            method: 'GET',
+            uri: configuracion.remoteuri
+          })
+          let out = require('fs').createWriteStream(configuracion.localuri)
+          req.pipe(out)
+
+          req.on('response', (data) => {
+            totalBytes = parseInt(data.headers['content-length'])
+          })
+
+          if (configuracion.hasOwnProperty('onProgress')) {
+            req.on('data', (chunk) => {
+              receivedBytes += chunk.length
+
+              configuracion.onProgress(receivedBytes, totalBytes)
+            })
+          } else {
+            req.on('data', (chunk) => {
+              receivedBytes += chunk.length
+            })
+          }
+
+          req.on('end', () => {
+            resolve()
+          })
+
+          req.on('error', () => {
+            reject(new Error('no ha sido posible descargar el paquete, revise su conexion a internet, si el problema persiste contacte a su proveedor'))
+          })
+        })
+      },
+      unzipFunction (configuracion) {
+        return new Promise((resolve, reject) => {
+          const extractZip = require('extract-zip')
+          extractZip(configuracion.uri, { dir: configuracion.path }, (err) => {
+            if (err) {
+              reject(new Error('ha ocurrido un error durante la extraccion del paquete: ' + err))
+            }
+            require('fs').unlink(configuracion.uri, (err) => {
+              reject(new Error('ha ocurrido un error al eliminar el cache del paquete: ' + err))
+            })
+            resolve('Extraccion del paquete exitosa')
+          })
+        })
       }
     }
   }

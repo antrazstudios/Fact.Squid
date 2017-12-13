@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <img width="500" src="src/renderer/assets/images/billsdelivery_forelogo.png" alt="billsdelivery-vue">
+  <img width="500" src="/billsdelivery_forelogo.png" alt="billsdelivery-vue">
   <br>
   <br>
 </div>
@@ -10,7 +10,7 @@ La plataforma dinamica y escalable de tracking por excelencia, lo hacemos mejor 
 <br>
 <div align="center">
 
-![Heart](https://img.shields.io/badge/HECHO%20EN-COLOMBIA-F7CA18.svg?style=for-the-badge) ![Status](https://img.shields.io/badge/alpha-0.0.1-%23c0392b.svg?style=for-the-badge) [![AntrazStudios](https://img.shields.io/badge/BY-ANTRAZSTUDIOS-9B59B6.svg?style=for-the-badge)](http://www.antrazstudios.com) 
+![Heart](https://img.shields.io/badge/HECHO%20EN-COLOMBIA-F7CA18.svg?style=for-the-badge) ![Status](https://img.shields.io/badge/alpha-0.0.1-%23c0392b.svg?style=for-the-badge) [![AntrazStudios](https://img.shields.io/badge/BY-ANTRAZSTUDIOS-9B59B6.svg?style=for-the-badge)](http://www.antrazstudios.com)
 
 </div>
 <br>

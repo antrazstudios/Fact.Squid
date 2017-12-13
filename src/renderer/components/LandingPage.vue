@@ -90,7 +90,7 @@
       </div>
     </i-col>
     <!-- Area de notificacion -->
-    <i-col span="6" style="visibility: hidden">
+    <i-col span="6" >
       <Card class="slides">
         <h3>Notificaciones</h3>
         <hr/>

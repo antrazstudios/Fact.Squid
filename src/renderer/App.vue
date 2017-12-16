@@ -96,9 +96,9 @@
     <!-- Titlebar - Barra de titulo -->
     <Row v-if="platform === 'darwin'">
       <div class="titlebar">
-        <label class="titlebar-title">Bills
+        <label class="titlebar-title">Fact
           <div class="titlebar-icon">
-            Delivery
+            .Squid
           </div>
         </label>
       </div>

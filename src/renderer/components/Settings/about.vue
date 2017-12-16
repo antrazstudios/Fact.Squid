@@ -20,9 +20,9 @@
     </Row>
     <Row v-if="source === ''">
       <div style="height: 100%; ">
-        <h1 style="margin-top: 10px; margin-bottom: 5px;">No es posible encontrar el contenido de ayuda de BillsDelivery</h1>
-        <p style="center; margin-bottom: 15px">Para poder utilizar el contenido de ayuda de BillsDelivery es necesario descargarlo, solo es cuestion de hacer click en el boton de descargar y esperar un poco</p>
-        <i-progress :percent="progressDownload" status="active"></i-progress>
+        <h1 style="margin-top: 10px; margin-bottom: 5px;">No es posible encontrar el contenido de ayuda de Fact.Squid</h1>
+        <p style="center; margin-bottom: 15px">Para poder utilizar el contenido de ayuda de Fact.Squid es necesario descargarlo, solo es cuestion de hacer click en el boton de descargar y esperar un poco</p>
+        <i-progress :percent="progressDownload" :status="progressStatus"></i-progress>
         <i-button @click="downloadDocumentation()">REINTENTAR</i-button>
       </div>
     </Row>
@@ -39,6 +39,7 @@
     name: 'settings-about',
     data: () => ({
       progressDownload: 0,
+      progressStatus: 'normal',
       source: '',
       activeName: '1',
       listContents: [
@@ -78,7 +79,7 @@
     methods: {
       loadMdWithItem (item) {
         if (item !== undefined) {
-          let modalPath = require('path').join(require('../../libs/settings.js').getDocumentsPath(), 'documentation/', item.nameFile)
+          let modalPath = require('path').join(require('../../libs/settings.js').getDocumentsPath(), 'packages-documentation/', item.nameFile)
           this.source = require('fs').readFileSync(modalPath, 'utf8')
         }
       },
@@ -93,28 +94,38 @@
         }
       },
       downloadDocumentation () {
+        const packager = require('../../libs/packager.js')
         const pathDownload = require('../../libs/settings.js').getDocumentsPath()
-        this.$parent.downloadFunction({
-          remoteuri: 'http://antrazstudios.com/billsdelivery/assetsdoc/documentation.zip',
-          localuri: pathDownload + 'documentation.zip',
+        this.progressStatus = 'active'
+        packager.downloadFunction({
+          remoteuri: 'http://antrazstudios.com/billsdelivery/assetsdoc/packages-documentation.zip',
+          localuri: pathDownload + 'packages-documentation.zip',
           onProgress: (getSize, totalSize) => {
-            this.progressDownload = (getSize * 100) / totalSize
+            this.progressDownload = Math.round(((getSize * 100) / totalSize) - 10)
             this.$forceUpdate()
           }
-        }).then(() => {
-          this.$parent.unzipFunction({ uri: pathDownload + 'documentation.zip', path: pathDownload }).then((content) => {
+        }).then((rta) => {
+          this.$Message.info({
+            content: rta,
+            duration: 6
+          })
+          packager.unzipFunction({ uri: pathDownload + 'packages-documentation.zip', path: pathDownload }).then((content) => {
+            this.progressDownload = this.progressDownload + 10
+            this.progressStatus = 'success'
             this.$Message.success({
               content: 'Se ha descargado e instalado los paquetes de documentacion',
               duration: 8
             })
             this.loadMdWithId(this.$route.params.id)
           }).catch((err) => {
+            this.progressStatus = 'wrong'
             this.$Message.error({
               content: err.toString(),
               duration: 8
             })
           })
         }).catch((err) => {
+          this.progressStatus = 'wrong'
           this.$Message.error({
             content: err.toString(),
             duration: 8

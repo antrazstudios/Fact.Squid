@@ -121,9 +121,9 @@
             date: '2017-12-08',
             author: 'AntrazStudios',
             imgsrc: 'https://pbs.twimg.com/profile_images/709902706698264576/YpX5dvPY.jpg',
-            title: 'Bienvenido al renovado BillsDelivery, el mismo aunque mucho mas poderoso',
-            description: 'Gracias a las nuevas tecnologias desarrolladas en AntrazStudios, BillsDelivery es mas potente, eficiente y rapido. Y esta preparado para las innovaciones futuras. Otra novedad es que mejora es que mejora las funcionalidades y modulos que usas todos los dias. En sintesis, es BillsDelivery en su maximo nivel.',
-            content: 'Estamos muy emocionados con que utilices esta hermosa version de BillsDelivery, aunque es importante decir que se encuentra en version BETA, y que algunas funciones no se encuentran activas del todo, lo que quiere decir que es posible que te encuentres con algunos problemas menores, pero no sera nada que no solucionemos en el menos tiempo posible.',
+            title: 'Bienvenido al renovado BillsDelivery: Fact.Squid, el mismo aunque mucho mas poderoso',
+            description: 'Gracias a las nuevas tecnologias desarrolladas en AntrazStudios, Fact.Squid es mas potente, eficiente y rapido. Y esta preparado para las innovaciones futuras. Otra novedad es que mejora es que mejora las funcionalidades y modulos que usas todos los dias. En sintesis, es BillsDelivery en su maximo nivel.',
+            content: 'Estamos muy emocionados con que utilices esta hermosa version de Fact.Squid, aunque es importante decir que se encuentra en version BETA, y que algunas funciones no se encuentran activas del todo, lo que quiere decir que es posible que te encuentres con algunos problemas menores, pero no sera nada que no solucionemos en el menos tiempo posible.',
             banner: 'https://www.chu.cam.ac.uk/media/assets/35/1de50922f08b3aafff073ecb0dcf052e3dc303.jpg',
             isOutstanding: true,
             link: 'http://www.antrazstudios.com'

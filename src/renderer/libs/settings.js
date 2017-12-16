@@ -9,7 +9,7 @@ const sesion = new Config({
 const fs = require('fs')
 
 exports.getDocumentsExist = (_callback) => {
-  let pathIndexDoc = config.path.replace('config.json', '') + 'documentation/README.md'
+  let pathIndexDoc = config.path.replace('config.json', '') + 'packages-documentation/README.md'
   require('fs').access(pathIndexDoc, (err) => {
     if (!err) {
       _callback(true)

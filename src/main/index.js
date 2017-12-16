@@ -1,5 +1,4 @@
 'use strict'
-
 import { app, BrowserWindow } from 'electron'
 /**
  * Set `__static` path to static files in production
@@ -10,6 +9,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
+let splashWindow
 
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -32,7 +32,7 @@ function createWindow () {
   }
 
   mainWindow = new BrowserWindow({
-    title: 'BillsDelivery+',
+    title: 'Fact.Squid',
     height: 650,
     width: 1000,
     minHeight: 650,
@@ -40,12 +40,37 @@ function createWindow () {
     center: true,
     autoHideMenuBar: true,
     titleBarStyle: titleBarStylev,
-    enableLargerThanScreen: true
+    enableLargerThanScreen: true,
+    show: false
   })
 
-  mainWindow.maximize()
+  splashWindow = new BrowserWindow({
+    title: 'Cargando Fact.Squid',
+    height: 300,
+    width: 612,
+    backgroundColor: '#fff',
+    autoHideMenuBar: true,
+    resizable: false,
+    movable: false,
+    alwaysOnTop: true,
+    frame: false,
+    center: true,
+    show: false
+  })
+  splashWindow.loadURL('file://' + __static + '/loading.html')
   mainWindow.loadURL(winURL)
 
+  // Cuando el splash este listo
+  splashWindow.on('ready-to-show', () => {
+    splashWindow.show()
+  })
+
+  // Cuando la ventana principal este lista
+  mainWindow.on('ready-to-show', () => {
+    splashWindow.destroy()
+    mainWindow.maximize()
+    mainWindow.show()
+  })
   mainWindow.on('closed', () => {
     mainWindow = null
   })

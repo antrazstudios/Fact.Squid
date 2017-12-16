@@ -1,7 +1,5 @@
 'use strict'
-
 import { app, BrowserWindow } from 'electron'
-
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -11,6 +9,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
+let splashWindow
 
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -25,15 +24,53 @@ function createWindow () {
   /**
    * Initial window options
    */
+  let titleBarStylev
+  if (process.platform !== 'darwin') {
+    titleBarStylev = 'customButtonsOnHover'
+  } else if (process.platform === 'darwin') {
+    titleBarStylev = 'hidden'
+  }
+
   mainWindow = new BrowserWindow({
-    height: 563,
-    useContentSize: true,
+    title: 'Fact.Squid',
+    height: 650,
     width: 1000,
-    center: true
+    minHeight: 650,
+    minWidth: 1000,
+    center: true,
+    autoHideMenuBar: true,
+    titleBarStyle: titleBarStylev,
+    enableLargerThanScreen: true,
+    show: false
   })
 
+  splashWindow = new BrowserWindow({
+    title: 'Cargando Fact.Squid',
+    height: 300,
+    width: 612,
+    backgroundColor: '#fff',
+    autoHideMenuBar: true,
+    resizable: false,
+    movable: false,
+    alwaysOnTop: true,
+    frame: false,
+    center: true,
+    show: false
+  })
+  splashWindow.loadURL('file://' + __static + '/loading.html')
   mainWindow.loadURL(winURL)
 
+  // Cuando el splash este listo
+  splashWindow.on('ready-to-show', () => {
+    splashWindow.show()
+  })
+
+  // Cuando la ventana principal este lista
+  mainWindow.on('ready-to-show', () => {
+    splashWindow.destroy()
+    mainWindow.maximize()
+    mainWindow.show()
+  })
   mainWindow.on('closed', () => {
     mainWindow = null
   })

@@ -2,9 +2,9 @@
   <div class="content">
     <Row :gutter="32">
       <i-col span="14">
-        <h1 class="layout-text-item">BillsDelivery</h1>
+        <h1 class="layout-text-item">Fact.Squid</h1>
         <h2 class="layout-text-item">Sencillo y poderoso</h2>
-        <p class="layout-text-item">BillsDelivery es un software especializado en el seguimiento de informacion hacia las cuentas medicas, abarcando completamente las etapas de trazabilidad de recepcion, respuesta, auditoria, envio y radicacion de cuentas medicas mas las fases posteriores. Para mas informacion puedes <a href="http://www.antrazstudios.com">leer la documentacion de BillsDelivery en antrazstudios.com</a>.</p>
+        <p class="layout-text-item">BillsDelivery era un software especializado en el seguimiento de informacion hacia las cuentas medicas, abarcando completamente las etapas de trazabilidad de recepcion, respuesta, auditoria, envio y radicacion de cuentas medicas mas las fases posteriores, el cual se ha transformado para entrar en la amplia gama de softwares de productividad de la familia Squid de AntrazStudios. Para mas informacion puedes <a href="http://www.antrazstudios.com">leer la documentacion de Fact.Squid en antrazstudios.com</a>.</p>
         <p class="layout-text-item">Hemos cambiado con el fin de ser compatibles con los tres sistemas operativos lideres del mercado, Windows10, macOS y Linux. Disfruta de las nuevas mejoras.</p>
         <Alert class="layout-text-item" type="warning" show-icon>
           IMPORTANTE
@@ -97,36 +97,57 @@
       }
     },
     methods: {
-      handleSubmit (name) { // Metodo de testeo --pendiente a eliminar
+      handleSubmit (name) { // Metodo de verificacion de usuario
+        // Verificacion si esta validado el formulario de inicio de sesion
         this.$refs[name].validate((valid) => {
+          // en caso de estar activado el modo de desarollo omitira los datos del formulario, inicia sesion de manera directa.
           if (this.$parent.developerMode === true) {
             this.$parent.handleSpinShow('Esperando respuesta del servidor, en modo desarrollador')
-            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass('ROOT', '1234567890', (rta) => {
-              if (rta.user !== undefined) {
-                require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
+            // ejecuta el procedimiento de inicio de sesion con los datos del usuario ROOT
+            require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass({
+              username: 'ROOT',
+              pass: '1234567890'
+            }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
+              if (rta.userConsult !== undefined) {
+                require('../../libs/settings.js').createSesion(rta.userConsult, this.connectionSelected)
                 this.$parent.$refs.menufix.$el.style.display = ''
                 this.$parent.changePath('/')
                 this.$parent.verifySesion()
               }
-              this.$Message[rta.message.type]({
-                content: rta.message.message,
+              this.$Message.success({
+                content: 'Inicio de sesion exitoso',
                 duration: 6
               })
               this.$parent.handleSpinHide()
+            }).catch((rta) => { // En caso de que ocurra un error, enseña la informacion al usuario
+              this.$Message.error({
+                content: rta,
+                duration: 8
+              })
+              this.$parent.handleSpinHide()
             })
-          } else {
+          } else { // Metodo de inicio de sesion corriente con el modo de desarrollo desactivado
             if (valid) {
               this.$parent.handleSpinShow('Esperando respuesta del servidor')
-              require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass(this.formInline.user, this.formInline.password, (rta) => {
-                if (rta.user !== undefined) {
-                  require('../../libs/settings.js').createSesion(rta.user, this.connectionSelected)
+              require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass({
+                username: this.formInline.user,
+                pass: this.formInline.password
+              }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
+                if (rta.userConsult !== undefined) {
+                  require('../../libs/settings.js').createSesion(rta.userConsult, this.connectionSelected)
                   this.$parent.$refs.menufix.$el.style.display = ''
                   this.$parent.changePath('/')
                   this.$parent.verifySesion()
                 }
-                this.$Message[rta.message.type]({
-                  content: rta.message.message,
+                this.$Message.success({
+                  content: 'Inicio de sesion exitoso',
                   duration: 6
+                })
+                this.$parent.handleSpinHide()
+              }).catch((rta) => { // En caso de que ocurra un error, enseña la informacion al usuario
+                this.$Message.error({
+                  content: rta,
+                  duration: 8
                 })
                 this.$parent.handleSpinHide()
               })

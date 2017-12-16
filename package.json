@@ -1,10 +1,10 @@
 {
-  "name": "billsdelivery-vue",
+  "name": "Fact.Squid",
   "version": "0.0.1",
   "deployVersion": "ALPHA",
   "author": "AntrazStudios",
   "description": "Proyecto de software para el seguimiento de cuentas medicas basado en electron y vue js",
-  "license": null,
+  "license": "MPL-2.0",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
@@ -23,8 +23,8 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "billsdelivery-vue",
-    "appId": "org.simulatedgreg.electron-vue",
+    "productName": "Fact.Squid",
+    "appId": "fact.squid.app",
     "directories": {
       "output": "build"
     },
@@ -47,22 +47,45 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/factsquid_iconColor.icns",
+      "category": "public.app-category.business",
+      "type": "development"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/factsquid_iconColor.ico",
+      "target": "nsis"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons/factsquid_iconColor256x256.png"
+    },
+    "dmg":{
+      "background": "build/factsquid_installerBackground.png",
+      "icon": "build/icons/factsquid_iconInstall.icns",
+      "window": {
+        "width" : "540",
+        "height" : "380"
+      }
+    },
+    "nsis":{
+      "installerIcon": "build/icons/factsquid_iconInstall.icon",
+      "uninstallerIcon": "build/icons/factsquid_iconUninstall.icon",
+      "installerHeaderIcon": "build/icons/factsquid_iconInstall.icon"
     }
   },
   "dependencies": {
     "axios": "^0.16.1",
     "electron-config": "^1.0.0",
+    "electron-download-manager": "^1.3.1",
+    "extract-zip": "^1.6.6",
     "iview": "^2.7.3",
     "jquery": "^3.2.1",
+    "jszip": "^3.1.5",
+    "jszip-utils": "0.0.2",
     "loaders.css": "^0.1.2",
     "mysql": "^2.15.0",
+    "node-sass": "^4.7.2",
+    "q": "^1.5.1",
+    "request": "^2.83.0",
     "sass-loader": "^6.0.6",
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",

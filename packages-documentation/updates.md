@@ -48,7 +48,7 @@ Se mejora notablemente la interfaz de usuario cambiando por completo el layout d
 
 4.  **Barra de Herramientas del sistema(4):** En este lugar, el sistema mostrara informacion sobre el sistema
     * Primero enseñara la version actual del sistema asi como su deploy tambien que puede ser *ALPHA*, *BETA*, *RELEASE CANDIDATE* y *STABLE*, para que el usuario este informado siempre de que version del sistema tiene funcionando.
-    * Todos los procesos en segundo plano se mostraran ahi tambien, de esta manera el usuario sabe en todo momento que esta haciendo **BillsDelivery** con la informacion.
+    * Todos los procesos en segundo plano se mostraran ahi tambien, de esta manera el usuario sabe en todo momento que esta haciendo **Fact.Squid** con la informacion.
 
 <br>
 
@@ -67,7 +67,7 @@ Se mejora notablemente la interfaz de usuario cambiando por completo el layout d
 
 <div align="center" backgroudcolor="purple">
 
-<img height="35" src="http://antrazstudios.com/assets/antraz_studios_logotipo_dark.png" alt="billsdelivery-vue">
+<img height="35" src="http://antrazstudios.com/assets/antraz_studios_logotipo_dark.png" alt="Fact.Squid-vue">
 
 </div>
 

@@ -2,7 +2,7 @@
   <div id="app" style="user-select: none">
     <!-- Menu superior fixed-->
     <Menu ref="menufix" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" style="background: white !important;">
-      <div class="layout-fixed">
+      <div class="layout-fixed" v-bind:style="{marginTop: margintop + 'px'}">
         <div class="layout-return" v-bind:style="{ visibility: visibleReturnButton }">
           <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
             <i-button type="text" @click="returnPath()">
@@ -69,7 +69,7 @@
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
-    <router-view class="content"></router-view>
+    <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
     <!-- Footer-->
     <div class="footer">
       <Row type="flex" justify="space-between">
@@ -93,6 +93,16 @@
         <label class="modal-contenedor--label">{{loaderMessage}}</label>
       </div>
     </div>
+    <!-- Titlebar - Barra de titulo -->
+    <Row v-if="platform === 'darwin'">
+      <div class="titlebar">
+        <label class="titlebar-title">Fact
+          <div class="titlebar-icon">
+            .Squid
+          </div>
+        </label>
+      </div>
+    </Row>
   </div>
 </template>
 
@@ -109,6 +119,8 @@
         visibleSearch: false,
         visibleReturnButton: 'hidden',
         activeName: '1',
+        platform: 'win32',
+        margintop: 0,
         routeIndexes: [
           {
             id: '1',
@@ -137,6 +149,13 @@
       this.handleSpinHide()
     },
     created: function () {
+      // Carga la plataforma
+      this.platform = process.platform
+      if (this.platform === 'win32') {
+        this.margintop = 0
+      } else {
+        this.margintop = 20
+      }
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
       // Define el color dependiendo del tipo de Deploy
@@ -237,6 +256,57 @@
       },
       gotoDocumentation () {
         this.changePath('/Settings/about/1')
+      },
+      // Funciones adicionales
+      downloadFunction (configuracion) {
+        return new Promise((resolve, reject) => {
+          let receivedBytes = 0
+          let totalBytes = 0
+          let req = require('request')({
+            method: 'GET',
+            uri: configuracion.remoteuri
+          })
+          let out = require('fs').createWriteStream(configuracion.localuri)
+          req.pipe(out)
+
+          req.on('response', (data) => {
+            totalBytes = parseInt(data.headers['content-length'])
+          })
+
+          if (configuracion.hasOwnProperty('onProgress')) {
+            req.on('data', (chunk) => {
+              receivedBytes += chunk.length
+
+              configuracion.onProgress(receivedBytes, totalBytes)
+            })
+          } else {
+            req.on('data', (chunk) => {
+              receivedBytes += chunk.length
+            })
+          }
+
+          req.on('end', () => {
+            resolve()
+          })
+
+          req.on('error', () => {
+            reject(new Error('no ha sido posible descargar el paquete, revise su conexion a internet, si el problema persiste contacte a su proveedor'))
+          })
+        })
+      },
+      unzipFunction (configuracion) {
+        return new Promise((resolve, reject) => {
+          const extractZip = require('extract-zip')
+          extractZip(configuracion.uri, { dir: configuracion.path }, (err) => {
+            if (err) {
+              reject(new Error('ha ocurrido un error durante la extraccion del paquete: ' + err))
+            }
+            require('fs').unlink(configuracion.uri, (err) => {
+              reject(new Error('ha ocurrido un error al eliminar el cache del paquete: ' + err))
+            })
+            resolve('Extraccion del paquete exitosa')
+          })
+        })
       }
     }
   }
@@ -265,8 +335,38 @@
     height:100%;
     margin:0;
     padding:0;
-    background-color: rgba(245, 241, 241, 0.2);
+    background-color: rgb(250, 250, 250);
     overflow-x: hidden;
+  }
+  .titlebar-title{
+    font-weight: bold;
+    opacity: 0.8;
+    font-size: 14px;
+    vertical-align: middle;
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif;
+  }
+  .titlebar-icon{
+    display: inline;
+    padding-left: 7px;
+    padding-top: 3px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    vertical-align: middle;
+    background-color: rgb(73, 80, 96);
+    color: white;
+    border-radius: 4px;
+  }
+  .titlebar{
+    user-select: none;
+    -webkit-app-region: drag;
+    position: fixed;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    text-align: center;
+    width: 100%;
+    top: 0px;
+    z-index: 1000;
+    background-color: white;
   }
   .footer{
     position: fixed;
@@ -302,7 +402,6 @@
     overflow-y: scroll;
     position: relative;
     height: 100%;
-    top: 10px;
     bottom: 30px;
   }
   .layout-nav{
@@ -310,12 +409,14 @@
       margin: auto;
   }
   .layout-fixed{
+    margin-top: 0px;
     width: 100%;
     background-color: white;
     position: fixed;
     -webkit-box-shadow: 0 4px 6px -6px #222;
     -moz-box-shadow: 0 4px 6px -6px #222;
     box-shadow: 0 4px 6px -6px #222;
+    z-index: 999;
   }
   .layout-buttons{
     float: right;

@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <img width="500" src="src/renderer/assets/images/factsquid_logoColor.png" alt="Fact.Squid-vue">
+  <img width="500" src="http://antrazstudios.com/factsquid/images/factsquid_logoColor.png" alt="Fact.Squid-vue">
   <br>
   <br>
 </div>
@@ -15,7 +15,7 @@ La plataforma dinamica y escalable de tracking por excelencia, lo hacemos mejor 
 </div>
 <br>
 
-# **Fact.Squid** (Vue project) :white_check_mark:
+# **Fact.Squid** Plus (Vue project) :white_check_mark:
 
 > **Fact.Squid** es un proyecto enfocado completamente al seguimiento o tracking de informacion de cuentas medicas en todas sus diferentes etapas. A diferencia de otros softwares de cuentas medicas, **Fact.Squid** esta diseñado desde el inicio para ser mucho mas ligero, productivo, eficaz, dinamico y escalable, su motor de gestion inicial se concentra en mantenerlo a usted informado de que esta sucediendo en tiempo real con cada uno de sus procesos.
 

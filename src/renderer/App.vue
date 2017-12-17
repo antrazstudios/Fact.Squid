@@ -103,6 +103,38 @@
         </label>
       </div>
     </Row>
+    <!-- Informacion del sistema -->
+    <Modal v-model="aboutModal">
+      <div style="text-align: center;">
+        <img src="./assets/images/factsquid_iconColor.png" style="width: 100px;">
+        <h1>Fact.Squid version {{ require('./libs/settings.js').getVersionApp() }}</h1>
+        <h4>Fact.Squid es desarrollado por Carlos Vasquez de AntrazStudios, Colombia</h4>
+        <p style="margin-top: 30px">Utilizamos tecnologias punteras Web adaptadas a escritorio y de codigo abierto:</p>
+        <Row style="margin-top: 15px; margin-bottom: 15px">
+          <i-col span="12">
+            <img src="./assets/images/vueelectronjs_logo.png" style="width: auto; height: 30px; margin-left: 5px; margin-right: 5px;">
+          </i-col>
+          <i-col span="12">
+            <img src="./assets/images/electronjs_logo.svg" style="width: auto; height: 30px; margin-left: 5px; margin-right: 5px;">
+          </i-col>
+        </Row>
+        <p>Fact.Squid utiliza VueJS y ElectronJS, ademas de otros asombrosos proyectos opensource.</p>
+        <Row style="margin-top: 15px">
+          <i-col span="12">
+            <i-button type="ghost">Contrato de usuario final</i-button>
+          </i-col>
+          <i-col span="12">
+            <i-button type="ghost">Listado de librerias de codigo libro</i-button>
+          </i-col>
+        </Row>
+      </div>
+      <Row slot="footer">
+        <i-col span="8">
+          <img src="./assets/images/antrazstudios.png" style="width: auto; height: 20px">
+        </i-col>
+        <i-col span="16">(C) 2016-2018 Todos los derechos reservados</i-col>
+      </Row>
+    </Modal>
   </div>
 </template>
 
@@ -111,6 +143,7 @@
     name: 'billsdelivery-vue',
     data () {
       return {
+        aboutModal: false,
         colorVersion: '',
         loaderMessage: '...',
         actualProfile: '',
@@ -149,6 +182,8 @@
       this.handleSpinHide()
     },
     created: function () {
+      // Creacion del menu
+      this.createMenu()
       // Carga la plataforma
       this.platform = process.platform
       if (this.platform === 'win32') {
@@ -187,6 +222,26 @@
       this.changePath('/login')
     },
     methods: {
+      createMenu () {
+        // Creacion del menu de la aplicacion
+        const {remote} = require('electron')
+        const {Menu} = remote
+        console.log(Menu.getApplicationMenu())
+        // // Creacion del template del menu
+        // const templateMenu = [
+        //   {
+        //     label: 'Fact.Squid',
+        //     submenu: [
+        //       {
+        //         label: 'Acerca de',
+        //         click () { this.aboutModal = true }
+        //       }
+        //     ]
+        //   }
+        // ]
+        // const menu = Menu.buildFromTemplate(templateMenu)
+        // Menu.setApplicationMenu(menu)
+      },
       changePath (to) {
         this.$router.push(to)
         for (let i = 0; i < this.routeIndexes.length; i++) {

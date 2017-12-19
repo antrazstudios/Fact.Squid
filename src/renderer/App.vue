@@ -18,7 +18,7 @@
             </router-link>
           </MenuItem>
           <MenuItem name="2">
-            <router-link style="color: inherit" :to="{ name: 'system-information' }">
+            <router-link style="color: inherit" :to="{ name: 'terceros' }">
               <icon type="ios-body"/>
               Terceros
             </router-link>
@@ -69,7 +69,9 @@
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
-    <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
+    <transition name="fade">
+      <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
+    </transition>
     <!-- Footer-->
     <div class="footer">
       <Row type="flex" justify="space-between">
@@ -87,12 +89,14 @@
       </Row>
     </div>
     <!-- Interfaz de carga -->
-    <div ref="loaderfix" class="modal">
-      <div class="modal-contenedor">
-        <div class="modal-contenedor--img"></div>
-        <label class="modal-contenedor--label">{{loaderMessage}}</label>
+    <transition name="fade">
+      <div v-if="showWaitDialog" ref="loaderfix" class="modal">
+        <div class="modal-contenedor">
+          <div class="modal-contenedor--img"></div>
+          <label class="modal-contenedor--label">{{loaderMessage}}</label>
+        </div>
       </div>
-    </div>
+    </transition>
     <!-- Titlebar - Barra de titulo -->
     <Row v-if="platform === 'darwin'">
       <div class="titlebar">
@@ -143,6 +147,8 @@
     name: 'billsdelivery-vue',
     data () {
       return {
+        showWaitDialog: false,
+        maxHeightTable: 0,
         aboutModal: false,
         colorVersion: '',
         loaderMessage: '...',
@@ -182,6 +188,10 @@
       this.handleSpinHide()
     },
     created: function () {
+      // Obtencion del maximo de una tabla dependiendo del tamaño de la app
+      require('electron').remote.getCurrentWindow().on('resize', () => {
+        this.maxHeightTable = require('electron').remote.getCurrentWindow().getSize()[1] - 240
+      })
       // Creacion del menu
       this.createMenu()
       // Carga la plataforma
@@ -280,11 +290,11 @@
         this.$router.push('/login')
       },
       handleSpinShow (message = 'Espere un momento por favor') {
-        this.$refs.loaderfix.style.display = ''
+        this.showWaitDialog = true
         this.loaderMessage = message
       },
       handleSpinHide () {
-        this.$refs.loaderfix.style.display = 'none'
+        this.showWaitDialog = false
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
@@ -311,57 +321,6 @@
       },
       gotoDocumentation () {
         this.changePath('/Settings/about/1')
-      },
-      // Funciones adicionales
-      downloadFunction (configuracion) {
-        return new Promise((resolve, reject) => {
-          let receivedBytes = 0
-          let totalBytes = 0
-          let req = require('request')({
-            method: 'GET',
-            uri: configuracion.remoteuri
-          })
-          let out = require('fs').createWriteStream(configuracion.localuri)
-          req.pipe(out)
-
-          req.on('response', (data) => {
-            totalBytes = parseInt(data.headers['content-length'])
-          })
-
-          if (configuracion.hasOwnProperty('onProgress')) {
-            req.on('data', (chunk) => {
-              receivedBytes += chunk.length
-
-              configuracion.onProgress(receivedBytes, totalBytes)
-            })
-          } else {
-            req.on('data', (chunk) => {
-              receivedBytes += chunk.length
-            })
-          }
-
-          req.on('end', () => {
-            resolve()
-          })
-
-          req.on('error', () => {
-            reject(new Error('no ha sido posible descargar el paquete, revise su conexion a internet, si el problema persiste contacte a su proveedor'))
-          })
-        })
-      },
-      unzipFunction (configuracion) {
-        return new Promise((resolve, reject) => {
-          const extractZip = require('extract-zip')
-          extractZip(configuracion.uri, { dir: configuracion.path }, (err) => {
-            if (err) {
-              reject(new Error('ha ocurrido un error durante la extraccion del paquete: ' + err))
-            }
-            require('fs').unlink(configuracion.uri, (err) => {
-              reject(new Error('ha ocurrido un error al eliminar el cache del paquete: ' + err))
-            })
-            resolve('Extraccion del paquete exitosa')
-          })
-        })
       }
     }
   }

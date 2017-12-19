@@ -15,9 +15,9 @@ export default new Router({
       redirect: '/'
     },
     {
-      path: '/systeminformation',
-      name: 'system-information',
-      component: require('@/components/LandingPage/SystemInformation').default
+      path: '/terceros',
+      name: 'terceros',
+      component: require('@/components/Terceros/index').default
     },
     {
       path: '/login',

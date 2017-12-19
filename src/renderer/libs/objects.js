@@ -68,3 +68,51 @@ exports.createPermissionsToken = (vnombre, vdescription) => {
     description: vdescription
   }
 }
+
+exports.createTiposIdentificacion = (vid, vnombre, vdescripcion) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    descripcion: vdescripcion
+  }
+}
+
+exports.createTerceros = (vid, vtipoidentificacion, videntificacion, vactive) => {
+  return {
+    id: vid,
+    tipoidentificacion: vtipoidentificacion,
+    identificacion: videntificacion,
+    active: vactive
+  }
+}
+
+exports.createTercerosJuridica = (vid, vnombre, vrepresentantelegal, vtercero) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    represnentelegal: vrepresentantelegal,
+    tercero: vtercero
+  }
+}
+
+exports.createTercerosNatural = (vid, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vtercero) => {
+  return {
+    id: vid,
+    primernombre: vprimernombre,
+    segundonombre: vsegundonombre,
+    primerapellido: vprimerapellido,
+    segundoapellido: vsegundoapellido,
+    tercero: vtercero,
+    getFullName () {
+      let name = this.primernombre
+      if (this.segundonombre) {
+        name = name + ' ' + this.segundonombre
+      }
+      name = name + ' ' + this.primerapellido
+      if (this.segundoapellido) {
+        name = name + ' ' + this.segundoapellido
+      }
+      return name
+    }
+  }
+}

@@ -32,19 +32,12 @@
       "dist/electron/**/*"
     ],
     "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
+      "background": "build/factsquid_installerBackground.png",
+      "icon": "build/icons/factsquid_iconInstall.icns",
+      "window": {
+        "width": "540",
+        "height": "380"
+      }
     },
     "mac": {
       "icon": "build/icons/factsquid_iconColor.icns",
@@ -58,15 +51,7 @@
     "linux": {
       "icon": "build/icons/factsquid_iconColor256x256.png"
     },
-    "dmg":{
-      "background": "build/factsquid_installerBackground.png",
-      "icon": "build/icons/factsquid_iconInstall.icns",
-      "window": {
-        "width" : "540",
-        "height" : "380"
-      }
-    },
-    "nsis":{
+    "nsis": {
       "installerIcon": "build/icons/factsquid_iconInstall.icon",
       "uninstallerIcon": "build/icons/factsquid_iconUninstall.icon",
       "installerHeaderIcon": "build/icons/factsquid_iconInstall.icon"

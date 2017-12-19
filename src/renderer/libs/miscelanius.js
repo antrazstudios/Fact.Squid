@@ -11,7 +11,7 @@ exports.removeObjectinArray = (arr, attr, value) => {
 exports.filterMethod = (obj, columns, value) => {
   return obj.filter((row) => {
     for (let i = 0; i < columns.length - 1; i++) {
-      if (String(row[columns[i].key]).toLowerCase().indexOf(value) !== -1) {
+      if (String(row[columns[i].key]).toLowerCase().indexOf(value.toLowerCase()) !== -1) {
         return true
       }
     }

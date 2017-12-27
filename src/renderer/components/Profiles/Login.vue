@@ -105,8 +105,10 @@
             this.$parent.handleSpinShow('Esperando respuesta del servidor, en modo desarrollador')
             // ejecuta el procedimiento de inicio de sesion con los datos del usuario ROOT
             require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass({
-              username: 'ROOT',
-              pass: '1234567890'
+              // username: 'ROOT',
+              // pass: '1234567890'
+              username: 'LCV',
+              pass: 'gata1125'
             }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
               if (rta.userConsult !== undefined) {
                 require('../../libs/settings.js').createSesion(rta.userConsult, this.connectionSelected)

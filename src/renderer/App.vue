@@ -252,8 +252,11 @@
         // const menu = Menu.buildFromTemplate(templateMenu)
         // Menu.setApplicationMenu(menu)
       },
-      changePath (to) {
-        this.$router.push(to)
+      changePath (to, params = null) {
+        this.$router.push({
+          path: to,
+          query: params
+        })
         for (let i = 0; i < this.routeIndexes.length; i++) {
           if (this.routeIndexes[i].name === this.$route.name) {
             this.activeName = this.routeIndexes[i].id

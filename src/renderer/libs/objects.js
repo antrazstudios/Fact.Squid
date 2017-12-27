@@ -116,3 +116,48 @@ exports.createTercerosNatural = (vid, vprimernombre, vsegundonombre, vprimerapel
     }
   }
 }
+
+exports.createDireccion = (vid, vtipodireccion, vdependencia, vdireccion, vciudad, vwebstring, visactive) => {
+  return {
+    id: vid,
+    tipodireccion: vtipodireccion,
+    dependencia: vdependencia,
+    direccion: vdireccion,
+    ciudad: vciudad,
+    webstring: vwebstring,
+    isactive: visactive
+  }
+}
+
+exports.createTipoDireccion = (vid, vnombre, vreqdependencia, vreqhorario, visactive) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    reqdependencia: vreqdependencia,
+    reqhorario: vreqhorario,
+    isactive: visactive
+  }
+}
+
+exports.createCiudad = (vid, vnombre, vdepartamento) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    departamento: vdepartamento
+  }
+}
+
+exports.createDepartamento = (vid, vnombre, vpais) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    pais: vpais
+  }
+}
+
+exports.createPais = (vid, vnombre) => {
+  return {
+    id: vid,
+    nombre: vnombre
+  }
+}

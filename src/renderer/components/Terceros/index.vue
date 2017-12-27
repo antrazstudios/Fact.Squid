@@ -15,7 +15,7 @@
       </i-col>
       <i-col span="6">
         <Tooltip content="Añadir nuevo tercero" style="float: right" placement="left">
-          <i-button icon="plus-round" type="info" @click="createNew()"></i-button>
+          <i-button icon="plus-round" type="info" @click="createTercero()"></i-button>
         </Tooltip>
         <i-switch style="float: right; margin-top: 5px; margin-right: 10px" v-model="switchTercero" @on-change="changeConsult">
           <Icon slot="open" type="briefcase"></Icon>
@@ -24,12 +24,12 @@
       </i-col>
     </Row>
     <Row style="margin-bottom: 20px">
-      <i-table ref="connTable" stripe :columns="columnsTerceros" :data="tercerosPages" size="small" :stripe="false" :height="$parent.maxHeightTable"></i-table>
+      <i-table :columns="columnsTerceros" :data="tercerosPages" size="small" :stripe="false" :height="$parent.maxHeightTable"></i-table>
       <div style="margin-top: 10px;overflow: hidden">
         <div style="float: right;">
           <Page :total="totalPages * 10" @on-change="changePages" ></Page>
         </div>
-    </div>
+      </div>
     </Row>
   </div>
 </template>
@@ -90,32 +90,34 @@ export default {
         })
       }
       // Estado del item
-      this.columnsTerceros.push({
-        title: 'Estado',
-        render: (h, {row}) => {
-          return h('div', {}, [
-            h('Icon', {
-              props: {
-                color: row.tercero.active === 1
-                  ? '#27ae60'
-                  : '#c0392b',
-                type: row.tercero.active === 1
-                  ? 'checkmark-circled'
-                  : 'close-circled'
-              },
-              style: {
-                marginRight: '5px'
-              }
-            }),
-            h('label', {
-              style: {
-                marginLeft: '5px'
-              }
-            }, row.tercero.active === 1 ? 'Activo' : 'Inactivo')
-          ])
-        },
-        width: 100
-      })
+      if (require('../../libs/settings.js').getSesionProfile().verifyPermission('ROOT') === true) {
+        this.columnsTerceros.push({
+          title: 'Estado',
+          render: (h, {row}) => {
+            return h('div', {}, [
+              h('Icon', {
+                props: {
+                  color: row.tercero.active === 1
+                    ? '#27ae60'
+                    : '#c0392b',
+                  type: row.tercero.active === 1
+                    ? 'checkmark-circled'
+                    : 'close-circled'
+                },
+                style: {
+                  marginRight: '5px'
+                }
+              }),
+              h('label', {
+                style: {
+                  marginLeft: '5px'
+                }
+              }, row.tercero.active === 1 ? 'Activo' : 'Inactivo')
+            ])
+          },
+          width: 100
+        })
+      }
       // Botones de accion
       this.columnsTerceros.push({
         title: 'Actions',
@@ -162,7 +164,8 @@ export default {
                 props: {
                   type: 'warning',
                   size: 'small',
-                  shape: 'circle'
+                  shape: 'circle',
+                  disabled: !require('../../libs/settings.js').getSesionProfile().verifyPermission('ROOT')
                 },
                 style: {
                   marginRight: '5px'
@@ -192,9 +195,9 @@ export default {
     loadTerceros () {
       this.$parent.handleSpinShow('Consultado terceros')
       const storage = require('../../libs/storage.js')
-      storage._consultTerceros({ type: 'juridica' }).then((data1) => {
+      storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
         this.tercerosJur = data1
-        storage._consultTerceros({ type: 'natural' }).then((data2) => {
+        storage._database_consultTerceros({ type: 'natural' }).then((data2) => {
           this.tercerosNat = data2
           this.changeConsult()
           this.$parent.handleSpinHide()
@@ -248,7 +251,7 @@ export default {
       let name = this.switchTercero === true ? row.nombre : row.getFullName()
       this.$parent.handleSpinShow('Cambiando el estado del tercero: ' + name)
       const storage = require('../../libs/storage.js')
-      storage._changeStateTerceros({ id: row.tercero.id, state: row.tercero.active === 1 ? 0 : 1 }).then((message) => {
+      storage._database_changeStateTerceros({ id: row.tercero.id, state: row.tercero.active === 1 ? 0 : 1 }).then((message) => {
         this.$Message.success(message + '(' + name + ')')
         row.tercero.active = row.tercero.active === 1 ? 0 : 1
         this.$parent.handleSpinHide()
@@ -258,7 +261,19 @@ export default {
       })
     },
     selectRow (row) {
-      console.log(row)
+      let type = 0
+      if (row.primernombre) {
+        type = 1
+      } else {
+        type = 0
+      }
+      this.$parent.changePath('terceros/editor', {
+        id: row.id,
+        type: type
+      })
+    },
+    createTercero () {
+      this.$parent.changePath('/terceros/editor/0')
     }
   }
 }

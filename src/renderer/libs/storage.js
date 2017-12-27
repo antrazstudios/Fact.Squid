@@ -1,3 +1,4 @@
+
 const q = require('q')
 
 // -----------------------------------------------------------------------------------------------------------
@@ -90,19 +91,9 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
     userConsult: '',
     permissionsConsult: []
   }
-  // Bandera de verificacion de mensaje
-  // let isSuccess = true
-  // // Definicion de variables de Q para generar promesas dentro de un modulo
+  // Definicion de variables de Q para generar promesas dentro de un modulo
   let deferred = q.defer()
-  // // Definicion de la conexion actual del sistema
-  // let actualConn = this.getActualConnection()
-  // Se intenta realizar la conexion al sistema
-  // actualConn.connect((err) => {
-  //   if (err) {
-  //     deferred.reject('Ha ocurrido un error al intentar realizar la conexion: ' + err)
-  //   }
-  // })
-  this._database_runQuery({ query: 'call usersLoginWithNicknameAndPass(\'' + configuracion.username + '\', \'' + configuracion.pass + '\');' }).then((rta) => {
+  this._database_runQuery({ query: 'call getProfileLogins(\'' + configuracion.username + '\', \'' + configuracion.pass + '\');' }).then((rta) => {
     let resultData1 = rta.result[0]
     let resultData2 = rta.result[1]
     let resultData3 = rta.result[2]
@@ -124,37 +115,6 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
   }).catch((err) => {
     deferred.reject(err)
   })
-  // // Se ejecuta el respectivo query con la consulta, y retorna el valor de la misma
-  // actualConn.query('call usersLoginWithNicknameAndPass(\'' + configuracion.username + '\', \'' + configuracion.pass + '\');', (err, results, fields) => {
-  //   let resultData1 = results[0]
-  //   let resultData2 = results[1]
-  //   let resultData3 = results[2]
-  //   // Verificacion de la cantidad de resultados obtenidos desde la base de datos,
-  //   // en caso de obtener 3 tablas de datos y la del sistema crear el token y permitir el inicio de sesion
-  //   if (results.length === 4) {
-  //     // Se recorren todos los permisos del usuario
-  //     for (let i = 0; i < resultData3.length; i++) {
-  //       data.permissionsConsult.push(require('./objects.js').createPermissionsToken(resultData3[i].tb_permission_content, resultData3[i].tb_permission_description))
-  //     }
-  //     // Se obtienen los datos del usuario, y se agregan los permisos obtenidos
-  //     data.userConsult = require('./objects.js').createUserToken(resultData2[0].idtb_users, resultData2[0].tb_users_identificacion, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil, resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, data.permissionsConsult)
-  //     deferred.resolve(data)
-  //     isSuccess = false
-  //   } else if (results.length === 3) {
-  //     deferred.reject('Su usuario aun no esta preparado para ser utilizado, pongase en contacto con el administrador del sistema.')
-  //   }
-  //   // Verificacion de los mensajes del sistema
-  //   if (isSuccess === true) {
-  //     if (err) {
-  //       deferred.reject('Ha ocurrido un error al intentar consultar la informacion en el servidor: ' + err)
-  //     } else {
-  //       deferred.reject('Respuesta del servidor => ' + resultData1[0].typeMessage + ': ' + resultData1[0].messageMessage)
-  //     }
-  //   }
-  // })
-  // // Finalizamos la conexion
-  // actualConn.end()
-  // Regresa como respuesta una promesa
   return deferred.promise
 }
 
@@ -181,8 +141,8 @@ exports._database_consultTerceros = (configuracion) => {
         } else {
           terceros.push(require('./objects.js').createTercerosNatural(rta.result[i].idtb_tercerosjuridicas, rta.result[i].tb_tercerospersonas_primernombre, rta.result[i].tb_tercerospersonas_segundonombre, rta.result[i].tb_tercerospersonas_primerapellido, rta.result[i].tb_tercerospersonas_segundoapellido, require('./objects.js').createTerceros(rta.result[i].idtb_terceros, require('./objects.js').createTiposIdentificacion(rta.result[i].tb_terceros_tipodocumento, rta.result[i].tb_tiposidentificacion_nombre, null), rta.result[i].tb_terceros_numerodocumento, rta.result[i].tb_terceros_isactive)))
         }
-        deferred.resolve(terceros)
       }
+      deferred.resolve(terceros)
     } else {
       deferred.reject('La consulta no ha arrojado resultados')
     }
@@ -204,11 +164,48 @@ exports._database_changeStateTerceros = (configuracion) => {
   // Definicion de variables de Q para generar promesas dentro de un modulo
   let deferred = q.defer()
   // Se ejecuta el respectivo query con la accion
-  this._database_runQuery({ query: 'call changeStateTercero (\'' + configuracion.id + '\', \'' + configuracion.state + '\');' }).then(() => {
+  this._database_runQuery({ query: 'call updateTerceroState (\'' + configuracion.id + '\', \'' + configuracion.state + '\');' }).then(() => {
     deferred.resolve('Tercero actualizado')
   }).catch((err) => {
     deferred.reject(err)
   })
   // Se retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_getTerceroDireccionesbyID = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Procedimiento almacenado en la base de datos
+  // Parameters:
+  // * configuracion. id = numero de identificacion a consultar
+  // ------------------------| End Description |------------------------
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  let tercero = ''
+  let direcciones = []
+  // se ejecuta el respectivo query con la accion
+  this._database_runQuery({ query: 'call getTerceroDireccionesbyID(\'' + configuracion.id + '\', \'' + configuracion.type + '\');' }).then((rta) => {
+    // Verficacion de la cantidad de resultados obtenidos desde la base de datos
+    if (rta.result !== 0 && rta.result !== null) {
+      if (configuracion.type === 0) {
+        tercero = require('./objects.js').createTercerosJuridica(rta.result[0][0].idtb_tercerosjuridicas, rta.result[0][0].tb_tercerosjuridicas_razonsocial, rta.result[0][0].tb_tercerosjuridicas_representantelegal, require('./objects.js').createTerceros(rta.result[0][0].idtb_terceros, require('./objects.js').createTiposIdentificacion(rta.result[0][0].idtb_tiposidentificacion, rta.result[0][0].tb_tiposidentificacion_nombre, rta.result[0][0].tb_tiposidentificacion_descripcion), rta.result[0][0].tb_terceros_numerodocumento, rta.result[0][0].tb_terceros_isactive))
+      } else {
+        tercero = require('./objects.js').createTercerosNatural(rta.result[0][0].idtb_tercerospersonas, rta.result[0][0].tb_tercerospersonas_primernombre, rta.result[0][0].tb_tercerospersonas_segundonombre, rta.result[0][0].tb_tercerospersonas_primerapellido, rta.result[0][0].tb_tercerospersonas_segundoapellido, require('./objects.js').createTerceros(rta.result[0][0].idtb_terceros, require('./objects.js').createTiposIdentificacion(rta.result[0][0].idtb_tiposidentificacion, rta.result[0][0].tb_tiposidentificacion_nombre, rta.result[0][0].tb_tiposidentificacion_descripcion), rta.result[0][0].tb_terceros_numerodocumento, rta.result[0][0].tb_terceros_isactive))
+      }
+      for (let i = 0; i < rta.result.length; i++) {
+        if (rta.result[1][i] !== undefined) {
+          direcciones.push(require('./objects.js').createDireccion(rta.result[1][i].idtb_tercerosdirecciones, require('./objects.js').createTipoDireccion(rta.result[1][i].idtb_tercerosdirecciones_tipo, rta.result[1][i].tb_tercerosdirecciones_tipo_nombre, rta.result[1][i].tb_tercerosdirecciones_tipo_reqdependencia, rta.result[1][i].tb_tercerosdirecciones_tipo_reqhorario, rta.result[1][i].tb_tercerosdirecciones_tipo_isactive), rta.result[1][i].tb_tercerosdirecciones_depedencia, rta.result[1][i].tb_tercerosdirecciones_direccion, require('./objects.js').createCiudad(rta.result[1][i].idtb_ciudad, rta.result[1][i].tb_ciudad_nombre, require('./objects.js').createDepartamento(rta.result[1][i].idtb_departamento, rta.result[1][i].tb_departamento_nombre, require('./objects.js').createPais(rta.result[1][i].idtb_pais, rta.result[1][i].tb_pais_nombre))), rta.result[1][i].tb_tercerosdirecciones_webstring, rta.result[1][i].tb_tercerosdirecciones_isactive))
+        }
+      }
+      deferred.resolve({tercero, direcciones})
+    } else {
+      deferred.reject('La consulta no ha arrojado resultados')
+    }
+  }).catch((err) => {
+    console.log(err)
+    deferred.reject(err)
+  })
+  // se retorna la promesa
   return deferred.promise
 }

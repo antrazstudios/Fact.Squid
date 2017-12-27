@@ -20,6 +20,14 @@ export default new Router({
       component: require('@/components/Terceros/index').default
     },
     {
+      path: '/terceros/editor/',
+      name: 'terceros-editor',
+      component: require('@/components/Terceros/editor').default,
+      props (route) {
+        return route.query || {}
+      }
+    },
+    {
       path: '/login',
       name: 'login',
       component: require('@/components/Profiles/login').default

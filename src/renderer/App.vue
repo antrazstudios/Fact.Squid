@@ -69,7 +69,7 @@
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
-    <transition name="fade">
+    <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" :duration="400">
       <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
     </transition>
     <!-- Footer-->
@@ -89,7 +89,7 @@
       </Row>
     </div>
     <!-- Interfaz de carga -->
-    <transition name="fade">
+    <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" :duration="300">
       <div v-if="showWaitDialog" ref="loaderfix" class="modal">
         <div class="modal-contenedor">
           <div class="modal-contenedor--img"></div>
@@ -420,6 +420,7 @@
     position: relative;
     height: 100%;
     bottom: 30px;
+    overflow-x: hidden;
   }
   .layout-nav{
       display: block;
@@ -453,7 +454,7 @@
       left:       0;
       height:     100%;
       width:      100%;
-      background: rgba( 255, 255, 255, .94 )
+      background: rgba( 255, 255, 255, 1)
 
                   50% 50%
                   no-repeat;
@@ -470,7 +471,7 @@
       margin: auto;
       width: 60px;
       height: 60px;
-      background-image: url("~@/assets/images/ajax-loader.gif");
+      background-image: url("~@/assets/images/loading.gif");
       background-size: contain;
   }
   .modal-contenedor--label{

@@ -261,6 +261,7 @@ export default {
       })
     },
     selectRow (row) {
+      console.log(row)
       let type = 0
       if (row.primernombre) {
         type = 1
@@ -268,12 +269,15 @@ export default {
         type = 0
       }
       this.$parent.changePath('terceros/editor', {
-        id: row.id,
+        id: row.tercero.id,
         type: type
       })
     },
     createTercero () {
-      this.$parent.changePath('/terceros/editor/0')
+      this.$parent.changePath('terceros/editor', {
+        id: 0,
+        type: 0
+      })
     }
   }
 }
@@ -287,6 +291,7 @@ export default {
     background-repeat: no-repeat;
     background-position: right;
     user-select: none;
+    overflow-x: hidden;
   }
   .layout-text-item{
     margin: 8px 0px;

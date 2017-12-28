@@ -202,6 +202,7 @@
     background-repeat: no-repeat;
     background-position: right;
     user-select: none;
+    overflow-x: hidden;
   }
   .slides-shortcut--img{
     display: inline;

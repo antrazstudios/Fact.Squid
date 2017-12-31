@@ -48,6 +48,7 @@ exports._database_runQuery = (configuracion) => {
   // Description: Corre un query que puede o no regresar una serie de datos
   // Parameters:
   // * configuracion. query = Es el query que se correra en el servidor
+  // * configuracion. parameters = aqui se especifica los parametros de un procedimiento almacenado
   // * configuracion. useActualConn = Define si se utiliza la conexion actual del sistema o si utiliza otra, por defecto esta propiedad esta establecida en true
   // * configuracion. alterConn = Define una conexion alternativa en caso de definir la propiedad useActualConn en false
   // ------------------------| End Description |------------------------
@@ -60,17 +61,31 @@ exports._database_runQuery = (configuracion) => {
     }
   })
   // Se ejecuta el respectivo query con la consulta, y retorna el valor de la misma
-  conn.query(configuracion.query, (err, results, fields) => {
-    if (err !== null && err !== '') {
-      deferred.reject('Ha ocurrido un error al ejecutar la consulta o el procedimiento en el servidor: ' + conn.host + ' => ' + err)
-    } else {
-      deferred.resolve({
-        message: 'Operacion ejecuta con exito en el servidor',
-        result: results,
-        field: fields
-      })
-    }
-  })
+  if (configuracion['parameters']) {
+    conn.query(configuracion.query, configuracion.parameters, (err, results, fields) => {
+      if (err !== null && err !== '') {
+        deferred.reject('Ha ocurrido un error al ejecutar la consulta o el procedimiento en el servidor: ' + conn.host + ' => ' + err)
+      } else {
+        deferred.resolve({
+          message: 'Operacion ejecuta con exito en el servidor',
+          result: results,
+          field: fields
+        })
+      }
+    })
+  } else {
+    conn.query(configuracion.query, (err, results, fields) => {
+      if (err !== null && err !== '') {
+        deferred.reject('Ha ocurrido un error al ejecutar la consulta o el procedimiento en el servidor: ' + conn.host + ' => ' + err)
+      } else {
+        deferred.resolve({
+          message: 'Operacion ejecuta con exito en el servidor',
+          result: results,
+          field: fields
+        })
+      }
+    })
+  }
   // Finalizamos la conexion actual con el servidor
   conn.end()
   // Regresa como respuesta una promesa
@@ -203,9 +218,59 @@ exports._database_getTerceroDireccionesbyID = (configuracion) => {
       deferred.reject('La consulta no ha arrojado resultados')
     }
   }).catch((err) => {
-    console.log(err)
     deferred.reject(err)
   })
   // se retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_consultTiposIdentificacion = () => {
+  // --------------------------| Description |--------------------------
+  // Description: Permite obtener todos los tipos de identificacion
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  let tiposidentificacion = []
+  this._database_runQuery({ query: 'SELECT * FROM consultTipoIdentificacion;' }).then((rta) => {
+    if (rta.result !== 0 && rta.result !== null) {
+      for (let i = 0; i < rta.result.length; i++) {
+        tiposidentificacion.push(require('./objects.js').createTiposIdentificacion(rta.result[i].idtb_tiposidentificacion, rta.result[i].tb_tiposidentificacion_nombre, rta.result[i].tb_tiposidentificacion_descripcion))
+      }
+      deferred.resolve(tiposidentificacion)
+    } else {
+      deferred.reject('La consulta no ha arrojado resultados: ERR consultTipoIdentificacion')
+    }
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // Se retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateTercerobyID = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Actualiza un tercero en el sistema
+  // Parameters:
+  // * configuracion. idTercero = Numero de llave del tercero principal en la herencia
+  // * configuracion. idHerencia = Numero de llave del tercero de herencia
+  // * configuracion. idTipoDocumento = Numero de llave del tipo de documento
+  // * configuracion. typeT = Tipo de Tercero Herencia a modificar 0 = Juridica, 1 = Natural
+  // * configuracion. numerodocumento = Numero de documento del tercero principal en la herencia
+  // * configuracion. datonombre1 = (typeT = 0): hace referencia a la razon social, (typeT = 1): hace referencia al primer nombre
+  // * configuracion. datonombre2 = (typeT = 0): hace referencia al nombre del rep. legal, (typeT = 1): hace referencia al segundo nombre
+  // * configuracion. datonombre3 = (typeT = 1): hace referencia al primer apellido
+  // * configuracion. datonombre4 = (typeT = 1): hace referencia al segundo apellido
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateTerceroJuridicabyID(?, ?, ?, ?, ?, ?, ?, ?, ?);',
+    parameters: [configuracion.idTercero, configuracion.idHerencia, configuracion.idTipoDocumento, configuracion.typeT, configuracion.numerodocumento, configuracion.datonombre1, configuracion.datonombre2, configuracion.datonombre3, configuracion.datonombre4]
+  }).then((rta) => {
+    deferred.resolve('Tercero Actualizado')
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+
   return deferred.promise
 }

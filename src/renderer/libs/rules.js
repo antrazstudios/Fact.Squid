@@ -149,7 +149,6 @@ exports.validateRulesFormField = (Form, rules) => {
         let tick = true
         // En caso que exista reglas para el item:
         // Se recorren todos los items de reglas que tenga lapropiedad del prop dentro de rules
-        console.log(rules[Form.$children[i].prop])
         for (let j = 0; j < rules[Form.$children[i].prop].rules.length; j++) {
           // Se verifican los argumentos de cantidad de elementos a validarse con cada regla
           if (rules[Form.$children[i].prop].rules[j].args['children']) {
@@ -165,6 +164,7 @@ exports.validateRulesFormField = (Form, rules) => {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 // verificacion del tipo
                 } else if (rules[Form.$children[i].prop].rules[j].typevalidation === 'type') {
@@ -174,6 +174,7 @@ exports.validateRulesFormField = (Form, rules) => {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 // verificacion de caracteres
                 } else if (rules[Form.$children[i].prop].rules[j].typevalidation === 'characters') {
@@ -183,6 +184,7 @@ exports.validateRulesFormField = (Form, rules) => {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 // verificacion de comparacion
                 } else if (rules[Form.$children[i].prop].rules[j].typevalidation === 'comparation') {
@@ -192,15 +194,16 @@ exports.validateRulesFormField = (Form, rules) => {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 }
               }
             } else {
               // en caso de que el argumento especifique a cuales subitems del Formitem se les debe aplicar la regla
-              for (let k = 0; k < rules[Form.$children[i].prop].rules[j].args.childrens.length; k++) {
+              for (let k = 0; k < rules[Form.$children[i].prop].rules[j].args.children.length; k++) {
                 // verificacion del contenido
                 if (rules[Form.$children[i].prop].rules[j].typevalidation === 'content-null') {
-                  if (this._rules_contentNull(Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.childrens[k]].value) === true) {
+                  if (this._rules_contentNull(Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.children[k]].value) === true) {
                     // en caso de pasar la validacion
                     rules[Form.$children[i].prop].result = ''
                   } else {
@@ -208,9 +211,10 @@ exports.validateRulesFormField = (Form, rules) => {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 } else if (rules[Form.$children[i].prop].rules[j].typevalidation === 'type') {
-                  if (this._rules_type({ val: Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.childrens[k]].value, type: rules[Form.$children[i].prop].rules[j].args.comparation })) {
+                  if (this._rules_type({ val: Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.children[k]].value, type: rules[Form.$children[i].prop].rules[j].args.comparation })) {
                     // en caso de pasar la validacion
                     rules[Form.$children[i].prop].result = ''
                   } else {
@@ -218,22 +222,25 @@ exports.validateRulesFormField = (Form, rules) => {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 } else if (rules[Form.$children[i].prop].rules[j].typevalidation === 'characters') {
-                  if (this._rules_characters({ val: Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.childrens[k]].value, min: rules[Form.$children[i].prop].rules[j].args.comparation.min, max: rules[Form.$children[i].prop].rules[j].args.comparation.max }) === true) {
+                  if (this._rules_characters({ val: Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.children[k]].value, min: rules[Form.$children[i].prop].rules[j].args.comparation.min, max: rules[Form.$children[i].prop].rules[j].args.comparation.max }) === true) {
                     rules[Form.$children[i].prop].result = ''
                   } else {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 } else if (rules[Form.$children[i].prop].rules[j].typevalidation === 'comparation') {
-                  if (this._rules_comparation({ val: Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.childrens[k]].value, type: rules[Form.$children[i].prop].rules[j].args.comparation.type, valc: rules[Form.$children[i].prop].rules[j].args.comparation.valc }) === true) {
+                  if (this._rules_comparation({ val: Form.$children[i].$children[rules[Form.$children[i].prop].rules[j].args.children[k]].value, type: rules[Form.$children[i].prop].rules[j].args.comparation.type, valc: rules[Form.$children[i].prop].rules[j].args.comparation.valc }) === true) {
                     rules[Form.$children[i].prop].result = ''
                   } else {
                     rules[Form.$children[i].prop].result = rules[Form.$children[i].prop].rules[j].message
                     tick = false
                     resultValidation = false
+                    break
                   }
                 }
               }

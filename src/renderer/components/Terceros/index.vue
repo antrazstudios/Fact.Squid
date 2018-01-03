@@ -261,9 +261,8 @@ export default {
       })
     },
     selectRow (row) {
-      console.log(row)
       let type = 0
-      if (row.primernombre) {
+      if (row['primernombre']) {
         type = 1
       } else {
         type = 0

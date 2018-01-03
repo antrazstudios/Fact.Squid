@@ -78,6 +78,9 @@ exports.createTiposIdentificacion = (vid, vnombre, vdescripcion) => {
 }
 
 exports.createTerceros = (vid, vtipoidentificacion, videntificacion, vactive) => {
+  if (vid > 400) {
+    console.log(vid)
+  }
   return {
     id: vid,
     tipoidentificacion: vtipoidentificacion,
@@ -90,7 +93,7 @@ exports.createTercerosJuridica = (vid, vnombre, vrepresentantelegal, vtercero) =
   return {
     id: vid,
     nombre: vnombre,
-    represnentelegal: vrepresentantelegal,
+    representantelegal: vrepresentantelegal,
     tercero: vtercero
   }
 }

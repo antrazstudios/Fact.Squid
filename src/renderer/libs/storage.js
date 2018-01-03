@@ -219,6 +219,7 @@ exports._database_getTerceroDireccionesbyID = (configuracion) => {
     }
   }).catch((err) => {
     deferred.reject(err)
+    console.log('error en storage', err)
   })
   // se retorna la promesa
   return deferred.promise
@@ -264,11 +265,48 @@ exports._database_updateTercerobyID = (configuracion) => {
   // ------------------------| End Description |------------------------
   let deferred = q.defer()
   this._database_runQuery({
-    query: 'call updateTerceroJuridicabyID(?, ?, ?, ?, ?, ?, ?, ?, ?);',
+    query: 'call updateTercerobyID(?, ?, ?, ?, ?, ?, ?, ?, ?);',
     parameters: [configuracion.idTercero, configuracion.idHerencia, configuracion.idTipoDocumento, configuracion.typeT, configuracion.numerodocumento, configuracion.datonombre1, configuracion.datonombre2, configuracion.datonombre3, configuracion.datonombre4]
   }).then((rta) => {
     deferred.resolve('Tercero Actualizado')
   }).catch((err) => {
+    deferred.reject(err)
+  })
+
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createTercero = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea un nuevo tercero en la base de datos
+  // Parameters:
+  // * configuracion. typeT = Tipo de Tercero Herencia a modificar 0 = Juridica, 1 = Natural
+  // * configuracion. idTipoDocumento = Numero de llave del tipo de documento
+  // * configuracion. numerodocumento = Numero de documento del tercero principal en la herencia
+  // * configuracion. datonombre1 = (typeT = 0): hace referencia a la razon social, (typeT = 1): hace referencia al primer nombre
+  // * configuracion. datonombre2 = (typeT = 0): hace referencia al nombre del rep. legal, (typeT = 1): hace referencia al segundo nombre
+  // * configuracion. datonombre3 = (typeT = 1): hace referencia al primer apellido
+  // * configuracion. datonombre4 = (typeT = 1): hace referencia al segundo apellido
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  // Proceso de creacion del registro principal del Tercero
+  this._database_runQuery({
+    query: 'INSERT INTO tb_terceros(tb_terceros_tipodocumento, tb_terceros_numerodocumento, tb_terceros_isactive) VALUES(?, ?, 1);',
+    parameters: [ configuracion.idTipoDocumento, configuracion.numerodocumento ]
+  }).then((rta) => {
+    this._database_runQuery({
+      query: configuracion.typeT === 0 ? 'INSERT INTO tb_tercerosjuridicas(tb_tercerosjuridicas_razonsocial, tb_tercerosjuridicas_representantelegal, idtb_terceros) VALUES(?, ?, ?);' : 'INSERT INTO tb_tercerosnaturales(tb_tercerospersonas_primernombre, tb_tercerospersonas_segundonombre, tb_tercerospersonas_primerapellido, tb_tercerospersonas_segundoapellido, idtb_terceros) VALUES(?, ?, ?, ?, ?);',
+      parameters: configuracion.typeT === 0 ? [ configuracion.datonombre1, configuracion.datonombre2, rta.result.insertId ] : [ configuracion.datonombre1, configuracion.datonombre2, configuracion.datonombre3, configuracion.datonombre4, rta.result.insertId ]
+    }).then((rta) => {
+      deferred.resolve('Tercero creado')
+    }).catch((err) => {
+      console.log('Error en proceso de creacion de Tercero', err)
+      deferred.reject(err)
+    })
+  }).catch((err) => {
+    console.log('Error en proceso de creacion de Tercero', err)
     deferred.reject(err)
   })
 

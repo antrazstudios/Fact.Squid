@@ -1,46 +1,56 @@
 <template>
   <div class="content">
-    <Row type="flex" align="middle">
+    <!-- Editor de Direcciones -->
+    <Row v-bind:style="{ opacity : editorDirecciones === true ? 1 : 0.1 }" >
+      <transition enter-active-class="animated slideInDown" leave-active-class="animated slideOutUp">
+        <div class="extern-contenedor--components" v-if="editorDirecciones === true">
+          <i-button shape="circle" size="small" icon="close-round" @click="() => { this.editorDirecciones = !this.editorDirecciones }"></i-button>
+          <editor-direcciones style="margin-top: -13px; margin-left: 20px"></editor-direcciones>
+        </div>
+      </transition>
+    </Row>
+    <!-- Formulario de datos basicos -->
+    <Row type="flex" align="middle" v-bind:style="{ opacity : editorDirecciones === true ? 0.1 : 1 }">
       <!-- Informacion basica del tercero -->
       <i-col span="12">
-        <Form :label-width="130">
+        <Form ref="FormTercero" :label-width="130">
           <!-- Tipo de tercero -->
-          <FormItem label="Tipo de Tercero: ">
+          <FormItem prop="tipostercero" label="Tipo de Tercero: " :error="validations.tipostercero.result">
             <RadioGroup v-model="tipoTercero">
-              <Radio label="natural">
+              <Radio label="natural" :disabled="$route.query.id === 0 ? false : true">
                 <Icon type="ios-person"/>
                 <span>Natural</span>
               </Radio>
-              <Radio label="juridico">
+              <Radio label="juridico" :disabled="$route.query.id === 0 ? false : true">
                 <Icon type="briefcase"/>
                 <span>Juridico</span>
               </Radio>
             </RadioGroup>
           </FormItem>
           <!-- Item de tipo de identificacion -->
-          <FormItem label="Tipo de identificacion">
-            <Select style="width: 470px">
+          <FormItem prop="tiposidentificacion" label="Tipo de identificacion" :required="true" :error="validations.tiposidentificacion.result">
+            <Select style="width: 470px" v-model="terceroEdit.tercero.tipoidentificacion.id">
               <Option v-for="item in tiposidentificacion" :value="item.id" :key="item.id">{{item.nombre}} ({{item.descripcion}})</Option>
             </Select>
           </FormItem>
           <!-- Item de numero de identificacion -->
-          <FormItem label="# de identificacion">
-            <Input style="width: 470px"/>
+          <FormItem prop="identificacion" label="# de identificacion" :required="true" :error="validations.identificacion.result">
+            <Input style="width: 470px" v-model="terceroEdit.tercero.identificacion"/>
           </FormItem>
           <!-- Nombres o razon social segun corresponda -->
           <!-- Natural -->
-          <FormItem v-if="tipoTercero === 'natural'" label="Nombre Tercero">
-            <Input placeholder="Primer Nombre" style="width: 115px"/>
-            <Input placeholder="Segundo Nombre" style="width: 115px"/>
-            <Input placeholder="Primer Apellido" style="width: 115px"/>
-            <Input placeholder="Segundo Apellido" style="width: 115px"/>
+          <FormItem :prop="tipoTercero === 'natural' ? 'nombre' : ''" v-if="tipoTercero === 'natural'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
+            <Input placeholder="Primer Nombre" style="width: 115px" v-model="terceroEdit.primernombre"/>
+            <Input placeholder="Segundo Nombre" style="width: 115px" v-model="terceroEdit.segundonombre"/>
+            <Input placeholder="Primer Apellido" style="width: 115px" v-model="terceroEdit.primerapellido"/>
+            <Input placeholder="Segundo Apellido" style="width: 115px" v-model="terceroEdit.segundoapellido"/>
           </FormItem>
           <!-- Juridico -->
-          <FormItem v-if="tipoTercero === 'juridico'" label="Nombre Tercero">
-            <Input placeholder="Razon social" style="width: 470px"/>
+          <FormItem :prop="tipoTercero === 'juridico' ? 'nombre' : ''" v-if="tipoTercero === 'juridico'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
+            <Input placeholder="Razon social" style="width: 470px" v-model="terceroEdit.nombre"/>
           </FormItem>
           <FormItem v-if="tipoTercero === 'juridico'" label="Representante legal">
-            <Input placeholder="Nombre completo" style="width: 470px"/>
+            <Input placeholder="Nombre completo" style="width: 470px" v-model="terceroEdit.representantelegal"/>
           </FormItem>
         </Form>
       </i-col>
@@ -50,53 +60,147 @@
       </i-col>
     </Row>
     <!-- Tabla de direcciones -->
-    <Row>
-      <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300"></i-table>
+    <Row v-if="this.$route.query.id !== 0" v-bind:style="{ opacity : editorDirecciones === true ? 0.1 : 1 }" style="enable: false;">
+      <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
+        <div slot="footer" style="text-align: center;">
+          <i-button>Agregar direccion</i-button>
+        </div>
+        <div slot="loading" style="text-align: center;">
+          <div class="modal-contenedor--img"></div>
+          <label class="modal-contenedor--label">Cargando datos</label>
+        </div>
+      </i-table>
     </Row>
     <!-- Botones de accion -->
-    <Row class="buttons-action">
-      <i-button type="error">CANCELAR</i-button>
-      <i-button type="info">CREAR</i-button>
+    <Row class="buttons-action" v-bind:style="{ opacity : editorDirecciones === true ? 0.1 : 1 }">
+      <i-button type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
+      <i-button type="info" @click="$route.query.id === 0 ? createTercero() : updateTercero()">{{ $route.query.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
     </Row>
   </div>
 </template>
 
 <script>
+  import EditorDirecciones from './editorDirecciones'
   export default {
     name: 'terceros-editor',
+    components: { EditorDirecciones },
     data () {
       return {
+        isTableLoading: false,
+        editorDirecciones: false,
         tipoTercero: '',
-        terceroEdit: '',
+        terceroEdit: require('../../libs/objects.js').createTercerosJuridica('', '', '', require('../../libs/objects.js').createTerceros('', require('../../libs/objects.js').createTiposIdentificacion('', '', ''), '', true)),
         direccionesEdit: [],
         direccionesColumns: [],
-        tiposidentificacion: [
-          {
-            id: 1,
-            nombre: 'CC',
-            descripcion: 'Cedula de Ciudadania'
-          },
-          {
-            id: 2,
-            nombre: 'NIT',
-            descripcion: 'Numero de identificacion T.'
-          }
-        ]
+        tiposidentificacion: [],
+        validations: {
+          tipostercero: { result: '' },
+          tiposidentificacion: { result: '' },
+          identificacion: { result: '' },
+          nombre: { result: '' }
+        }
       }
     },
     mounted () {
+      this.getTiposIdentificacion()
       this.getTerceroInfo()
+      // require('../../libs/miscelanius.js').addRulesFormField(this.$refs['FormTercero'], 'identificacion', { required: true, message: 'Este campo es obligatorio', trigger: 'blur' })
     },
     methods: {
+      createRules () {
+        this.validations = { tipostercero: '', tiposidentificacion: '', identificacion: '', nombre: '' }
+        this.validations.tipostercero = {
+          result: '',
+          rules: [
+            {
+              prop: 'tipostercero',
+              typevalidation: 'content-null',
+              message: 'Debes elegir un tipo de tercero como minimo',
+              args: ''
+            }
+          ]
+        }
+        this.validations.tiposidentificacion = {
+          result: '',
+          rules: [
+            {
+              prop: 'tiposidentificacion',
+              typevalidation: 'content-null',
+              message: 'Debes elegir un tipo de identificacion como minimo',
+              args: ''
+            }
+          ]
+        }
+        this.validations.identificacion = {
+          result: '',
+          rules: [
+            {
+              prop: 'identificacion',
+              typevalidation: 'content-null',
+              message: 'El campo de identificacion no puede estar vacio',
+              args: ''
+            }
+          ]
+        }
+        if (this.tipoTercero === 'juridico') {
+          this.validations.nombre = {
+            result: '',
+            rules: [
+              {
+                prop: 'nombre',
+                typevalidation: 'content-null',
+                message: 'El campo de nombre no puede estar vacio',
+                args: ''
+              }
+            ]
+          }
+        } else if (this.tipoTercero === 'natural') {
+          this.validations.nombre = {
+            result: '',
+            rules: [
+              {
+                prop: 'nombre',
+                typevalidation: 'content-null',
+                message: 'El campo de nombre recibe como minimo el primer nombre y el primer apellido',
+                args: {
+                  children: [ 0, 2 ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      getTiposIdentificacion () {
+        this.$parent.handleSpinShow('Cargando Configuracion')
+        let storage = require('../../libs/storage.js')
+        storage._database_consultTiposIdentificacion().then((rta) => {
+          this.tiposidentificacion = rta
+          this.$parent.handleSpinHide()
+        }).catch((err) => {
+          this.$Message.error(err)
+          this.$parent.handleSpinHide()
+        })
+      },
       getTerceroInfo () {
         if (this.$route.query.id !== 0) {
+          this.$parent.handleSpinShow('Cargando Tercero')
           let storage = require('../../libs/storage.js')
+          this.isTableLoading = true
           storage._database_getTerceroDireccionesbyID({ id: this.$route.query.id, type: this.$route.query.type }).then((rta) => {
             this.terceroEdit = rta.tercero
             this.direccionesEdit = rta.direcciones
             this.createColumns()
+            if (this.$route.query.type === 0) {
+              this.tipoTercero = 'juridico'
+            } else {
+              this.tipoTercero = 'natural'
+            }
+            this.$parent.handleSpinHide()
+            this.isTableLoading = false
           }).catch((err) => {
+            console.log('Error de consulta', err)
             this.$Message.error(err)
+            this.$parent.handleSpinHide()
           })
         }
       },
@@ -206,7 +310,7 @@
                   },
                   on: {
                     click: () => {
-                      this.selectRow(params.row)
+                      this.editorDirecciones = !this.editorDirecciones
                     }
                   }
                 }, [
@@ -249,6 +353,68 @@
             ])
           }
         })
+      },
+      updateTercero () {
+        this.createRules()
+        require('../../libs/rules').validateRulesFormField(this.$refs['FormTercero'], this.validations).then((rta) => {
+          this.validations = rta.rules
+          // En caso de que la validacion no pase mostrar el error
+          if (rta.resultValidation === false) {
+            this.$Message.error('Aun hay campos que necesitan diligenciarse')
+          // En caso de que la validacion pase continuar con el proceso de almacenamiento
+          } else {
+            this.$parent.handleSpinShow('Almacenando cambios')
+            require('../../libs/storage')._database_updateTercerobyID({
+              idTercero: this.terceroEdit.tercero.id,
+              idHerencia: this.terceroEdit.id,
+              idTipoDocumento: this.terceroEdit.tercero.tipoidentificacion.id,
+              typeT: this.tipoTercero === 'juridico' ? 0 : 1,
+              numerodocumento: this.terceroEdit.tercero.identificacion,
+              datonombre1: this.tipoTercero === 'juridico' ? this.terceroEdit.nombre : this.terceroEdit.primernombre,
+              datonombre2: this.tipoTercero === 'juridico' ? this.terceroEdit.razonsocial : this.terceroEdit.segundonombre,
+              datonombre3: this.tipoTercero === 'natural' ? this.terceroEdit.primerapellido : '',
+              datonombre4: this.tipoTercero === 'natural' ? this.terceroEdit.segundoapellido : ''
+            }).then((rta) => {
+              this.$parent.handleSpinHide()
+              this.$Message.info(rta)
+            }).catch((err) => {
+              this.$parent.handleSpinHide()
+              this.$Message.error(err)
+              console.log('error de actualizacion de usuario', err)
+            })
+          }
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
+      },
+      createTercero () {
+        this.createRules()
+        require('../../libs/rules').validateRulesFormField(this.$refs['FormTercero'], this.validations).then((rta) => {
+          this.validations = rta.rules
+          if (rta.resultValidation === false) {
+            this.$Message.error('Aun hay campos que necesitan diligenciarse')
+          } else {
+            this.$parent.handleSpinShow('Creando Tercero')
+            require('../../libs/storage')._database_createTercero({
+              typeT: this.tipoTercero === 'juridico' ? 0 : 1,
+              idTipoDocumento: this.terceroEdit.tercero.tipoidentificacion.id,
+              numerodocumento: this.terceroEdit.tercero.identificacion,
+              datonombre1: this.tipoTercero === 'juridico' ? this.terceroEdit.nombre : this.terceroEdit.primernombre,
+              datonombre2: this.tipoTercero === 'juridico' ? this.terceroEdit.razonsocial : this.terceroEdit.segundonombre,
+              datonombre3: this.tipoTercero === 'natural' ? this.terceroEdit.primerapellido : '',
+              datonombre4: this.tipoTercero === 'natural' ? this.terceroEdit.segundoapellido : ''
+            }).then((rta) => {
+              this.$Message.info(rta)
+              this.$parent.handleSpinHide()
+              this.$parent.returnPath()
+            }).catch((err) => {
+              this.$Message.error(err)
+              this.$parent.handleSpinHide()
+            })
+          }
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
       }
     }
   }
@@ -256,6 +422,7 @@
 
 <style lang="css" scoped>
   .content{
+    overflow-x: hidden;
     position: relative;
     width: 100%;
     padding: 20px;
@@ -268,11 +435,34 @@
   .buttons-action{
     position: fixed;
     bottom: 30px;
-    right: 30px;
+    right: 25px;
     width: 100%;
-    text-align: center;
+    text-align: right;
   }
   .labels-form{
     margin-right: 20px;
+  }
+  .modal-contenedor--img{
+      display: block;
+      margin: auto;
+      width: 30px;
+      height: 30px;
+      /* background-image: url("~@/assets/images/ajax-loader.gif"); */
+      background-image: url("~@/assets/images/loading.gif");
+      background-size: contain;
+  }
+  .modal-contenedor--label{
+      display: block;
+      margin: 4%;
+      text-align: center;
+      color: rgba(41, 41, 41, 0.6);
+  }
+  .extern-contenedor--components{
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: #DDDEE1;
+    background-color: white;
+    padding: 20px;
   }
 </style>

@@ -27,6 +27,14 @@ export default new Router({
         return route.query || {}
       }
     },
+    // {
+    //   path: '/terceros/editordirecciones',
+    //   name: 'direcciones-editor',
+    //   component: require('@/components/Terceros/editorDirecciones').default,
+    //   props (route) {
+    //     return route.query || {}
+    //   }
+    // },
     {
       path: '/login',
       name: 'login',

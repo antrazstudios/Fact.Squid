@@ -2,80 +2,85 @@
   <div class="content">
     <!-- Editor de Direcciones -->
     <Row v-bind:style="{ opacity : editorDirecciones === true ? 1 : 0.1 }" >
-      <transition enter-active-class="animated slideInDown" leave-active-class="animated slideOutUp">
+      <transition enter-active-class="animated slideInDown" leave-active-class="animated slideOutUp" :duration="{ enter: 900, leave: 200 }">
         <div class="extern-contenedor--components" v-if="editorDirecciones === true">
           <i-button shape="circle" size="small" icon="close-round" @click="() => { this.editorDirecciones = !this.editorDirecciones }"></i-button>
-          <editor-direcciones style="margin-top: -13px; margin-left: 20px"></editor-direcciones>
+          <editor-direcciones ref="editorDireccion" style="margin-top: -13px; margin-left: 20px"></editor-direcciones>
         </div>
       </transition>
     </Row>
-    <!-- Formulario de datos basicos -->
-    <Row type="flex" align="middle" v-bind:style="{ opacity : editorDirecciones === true ? 0.1 : 1 }">
-      <!-- Informacion basica del tercero -->
-      <i-col span="12">
-        <Form ref="FormTercero" :label-width="130">
-          <!-- Tipo de tercero -->
-          <FormItem prop="tipostercero" label="Tipo de Tercero: " :error="validations.tipostercero.result">
-            <RadioGroup v-model="tipoTercero">
-              <Radio label="natural" :disabled="$route.query.id === 0 ? false : true">
-                <Icon type="ios-person"/>
-                <span>Natural</span>
-              </Radio>
-              <Radio label="juridico" :disabled="$route.query.id === 0 ? false : true">
-                <Icon type="briefcase"/>
-                <span>Juridico</span>
-              </Radio>
-            </RadioGroup>
-          </FormItem>
-          <!-- Item de tipo de identificacion -->
-          <FormItem prop="tiposidentificacion" label="Tipo de identificacion" :required="true" :error="validations.tiposidentificacion.result">
-            <Select style="width: 470px" v-model="terceroEdit.tercero.tipoidentificacion.id">
-              <Option v-for="item in tiposidentificacion" :value="item.id" :key="item.id">{{item.nombre}} ({{item.descripcion}})</Option>
-            </Select>
-          </FormItem>
-          <!-- Item de numero de identificacion -->
-          <FormItem prop="identificacion" label="# de identificacion" :required="true" :error="validations.identificacion.result">
-            <Input style="width: 470px" v-model="terceroEdit.tercero.identificacion"/>
-          </FormItem>
-          <!-- Nombres o razon social segun corresponda -->
-          <!-- Natural -->
-          <FormItem :prop="tipoTercero === 'natural' ? 'nombre' : ''" v-if="tipoTercero === 'natural'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
-            <Input placeholder="Primer Nombre" style="width: 115px" v-model="terceroEdit.primernombre"/>
-            <Input placeholder="Segundo Nombre" style="width: 115px" v-model="terceroEdit.segundonombre"/>
-            <Input placeholder="Primer Apellido" style="width: 115px" v-model="terceroEdit.primerapellido"/>
-            <Input placeholder="Segundo Apellido" style="width: 115px" v-model="terceroEdit.segundoapellido"/>
-          </FormItem>
-          <!-- Juridico -->
-          <FormItem :prop="tipoTercero === 'juridico' ? 'nombre' : ''" v-if="tipoTercero === 'juridico'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
-            <Input placeholder="Razon social" style="width: 470px" v-model="terceroEdit.nombre"/>
-          </FormItem>
-          <FormItem v-if="tipoTercero === 'juridico'" label="Representante legal">
-            <Input placeholder="Nombre completo" style="width: 470px" v-model="terceroEdit.representantelegal"/>
-          </FormItem>
-        </Form>
-      </i-col>
-      <!-- Geolocalizacion -->
-      <i-col span="12">
-        <Alert type="warning" show-icon>Geolocalizacion de tercero desactivada, el servicio de Geolocalizacion se encuentra desactivado directamente desde el servidor de AntrazStudios.</Alert>
-      </i-col>
-    </Row>
-    <!-- Tabla de direcciones -->
-    <Row v-if="this.$route.query.id !== 0" v-bind:style="{ opacity : editorDirecciones === true ? 0.1 : 1 }" style="enable: false;">
-      <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
-        <div slot="footer" style="text-align: center;">
-          <i-button>Agregar direccion</i-button>
-        </div>
-        <div slot="loading" style="text-align: center;">
-          <div class="modal-contenedor--img"></div>
-          <label class="modal-contenedor--label">Cargando datos</label>
-        </div>
-      </i-table>
-    </Row>
-    <!-- Botones de accion -->
-    <Row class="buttons-action" v-bind:style="{ opacity : editorDirecciones === true ? 0.1 : 1 }">
-      <i-button type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
-      <i-button type="info" @click="$route.query.id === 0 ? createTercero() : updateTercero()">{{ $route.query.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
-    </Row>
+    <transition enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutUp" :duration="{ enter: 10000, leave: 900 }">
+      <Row v-if="!editorDirecciones">
+        <!-- Formulario de datos basicos -->
+        <Row type="flex" align="middle" >
+          <!-- Informacion basica del tercero -->
+          <i-col span="12">
+            <Form ref="FormTercero" :label-width="130">
+              <!-- Tipo de tercero -->
+              <FormItem prop="tipostercero" label="Tipo de Tercero: " :error="validations.tipostercero.result">
+                <RadioGroup v-model="tipoTercero">
+                  <Radio label="natural" :disabled="$route.query.id === 0 ? false : true">
+                    <Icon type="ios-person"/>
+                    <span>Natural</span>
+                  </Radio>
+                  <Radio label="juridico" :disabled="$route.query.id === 0 ? false : true">
+                    <Icon type="briefcase"/>
+                    <span>Juridico</span>
+                  </Radio>
+                </RadioGroup>
+              </FormItem>
+              <!-- Item de tipo de identificacion -->
+              <FormItem prop="tiposidentificacion" label="Tipo de identificacion" :required="true" :error="validations.tiposidentificacion.result">
+                <Select style="width: 470px" v-model="terceroEdit.tercero.tipoidentificacion.id">
+                  <Option v-for="item in tiposidentificacion" :value="item.id" :key="item.id">{{item.nombre}} ({{item.descripcion}})</Option>
+                </Select>
+              </FormItem>
+              <!-- Item de numero de identificacion -->
+              <FormItem prop="identificacion" label="# de identificacion" :required="true" :error="validations.identificacion.result">
+                <Input style="width: 470px" v-model="terceroEdit.tercero.identificacion"/>
+              </FormItem>
+              <!-- Nombres o razon social segun corresponda -->
+              <!-- Natural -->
+              <FormItem :prop="tipoTercero === 'natural' ? 'nombre' : ''" v-if="tipoTercero === 'natural'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
+                <Input placeholder="Primer Nombre" style="width: 115px" v-model="terceroEdit.primernombre"/>
+                <Input placeholder="Segundo Nombre" style="width: 115px" v-model="terceroEdit.segundonombre"/>
+                <Input placeholder="Primer Apellido" style="width: 115px" v-model="terceroEdit.primerapellido"/>
+                <Input placeholder="Segundo Apellido" style="width: 115px" v-model="terceroEdit.segundoapellido"/>
+              </FormItem>
+              <!-- Juridico -->
+              <FormItem :prop="tipoTercero === 'juridico' ? 'nombre' : ''" v-if="tipoTercero === 'juridico'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
+                <Input placeholder="Razon social" style="width: 470px" v-model="terceroEdit.nombre"/>
+              </FormItem>
+              <FormItem v-if="tipoTercero === 'juridico'" label="Representante legal">
+                <Input placeholder="Nombre completo" style="width: 470px" v-model="terceroEdit.representantelegal"/>
+              </FormItem>
+            </Form>
+          </i-col>
+          <!-- Geolocalizacion -->
+          <i-col span="12">
+            <Alert type="warning" show-icon>Geolocalizacion de tercero desactivada, el servicio de Geolocalizacion se encuentra desactivado directamente desde el servidor de AntrazStudios.</Alert>
+          </i-col>
+        </Row>
+        <!-- Tabla de direcciones -->
+        <Row v-if="this.$route.query.id !== 0" style="enable: false;">
+          <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
+            <div slot="footer" style="text-align: center;">
+              <i-button>Agregar direccion</i-button>
+            </div>
+            <div slot="loading" style="text-align: center;">
+              <div class="modal-contenedor--img"></div>
+              <label class="modal-contenedor--label">Cargando datos</label>
+            </div>
+          </i-table>
+        </Row>
+        <!-- Botones de accion -->
+        <Row class="buttons-action" >
+          <i-button type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
+          <i-button type="info" @click="$route.query.id === 0 ? createTercero() : updateTercero()">{{ $route.query.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
+        </Row>
+      </Row>
+    </transition>
+    
   </div>
 </template>
 
@@ -311,6 +316,7 @@
                   on: {
                     click: () => {
                       this.editorDirecciones = !this.editorDirecciones
+                      console.log(this)
                     }
                   }
                 }, [
@@ -463,6 +469,8 @@
     border-radius: 8px;
     border-color: #DDDEE1;
     background-color: white;
-    padding: 20px;
+    padding-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 </style>

@@ -78,9 +78,6 @@ exports.createTiposIdentificacion = (vid, vnombre, vdescripcion) => {
 }
 
 exports.createTerceros = (vid, vtipoidentificacion, videntificacion, vactive) => {
-  if (vid > 400) {
-    console.log(vid)
-  }
   return {
     id: vid,
     tipoidentificacion: vtipoidentificacion,
@@ -120,12 +117,15 @@ exports.createTercerosNatural = (vid, vprimernombre, vsegundonombre, vprimerapel
   }
 }
 
-exports.createDireccion = (vid, vtipodireccion, vdependencia, vdireccion, vciudad, vwebstring, visactive) => {
+exports.createDireccion = (vid, vtipodireccion, vdependencia, vdireccion, vdireccionjson, vciudad, vwebstring, visactive) => {
+  let jquery = require('jquery')
+  vdireccionjson = jquery.parseJSON(vdireccionjson)
   return {
     id: vid,
     tipodireccion: vtipodireccion,
     dependencia: vdependencia,
     direccion: vdireccion,
+    direccionjson: vdireccionjson,
     ciudad: vciudad,
     webstring: vwebstring,
     isactive: visactive

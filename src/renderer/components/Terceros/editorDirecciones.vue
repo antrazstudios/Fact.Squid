@@ -12,41 +12,21 @@
       
     </Row>
     <!-- Editor de Direccion -->
-    <Row type="flex">
+    <Row type="flex" :gutter="16">
       <i-col span="12">
         <Form ref="FormDireccion" :label-width="130">
           <!-- Tipo de Direccion -->
           <FormItem prop="tipoDireccion" label="Tipo de Direccion: " :required="true">
-            <Select style="width: 470px">
+            <Select v-model="selectIdTipoDireccion" v-on:on-change="updateTipoDireccion()">
               <Option v-for="item in tiposDirecciones" :value="item.id" :key="item.id">{{item.nombre}}</Option>
             </Select>
           </FormItem>
           <!-- Dependencia de la Direccion en caso que aplique -->
-          <FormItem prop="dependenciaDireccion" label="Dependencia: " :required="true">
-            <Input style="width: 470px"/>
+          <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciaDireccion" label="Dependencia: " :required="true">
+            <Input type="text" v-model="direccionEdit.dependencia"/>
           </FormItem>
-          <!-- Direccion general -->
-          <FormItem prop="detalleDireccion" label="Direccion: " :required="true">
-            <Input style="width: 470px"/>
-          </FormItem>
-          <!-- Pais de la Direccion -->
-          <FormItem prop="paisDireccion" label="Pais: " :required="true">
-            <Select style="width: 470px">
-              <Option v-for="item in paises" :value="item.id" :key="item.id">{{item.nombre}}</Option>
-            </Select>
-          </FormItem>
-          <!-- Departamento de la Direccion -->
-          <FormItem prop="departamentoDireccion" label="Departamento: " :required="true">
-            <Select style="width: 470px">
-              <Option v-for="item in departamentos" :value="item.id" :key="item.id">{{item.nombre}}</Option>
-            </Select>
-          </FormItem>
-          <!-- Ciudades de la Direccion -->
-          <FormItem prop="paisDireccion" label="Ciudad: " :required="true">
-            <Select style="width: 470px">
-              <Option v-for="item in ciudades" :value="item.id" :key="item.id">{{item.nombre}}</Option>
-            </Select>
-          </FormItem>
+          <!-- Componente de Ciudad-Departamento-Ciudad -->
+          <edit-direccion-component ref="editordireccion" :direccionTags="direccionEdit.direccionjson" :selections="{ pais: this.direccionEdit.ciudad.departamento.pais.id, departamento: this.direccionEdit.ciudad.departamento.id, ciudad: this.direccionEdit.ciudad.id }"></edit-direccion-component>
         </Form>
       </i-col>
       <i-col span="12">
@@ -54,22 +34,10 @@
       </i-col>
     </Row>
     <!-- Tablas de informacion adicional -->
-    <Row type="flex" :gutter="16">
-      <!-- Tabla de Horarios -->
-      <i-col span="12">
-        <i-table size="small" :columns="horariosColumns" :data="horarios" :stripe="false" :height="300" :loading="horariosIsLoading">
-          <div slot="footer" style="text-align: center;">
-            <i-button>Agregar Horario</i-button>
-          </div>
-          <div slot="loading" style="text-align: center;">
-            <div class="modal-contenedor--img"></div>
-            <label class="modal-contenedor--label">Cargando horarios</label>
-          </div>
-        </i-table>
-      </i-col>
+    <Row v-if="direccionEdit.id !== 0" type="flex" :gutter="16">
       <!-- Tabla de Contactos -->
       <i-col span="12">
-        <i-table size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="300" :loading="contactosIsLoading">
+        <i-table size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="240" :loading="contactosIsLoading">
           <div slot="footer" style="text-align: center;">
             <i-button>Agregar Contacto</i-button>
           </div>
@@ -79,21 +47,42 @@
           </div>
         </i-table>
       </i-col>
+      <!-- Tabla de Horarios -->
+      <i-col span="12">
+        <i-table v-if="selectTipoDireccion.reqhorario === 1" size="small" :columns="horariosColumns" :data="horarios" :stripe="false" :height="240" :loading="horariosIsLoading">
+          <div slot="footer" style="text-align: center;">
+            <i-button>Agregar Horario</i-button>
+          </div>
+          <div slot="loading" style="text-align: center;">
+            <div class="modal-contenedor--img"></div>
+            <label class="modal-contenedor--label">Cargando horarios</label>
+          </div>
+        </i-table>
+        <Alert v-if="selectTipoDireccion.reqhorario !== 1" type="warning" show-icon>Este tipo de Direccion no require el uso de horarios para el envio de documentacion</Alert>
+      </i-col>
+    </Row>
+    <!-- Botones de accion -->
+    <Row type="flex" align="bottom" justify="center">
+      <i-col>
+        <i-button style="margin-top: 10px" type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
+        <i-button style="margin-top: 10px" type="info" @click="direccionEdit.id === 0 ? createDireccion() : updateDireccion()">{{ direccionEdit.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
+      </i-col>
     </Row>
   </div>
 </template>
 
 <script>
+  import EditDireccionComponent from '../miscelanius/editDireccionComponent'
   export default {
     name: 'direcciones-editor',
+    components: { EditDireccionComponent },
+    props: ['direccionEdit'],
     data () {
       return {
         id: 0,
-        direccionEdit: '',
+        selectIdTipoDireccion: '',
+        selectTipoDireccion: '',
         tiposDirecciones: [],
-        paises: [],
-        departamentos: [],
-        ciudades: [],
         horarios: [],
         horariosColumns: [],
         horariosIsLoading: true,
@@ -103,17 +92,40 @@
       }
     },
     mounted () {
-      this.getTiposDireccion()
+      console.log(this.direccionEdit.dependencia)
+      if (this.direccionEdit.id !== 0) {
+        this.getTiposDireccion(() => {
+          this.selectIdTipoDireccion = this.direccionEdit.tipodireccion.id
+        })
+      } else {
+        this.getTiposDireccion()
+      }
     },
     methods: {
-      getTiposDireccion () {
+      getTiposDireccion (_callback = null) {
         let storage = require('../../libs/storage')
         storage._database_consultTiposDirecciones().then((rta) => {
           this.tiposDirecciones = rta
+          if (_callback !== null) {
+            _callback()
+          }
         }).catch((err) => {
           this.$Message.error(err)
         })
-      }
+      },
+      updateTipoDireccion () {
+        // buscar id seleccionada en la lista de id
+        for (let i = 0; i < this.tiposDirecciones.length; i++) {
+          const tipoDireccion = this.tiposDirecciones[i]
+          if (tipoDireccion.id === this.selectIdTipoDireccion) {
+            this.selectTipoDireccion = tipoDireccion
+          }
+        }
+      },
+      createDireccion () {
+        console.log('prueba', this.$refs.editordireccion._component_getciudad())
+      },
+      updateDireccion () {}
     }
   }
 </script>

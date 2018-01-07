@@ -220,14 +220,15 @@ exports._database_getTerceroDireccionesbyID = (configuracion) => {
       for (let i = 0; i < rta.result.length; i++) {
         if (rta.result[1][i] !== undefined) {
           if (acProfile.verifyPermission('ADMIN_EDITOR') === true) {
-            direcciones.push(require('./objects.js').createDireccion(rta.result[1][i].idtb_tercerosdirecciones, require('./objects.js').createTipoDireccion(rta.result[1][i].idtb_tercerosdirecciones_tipo, rta.result[1][i].tb_tercerosdirecciones_tipo_nombre, rta.result[1][i].tb_tercerosdirecciones_tipo_reqdependencia, rta.result[1][i].tb_tercerosdirecciones_tipo_reqhorario, rta.result[1][i].tb_tercerosdirecciones_tipo_isactive), rta.result[1][i].tb_tercerosdirecciones_depedencia, rta.result[1][i].tb_tercerosdirecciones_direccion, require('./objects.js').createCiudad(rta.result[1][i].idtb_ciudad, rta.result[1][i].tb_ciudad_nombre, require('./objects.js').createDepartamento(rta.result[1][i].idtb_departamento, rta.result[1][i].tb_departamento_nombre, require('./objects.js').createPais(rta.result[1][i].idtb_pais, rta.result[1][i].tb_pais_nombre))), rta.result[1][i].tb_tercerosdirecciones_webstring, rta.result[1][i].tb_tercerosdirecciones_isactive))
+            direcciones.push(require('./objects.js').createDireccion(rta.result[1][i].idtb_tercerosdirecciones, require('./objects.js').createTipoDireccion(rta.result[1][i].idtb_tercerosdirecciones_tipo, rta.result[1][i].tb_tercerosdirecciones_tipo_nombre, rta.result[1][i].tb_tercerosdirecciones_tipo_reqdependencia, rta.result[1][i].tb_tercerosdirecciones_tipo_reqhorario, rta.result[1][i].tb_tercerosdirecciones_tipo_isactive), rta.result[1][i].tb_tercerosdirecciones_dependencia, rta.result[1][i].tb_tercerosdirecciones_direccion, rta.result[1][i].tb_tercerosdirecciones_tagsjson, require('./objects.js').createCiudad(rta.result[1][i].idtb_ciudad, rta.result[1][i].tb_ciudad_nombre, require('./objects.js').createDepartamento(rta.result[1][i].idtb_departamento, rta.result[1][i].tb_departamento_nombre, require('./objects.js').createPais(rta.result[1][i].idtb_pais, rta.result[1][i].tb_pais_nombre))), rta.result[1][i].tb_tercerosdirecciones_webstring, rta.result[1][i].tb_tercerosdirecciones_isactive))
           } else {
             if (rta.result[1][i].tb_tercerosdirecciones_isactive === 1) {
-              direcciones.push(require('./objects.js').createDireccion(rta.result[1][i].idtb_tercerosdirecciones, require('./objects.js').createTipoDireccion(rta.result[1][i].idtb_tercerosdirecciones_tipo, rta.result[1][i].tb_tercerosdirecciones_tipo_nombre, rta.result[1][i].tb_tercerosdirecciones_tipo_reqdependencia, rta.result[1][i].tb_tercerosdirecciones_tipo_reqhorario, rta.result[1][i].tb_tercerosdirecciones_tipo_isactive), rta.result[1][i].tb_tercerosdirecciones_depedencia, rta.result[1][i].tb_tercerosdirecciones_direccion, require('./objects.js').createCiudad(rta.result[1][i].idtb_ciudad, rta.result[1][i].tb_ciudad_nombre, require('./objects.js').createDepartamento(rta.result[1][i].idtb_departamento, rta.result[1][i].tb_departamento_nombre, require('./objects.js').createPais(rta.result[1][i].idtb_pais, rta.result[1][i].tb_pais_nombre))), rta.result[1][i].tb_tercerosdirecciones_webstring, rta.result[1][i].tb_tercerosdirecciones_isactive))
+              direcciones.push(require('./objects.js').createDireccion(rta.result[1][i].idtb_tercerosdirecciones, require('./objects.js').createTipoDireccion(rta.result[1][i].idtb_tercerosdirecciones_tipo, rta.result[1][i].tb_tercerosdirecciones_tipo_nombre, rta.result[1][i].tb_tercerosdirecciones_tipo_reqdependencia, rta.result[1][i].tb_tercerosdirecciones_tipo_reqhorario, rta.result[1][i].tb_tercerosdirecciones_tipo_isactive), rta.result[1][i].tb_tercerosdirecciones_dependencia, rta.result[1][i].tb_tercerosdirecciones_direccion, rta.result[1][i].tb_tercerosdirecciones_tagsjson, require('./objects.js').createCiudad(rta.result[1][i].idtb_ciudad, rta.result[1][i].tb_ciudad_nombre, require('./objects.js').createDepartamento(rta.result[1][i].idtb_departamento, rta.result[1][i].tb_departamento_nombre, require('./objects.js').createPais(rta.result[1][i].idtb_pais, rta.result[1][i].tb_pais_nombre))), rta.result[1][i].tb_tercerosdirecciones_webstring, rta.result[1][i].tb_tercerosdirecciones_isactive))
             }
           }
         }
       }
+      console.log(rta.result)
       deferred.resolve({tercero, direcciones})
     } else {
       deferred.reject('La consulta no ha arrojado resultados')
@@ -386,19 +387,43 @@ exports._database_consultPaises = () => {
 // -----------------------------------------------------------------------------------------------------------
 exports._database_consultDepartamentos = (idPais) => {
   // --------------------------| Description |--------------------------
-  // Description: Obtiene un listado de los paises en la base de datos
+  // Description: Obtiene un listado de los departamentos en la base de datos
   // return: una promesa
   // ------------------------| End Description |------------------------
   let deferred = q.defer()
   let departamentos = []
-  this._database_runQuery({ query: 'SELECT * FROM consultDepartamentos;' }).then((rta) => {
+  this._database_runQuery({ query: 'SELECT * FROM consultDepartamentos WHERE idtb_pais = ' + idPais + ';' }).then((rta) => {
     if (rta.result !== 0 && rta.result !== null) {
       for (let i = 0; i < rta.result.length; i++) {
-        departamentos.push(require('./objects.js').createPais(rta.result[i].idtb_pais, rta.result[i].tb_pais_nombre))
+        departamentos.push(require('./objects.js').createDepartamento(rta.result[i].idtb_departamento, rta.result[i].tb_departamento_nombre, idPais))
       }
-      deferred.resolve(paises)
+      deferred.resolve(departamentos)
     } else {
-      deferred.reject('La consulta no ha arrojado resultados: ERR consultPaises')
+      deferred.reject('La consulta no ha arrojado resultados: ERR consultDepartamentos')
+    }
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // Se retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_consultCiudades = (idDepartamento) => {
+  // --------------------------| Description |--------------------------
+  // Description: Obtiene un listado de las ciudades en la base de datos
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  let ciudades = []
+  this._database_runQuery({ query: 'SELECT * FROM consultCiudades WHERE idtb_departamento = ' + idDepartamento + ';' }).then((rta) => {
+    if (rta.result !== 0 && rta.result !== null) {
+      for (let i = 0; i < rta.result.length; i++) {
+        ciudades.push(require('./objects.js').createDepartamento(rta.result[i].idtb_ciudad, rta.result[i].tb_ciudad_nombre, idDepartamento))
+      }
+      deferred.resolve(ciudades)
+    } else {
+      deferred.reject('La consulta no ha arrojado resultados: ERR consultCiudades')
     }
   }).catch((err) => {
     deferred.reject(err)

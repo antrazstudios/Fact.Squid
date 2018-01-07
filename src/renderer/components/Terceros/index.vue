@@ -5,7 +5,7 @@
         <i-button icon="arrow-left-c" type="text" @click="$router.go(-1)">Regresar</i-button>
       </i-col>
       <i-col span="12">
-        <Input ref="searchInput" v-model="searchText" placeholder="Ingrese el dato a buscar" :disabled="searchState">
+        <Input ref="searchInput" v-model="searchText" placeholder="Ingrese el dato a buscar" :disabled="searchState" v-on:on-enter="searchClick()">
           <span slot="prepend">Buscar: </span>
           <Tooltip slot="append" :content="searchState === false ? 'Ejecutar busqueda' : 'Cancelar busqueda' ">
             <Button ref="searchButtonRun" icon="search" @click="searchClick()" v-bind:style="{ display : searchState === false ? '' : 'none' }"></Button>

@@ -2,14 +2,14 @@
   <div class="content">
     <!-- Editor de Direcciones -->
     <Row v-bind:style="{ opacity : editorDirecciones === true ? 1 : 0.1 }" >
-      <transition enter-active-class="animated slideInDown" leave-active-class="animated slideOutUp" :duration="{ enter: 900, leave: 200 }">
+      <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
         <div class="extern-contenedor--components" v-if="editorDirecciones === true">
           <i-button shape="circle" size="small" icon="close-round" @click="() => { this.editorDirecciones = !this.editorDirecciones }"></i-button>
-          <editor-direcciones ref="editorDireccion" style="margin-top: -13px; margin-left: 20px"></editor-direcciones>
+          <editor-direcciones ref="editorDireccion" style="margin-top: -13px; margin-left: 20px" :direccionEdit="selectDireccionesEdit"></editor-direcciones>
         </div>
       </transition>
     </Row>
-    <transition enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutUp" :duration="{ enter: 10000, leave: 900 }">
+    <transition enter-active-class="animated fadeInDown" :duration="{ enter: 1000 }">
       <Row v-if="!editorDirecciones">
         <!-- Formulario de datos basicos -->
         <Row type="flex" align="middle" >
@@ -65,7 +65,7 @@
         <Row v-if="this.$route.query.id !== 0" style="enable: false;">
           <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
             <div slot="footer" style="text-align: center;">
-              <i-button>Agregar direccion</i-button>
+              <i-button @click="createDireccion()">Agregar direccion</i-button>
             </div>
             <div slot="loading" style="text-align: center;">
               <div class="modal-contenedor--img"></div>
@@ -74,13 +74,14 @@
           </i-table>
         </Row>
         <!-- Botones de accion -->
-        <Row class="buttons-action" >
-          <i-button type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
-          <i-button type="info" @click="$route.query.id === 0 ? createTercero() : updateTercero()">{{ $route.query.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
+        <Row type="flex" align="bottom" justify="end">
+          <i-col>
+            <i-button style="margin-top: 50px" type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
+            <i-button style="margin-top: 50px" type="info" @click="$route.query.id === 0 ? createTercero() : updateTercero()">{{ $route.query.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
+          </i-col>
         </Row>
       </Row>
     </transition>
-    
   </div>
 </template>
 
@@ -96,6 +97,7 @@
         tipoTercero: '',
         terceroEdit: require('../../libs/objects.js').createTercerosJuridica('', '', '', require('../../libs/objects.js').createTerceros('', require('../../libs/objects.js').createTiposIdentificacion('', '', ''), '', true)),
         direccionesEdit: [],
+        selectDireccionesEdit: '',
         direccionesColumns: [],
         tiposidentificacion: [],
         validations: {
@@ -315,8 +317,9 @@
                   },
                   on: {
                     click: () => {
+                      // Cambiar el estado del editor
+                      this.selectDireccionesEdit = params.row
                       this.editorDirecciones = !this.editorDirecciones
-                      console.log(this)
                     }
                   }
                 }, [
@@ -421,6 +424,11 @@
         }).catch((err) => {
           this.$Message.error(err)
         })
+      },
+      createDireccion () {
+        const objects = require('../../libs/objects')
+        this.selectDireccionesEdit = objects.createDireccion(0, objects.createTipoDireccion(0, '', '', '', ''), '', '', '[]', objects.createCiudad('', '', objects.createDepartamento('', '', objects.createPais('', ''))), '', '')
+        this.editorDirecciones = !this.editorDirecciones
       }
     }
   }
@@ -439,8 +447,7 @@
     user-select: none;
   }
   .buttons-action{
-    position: fixed;
-    bottom: 30px;
+    top: 30px;
     right: 25px;
     width: 100%;
     text-align: right;

@@ -16,14 +16,14 @@
       <i-col span="12">
         <Form ref="FormDireccion" :label-width="130">
           <!-- Tipo de Direccion -->
-          <FormItem prop="tipoDireccion" label="Tipo de Direccion: " :required="true">
+          <FormItem prop="tipoDireccion" label="Tipo de Direccion: " :required="true" :result="validations.tiposdireccion.result">
             <Select v-model="selectIdTipoDireccion" v-on:on-change="updateTipoDireccion()">
               <Option v-for="item in tiposDirecciones" :value="item.id" :key="item.id">{{item.nombre}}</Option>
             </Select>
           </FormItem>
           <!-- Dependencia de la Direccion en caso que aplique -->
-          <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciaDireccion" label="Dependencia: " :required="true">
-            <Input type="text" v-model="direccionEdit.dependencia"/>
+          <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciaDireccion" label="Dependencia: " :required="true" :result="validations.dependencia !== undefined ? validations.dependencia.result : ''">
+            <Input style="text-transform:uppercase" type="text" v-model="direccionEdit.dependencia"/>
           </FormItem>
           <!-- Componente de Ciudad-Departamento-Ciudad -->
           <edit-direccion-component ref="editordireccion" :direccionTags="direccionEdit.direccionjson" :selections="{ pais: this.direccionEdit.ciudad.departamento.pais.id, departamento: this.direccionEdit.ciudad.departamento.id, ciudad: this.direccionEdit.ciudad.id }"></edit-direccion-component>
@@ -76,7 +76,7 @@
   export default {
     name: 'direcciones-editor',
     components: { EditDireccionComponent },
-    props: ['direccionEdit'],
+    props: ['direccionEdit', 'actionsCallback', 'idTercero'],
     data () {
       return {
         id: 0,
@@ -88,11 +88,14 @@
         horariosIsLoading: true,
         contactos: [],
         contactosColumns: [],
-        contactosIsLoading: true
+        contactosIsLoading: true,
+        validations: {
+          tiposdireccion: { result: '' },
+          dependencia: undefined
+        }
       }
     },
     mounted () {
-      console.log(this.direccionEdit.dependencia)
       if (this.direccionEdit.id !== 0) {
         this.getTiposDireccion(() => {
           this.selectIdTipoDireccion = this.direccionEdit.tipodireccion.id
@@ -121,9 +124,62 @@
             this.selectTipoDireccion = tipoDireccion
           }
         }
+        this.createRules()
+      },
+      createRules () {
+        this.validations = { tiposdireccion: { result: '' }, dependencia: undefined }
+        this.validations.tiposdireccion = {
+          result: '',
+          rules: [
+            {
+              prop: 'tipoDireccion',
+              typevalidation: 'content-null',
+              message: 'Debes elegir un tipo de Direccion como minimo',
+              args: ''
+            }
+          ]
+        }
+        if (this.selectTipoDireccion.reqdependencia === 1) {
+          this.validations.dependencia = {
+            result: '',
+            rules: [
+              {
+                prop: 'dependenciaDireccion',
+                typevalidation: 'content-null',
+                message: 'El tipo de direccion seleccionado, requiere dependencia',
+                args: ''
+              }
+            ]
+          }
+        }
       },
       createDireccion () {
-        console.log('prueba', this.$refs.editordireccion._component_getciudad())
+        const rules = require('../../libs/rules')
+        let dataCreate = {
+          idTercero: this.idTercero,
+          idTipoDireccion: this.selectIdTipoDireccion,
+          dependencia: this.direccionEdit.dependencia,
+          direccion: this.$refs.editordireccion._component_getdireccionText(),
+          direcciontagsjson: JSON.stringify(this.$refs.editordireccion._component_getdireccionTags()),
+          idCiudad: this.$refs.editordireccion._component_getciudad().id,
+          webString: ''
+        }
+        rules.validateRulesFormField(this.$refs.FormDireccion, this.validations).then((rta) => {
+          this.validations = rta.rules
+          if (rta.resultValidation === false || this.$refs.editordireccion._component_validate() === false) {
+            this.$Message.error('Aun hay campos por diligenciar')
+          } else {
+            this.$parent.$parent.$parent.handleSpinShow('Creando direccion') // pendiente de mejorar
+            require('../../libs/storage')._database_createDireccion(dataCreate).then((rta) => {
+              this.$Message.info(rta.message)
+              this.$parent.$parent.getTerceroInfo()
+              this.$parent.$parent.editorDirecciones = false // pendiente de mejorar
+            }).catch((err) => {
+              this.$parent.$parent.$parent.handleSpinHide() // pendiente de mejorar
+              this.$Message.error(err)
+            })
+          }
+        })
       },
       updateDireccion () {}
     }

@@ -5,7 +5,7 @@
       <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
         <div class="extern-contenedor--components" v-if="editorDirecciones === true">
           <i-button shape="circle" size="small" icon="close-round" @click="() => { this.editorDirecciones = !this.editorDirecciones }"></i-button>
-          <editor-direcciones ref="editorDireccion" style="margin-top: -13px; margin-left: 20px" :direccionEdit="selectDireccionesEdit"></editor-direcciones>
+          <editor-direcciones ref="editorDireccion" style="margin-top: -13px; margin-left: 20px" :direccionEdit="selectDireccionesEdit" :idTercero="terceroEdit.tercero.id"></editor-direcciones>
         </div>
       </transition>
     </Row>
@@ -37,22 +37,22 @@
               </FormItem>
               <!-- Item de numero de identificacion -->
               <FormItem prop="identificacion" label="# de identificacion" :required="true" :error="validations.identificacion.result">
-                <Input style="width: 470px" v-model="terceroEdit.tercero.identificacion"/>
+                <Input style="text-transform: uppercase; width: 470px" v-model="terceroEdit.tercero.identificacion"/>
               </FormItem>
               <!-- Nombres o razon social segun corresponda -->
               <!-- Natural -->
               <FormItem :prop="tipoTercero === 'natural' ? 'nombre' : ''" v-if="tipoTercero === 'natural'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
-                <Input placeholder="Primer Nombre" style="width: 115px" v-model="terceroEdit.primernombre"/>
-                <Input placeholder="Segundo Nombre" style="width: 115px" v-model="terceroEdit.segundonombre"/>
-                <Input placeholder="Primer Apellido" style="width: 115px" v-model="terceroEdit.primerapellido"/>
-                <Input placeholder="Segundo Apellido" style="width: 115px" v-model="terceroEdit.segundoapellido"/>
+                <Input placeholder="Primer Nombre" style="text-transform: uppercase; width: 115px" v-model="terceroEdit.primernombre"/>
+                <Input placeholder="Segundo Nombre" style="text-transform: uppercase; width: 115px" v-model="terceroEdit.segundonombre"/>
+                <Input placeholder="Primer Apellido" style="text-transform: uppercase; width: 115px" v-model="terceroEdit.primerapellido"/>
+                <Input placeholder="Segundo Apellido" style="text-transform: uppercase; width: 115px" v-model="terceroEdit.segundoapellido"/>
               </FormItem>
               <!-- Juridico -->
               <FormItem :prop="tipoTercero === 'juridico' ? 'nombre' : ''" v-if="tipoTercero === 'juridico'" label="Nombre Tercero" :required="true" :error="validations.nombre.result">
-                <Input placeholder="Razon social" style="width: 470px" v-model="terceroEdit.nombre"/>
+                <Input placeholder="Razon social" style="text-transform: uppercase; width: 470px" v-model="terceroEdit.nombre"/>
               </FormItem>
               <FormItem v-if="tipoTercero === 'juridico'" label="Representante legal">
-                <Input placeholder="Nombre completo" style="width: 470px" v-model="terceroEdit.representantelegal"/>
+                <Input placeholder="Nombre completo" style="text-transform: uppercase; width: 470px" v-model="terceroEdit.representantelegal"/>
               </FormItem>
             </Form>
           </i-col>
@@ -65,7 +65,7 @@
         <Row v-if="this.$route.query.id !== 0" style="enable: false;">
           <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
             <div slot="footer" style="text-align: center;">
-              <i-button @click="createDireccion()">Agregar direccion</i-button>
+              <i-button @click="newDireccion()">Agregar direccion</i-button>
             </div>
             <div slot="loading" style="text-align: center;">
               <div class="modal-contenedor--img"></div>
@@ -425,7 +425,7 @@
           this.$Message.error(err)
         })
       },
-      createDireccion () {
+      newDireccion () {
         const objects = require('../../libs/objects')
         this.selectDireccionesEdit = objects.createDireccion(0, objects.createTipoDireccion(0, '', '', '', ''), '', '', '[]', objects.createCiudad('', '', objects.createDepartamento('', '', objects.createPais('', ''))), '', '')
         this.editorDirecciones = !this.editorDirecciones

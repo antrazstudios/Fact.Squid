@@ -2,7 +2,7 @@
   <div>
     <Form v-if="configuracion.direccion.use === true" ref="FormVisorText" :label-width="configuracion.labelWidth">
       <FormItem label="Direccion: " :required="configuracion.direccion.validation" :error="direccionError">
-        <Input v-model="direccionText" :readonly="true" type="text" v-bind:style="{ width: configuracion.objectsWidth }" placeholder="Aqui veras la direccion final">
+        <Input v-model="direccionText" :readonly="true" type="text" v-bind:style="{ width: configuracion.objectsWidth, textTransform: 'uppercase' }" placeholder="Aqui veras la direccion final">
           <Button slot="append" :icon="isEdition === false ? 'edit' : 'checkmark-round'" @click="() => { isEdition = !isEdition }"></Button>
         </Input>
       </FormItem>
@@ -17,11 +17,11 @@
         </FormItem>
         <!-- Insercion de texto o numero adicional -->
         <FormItem v-if="insertAdditional !== ''">
-          <Input v-if="insertAdditional === 'text'" v-model="textAdditional">
+          <Input v-if="insertAdditional === 'text'" v-model="textAdditional" style="text-transform:uppercase;">
             <Button slot="append" icon="checkmark-round" @click="() => { createTag('TEXT', textAdditional, textAdditional), insertAdditional = '' }"></Button>
             <Button slot="append" icon="close" @click="() => { insertAdditional = '' }"></Button>
           </Input>
-          <Input type="number" min="0" step="1" v-if="insertAdditional === 'number'" v-model="numAdditional">
+          <Input type="number" style="text-transform:uppercase; " min="0" step="1" v-if="insertAdditional === 'number'" v-model="numAdditional">
             <Button slot="append" icon="checkmark-round" @click="() => { createTag('NUMBER', numAdditional, numAdditional), insertAdditional = ''}"></Button>
             <Button slot="append" icon="close" @click="() => { insertAdditional = '' }"></Button>
           </Input>

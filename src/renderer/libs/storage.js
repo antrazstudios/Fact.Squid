@@ -228,7 +228,6 @@ exports._database_getTerceroDireccionesbyID = (configuracion) => {
           }
         }
       }
-      console.log(rta.result)
       deferred.resolve({tercero, direcciones})
     } else {
       deferred.reject('La consulta no ha arrojado resultados')
@@ -429,5 +428,35 @@ exports._database_consultCiudades = (idDepartamento) => {
     deferred.reject(err)
   })
   // Se retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createDireccion = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: crea una nueva direccion asociada a un tercero
+  // Parameters:
+  // * configuracion. idTercero = Numero de id del tercero principal
+  // * configuracion. idTipoDireccion = Numero de id del tipo de direccion asociada
+  // * configuracion. dependencia = Opcional, define la dependencia de la direccion solo en caso que el tipo de direccion lo requiera
+  // * configuracion. direccion = define la direccion en modo texto
+  // * configuracion. direcciontagsjson = define la direccion en modo json para postestructuracion, lo recibe en texto para ser almancenado
+  // * configuracion. idCiudad = Numero de id de la ciudad a donde pertenece la direccion
+  // * configuracion. webString = Opcional, define la direccion de GoogleMaps para hacer renderizacion de la misma.
+  // return:
+  // ------------------------| End Description |------------------------
+  console.log(configuracion)
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createDireccion(?, ?, ?, ?, ?, ?, ?)',
+    parameters: [ configuracion.idTercero, configuracion.idTipoDireccion, configuracion.dependencia, configuracion.direccion, configuracion.direcciontagsjson, configuracion.idCiudad, configuracion.webString ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+    console.log(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
   return deferred.promise
 }

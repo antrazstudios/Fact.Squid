@@ -295,5 +295,6 @@
     color: #fff;
     text-align: center;
     border-radius: 8px;
-    }
+    box-shadow: 0px 0px 6px 0.5px #949494;
+  }
 </style>

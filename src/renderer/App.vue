@@ -69,37 +69,40 @@
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
-    <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" :duration="400">
+    <transition enter-active-class="animated fadeIn" :duration="{ enter: 500 }" >
       <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
     </transition>
     <!-- Footer-->
     <div class="footer">
       <Row type="flex" justify="space-between">
-        <div class="footer-release" v-bind:style="{ backgroundColor: colorVersion}" @click="gotoAbout()">
-          <h4>{{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}</h4>
+        <!-- Contenedor Izquierdo -->
+        <div class="footer-container">
+          <Tag class="footer-item-tag clicker" v-bind:style="{ backgroundColor: colorVersion}" @click="gotoAbout()">
+            {{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}
+          </Tag>
+          <Tag class="footer-item-tag noclicker" v-if="developerMode === true">
+            Modo Desarrollador
+          </Tag>
+          <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
+            <h4 style="display: inline-block;">Usuario actaul: {{actualProfile.username}}</h4>
+          </Tag>
         </div>
-        <div v-if="actualProfile !== ''" class="footer-connection">
-          <Icon style="display: inline-block" type="link"/>
-          <h4 style="display: inline-block">Conectado a: {{require('./libs/settings.js').getConnectionName()}}</h4>
-          <h4 style="display: inline-block; margin-left: 10px">Usuario actaul: {{actualProfile.username}}</h4>
-          <div v-if="developerMode === true" class="footer-release" style="background-color: #444444; cursor: inherit">
-            <h4>Modo desarrollador</h4>
-          </div>
+        <!-- Contenedor Derecho -->
+        <div class="footer-container">
+          <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
+            <Icon type="link"/>
+            Conectado a: {{ require('./libs/settings.js').getConnectionName()}}
+          </Tag>
+          <Poptip trigger="hover" title="Conexiones a BD" content="Prueba" placement="left-end">
+            <Tag class="footer-item-tag clicker" style="background-color: #16A085">Conexiones</Tag>
+          </Poptip>
         </div>
       </Row>
     </div>
-    <!-- Interfaz de carga -->
-    <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut" :duration="300">
-      <div v-if="showWaitDialog" ref="loaderfix" class="modal">
-        <div class="modal-contenedor">
-          <div class="modal-contenedor--img"></div>
-          <label class="modal-contenedor--label">{{loaderMessage}}</label>
-        </div>
-      </div>
-    </transition>
     <!-- Titlebar - Barra de titulo -->
     <Row v-if="platform === 'darwin'">
-      <div class="titlebar">
+      <div :class="this.showTitlebar === false ? 'titlebar titlebar-darwin-close' : 'titlebar'">
+      <!-- <div class="titlebar"> -->
         <label class="titlebar-title">Fact
           <div class="titlebar-icon">
             .Squid
@@ -147,7 +150,6 @@
     name: 'billsdelivery-vue',
     data () {
       return {
-        showWaitDialog: false,
         maxHeightTable: 0,
         aboutModal: false,
         colorVersion: '',
@@ -160,6 +162,7 @@
         activeName: '1',
         platform: 'win32',
         margintop: 0,
+        showTitlebar: false,
         routeIndexes: [
           {
             id: '1',
@@ -186,6 +189,7 @@
     },
     mounted () {
       this.handleSpinHide()
+      console.log(this.$refs.menufix.$el.style.display)
     },
     created: function () {
       // Obtencion del maximo de una tabla dependiendo del tamaño de la app
@@ -232,6 +236,14 @@
       this.changePath('/login')
     },
     methods: {
+      showTitleBar (show) {
+        if (show === true) {
+          this.$refs.menufix.$el.style.display = ''
+        } else {
+          this.$refs.menufix.$el.style.display = 'none'
+        }
+        this.showTitlebar = show
+      },
       createMenu () {
         // Creacion del menu de la aplicacion
         const {remote} = require('electron')
@@ -293,11 +305,21 @@
         this.$router.push('/login')
       },
       handleSpinShow (message = 'Espere un momento por favor') {
-        this.showWaitDialog = true
-        this.loaderMessage = message
+        this.$Spin.show({
+          render: (h) => {
+            return h('div', [
+              h('div', {
+                'class': 'modal-contenedor--img'
+              }),
+              h('label', {
+                'class': 'modal-contenedor--label'
+              }, message)
+            ])
+          }
+        })
       },
       handleSpinHide () {
-        this.showWaitDialog = false
+        this.$Spin.hide()
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
@@ -385,35 +407,48 @@
     z-index: 1000;
     background-color: white;
   }
+  .titlebar-darwin-close{
+    -webkit-box-shadow: 0 4px 6px -6px #222;
+    -moz-box-shadow: 0 4px 6px -6px #222;
+    box-shadow: 0 4px 6px -6px #222;
+    z-index: 999;
+  }
   .footer{
     position: fixed;
     bottom: 0;
     width: 100%;
-    background-color: rgb(228, 228, 228);
+    background-color: white;
     color: rgba(0, 0, 0, 0.43);
+    -webkit-box-shadow: 0px -6px 4px -6px #949494;
+    -moz-box-shadow: 0px -6px 4px -6px #949494;
+    box-shadow: 0px -6px 4px -6px #949494;
+    z-index: 999;
   }
-  .footer-release{
+  .footer-container{
     display: inline-block;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 8px;
-    padding-right: 8px;
-    margin: 2px;
-    margin-left: 10px;
-    font-size: 10px;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
+  }
+  .footer-item-tag{
+    margin-top: 1px;
+    margin-bottom: 0px;
     vertical-align: middle;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+    border-radius: 6px;
   }
-  .footer-connection{
-    display: inline-block;
-    color: rgb(117, 117, 117);
-    font-size: 12px;
+  .footer-item-tag.clicker{
+    cursor: pointer;
+    color: white;
+  }
+  .footer-item-tag.noclicker{
     cursor: not-allowed;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 2.5px;
+    background-color: #444444;
+    color: white;
+  }
+  .footer-item-tag.text{
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
   }
   .content {
     overflow-y: scroll;
@@ -446,32 +481,12 @@
     position: relative;
     left: 0px;
   }
-  .modal {
-      display: '';
-      position:   fixed;
-      z-index:    1000;
-      top:        0;
-      left:       0;
-      height:     100%;
-      width:      100%;
-      background: rgba( 255, 255, 255, 1)
-
-                  50% 50%
-                  no-repeat;
-      background-size: 10%;
-  }
-  .modal-contenedor{
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-  }
   .modal-contenedor--img{
       display: block;
       margin: auto;
       width: 60px;
       height: 60px;
-      background-image: url("~@/assets/images/loading.gif");
+      background-image: url("~@/assets/images/ajax-loader.gif");
       background-size: contain;
   }
   .modal-contenedor--label{

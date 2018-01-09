@@ -1,19 +1,29 @@
-<template lang="html">
-  <div class="content">
-    <Row :gutter="32">
-      <i-col span="14">
-        <h1 class="layout-text-item">Fact.Squid</h1>
-        <h2 class="layout-text-item">Sencillo y poderoso</h2>
-        <p class="layout-text-item">BillsDelivery era un software especializado en el seguimiento de informacion hacia las cuentas medicas, abarcando completamente las etapas de trazabilidad de recepcion, respuesta, auditoria, envio y radicacion de cuentas medicas mas las fases posteriores, el cual se ha transformado para entrar en la amplia gama de softwares de productividad de la familia Squid de AntrazStudios. Para mas informacion puedes <a href="http://www.antrazstudios.com">leer la documentacion de Fact.Squid en antrazstudios.com</a>.</p>
-        <p class="layout-text-item">Hemos cambiado con el fin de ser compatibles con los tres sistemas operativos lideres del mercado, Windows10, macOS y Linux. Disfruta de las nuevas mejoras.</p>
-        <Alert class="layout-text-item" type="warning" show-icon>
-          IMPORTANTE
-          <Icon type="bug" slot="icon"/>
-          <span slot="desc">
-            Nota: Esta una version ALPHA, es decir es una version del software que aun se encuentra en desarrollo, en cualquier momento algunas funcionalidades pueden desaparecer, ser cambiadas, mejoradas, o implementadas en cualquier momento, tambien es importante tener en cuenta que puede contener BUGS y/o ERRORES, es importante que nos reporte estos errores o sus opiniones que para nosostros es muy importante.
-          </span>
-        </Alert>
-        <div>
+<template>
+  <Row class="background-row" type="flex" justify="center" align="middle">
+    <Card class="cardcontent">
+      <div style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
+          <img src="../../assets/images/factsquid_logoColor.png" style="width: 20%;"/>
+        </div>
+        <div style="margin-top: 100px">
+          <!-- <div class="layout-image form-object"></div> -->
+          <h1 class="layout-text-item form-text">Bienvenido!</h1>
+          <h3 class="layout-text-item form-text" style="opacity: 0.4; font-weight: normal; margin-bottom: 50px">Inicie sesion para acceder al sistema</h3>
+          <Form ref="formInline" :model="formInline" :rules="ruleInline" style="width: 75%" class="layout-text-item form-object">
+            <FormItem prop="user">
+                <Input type="text" v-model="formInline.user" placeholder="Usuario o Identificacion"/>
+            </FormItem>
+            <FormItem prop="password" style="margin: 20px 0px 5px 0px">
+                <Input type="password" v-model="formInline.password" placeholder="Contraseña"/>
+            </FormItem>
+            <FormItem style="margin: 25px 0px 5px 0px">
+              <Button class="form-object" style="margin: 0px auto 10px auto; width: 100%" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
+              <Button class="form-object" style=" width: 100%" @click="CancelLogin()">Cancelar</Button>
+            </FormItem>
+            <FormItem>
+                <Button class="form-object" type="text">He olvidado mi contraseña</Button>
+            </FormItem>
+          </Form>
+          <div>
           <div id="divConexionChange" class="layout-text-item" style="display: none">
             <h4 style="display: inline">Conexion: </h4>
             <i-select v-model="connectionSelected" style="width: 250px" clearable>
@@ -28,37 +38,9 @@
           </div>
           <Button @click="ConnectionsAssitantShow()">Asistente de Conexiones</Button>
         </div>
-      </i-col>
-      <i-col span="10">
-        <Card style="background-color: rgb(242, 242, 242)">
-          <div>
-            <div class="layout-image form-object"></div>
-            <h1 class="layout-text-item form-text">Inicio de sesion</h1>
-            <h2 class="layout-text-item form-text">Ingrese sus credenciales</h2>
-            <Form ref="formInline" :model="formInline" :rules="ruleInline" style="width: 300px" class="layout-text-item form-object">
-              <FormItem prop="user" style="margin: 20px 0px 5px 0px">
-                  <Input type="text" v-model="formInline.user" placeholder="Usuario o Identificacion">
-                      <Icon type="ios-person-outline" slot="prepend"></Icon>
-                  </Input>
-              </FormItem>
-              <FormItem prop="password" style="margin: 20px 0px 5px 0px">
-                  <Input type="password" v-model="formInline.password" placeholder="Contraseña">
-                      <Icon type="ios-locked-outline" slot="prepend"></Icon>
-                  </Input>
-              </FormItem>
-              <FormItem style="margin: 25px 0px 5px 0px">
-                  <Button class="form-object" style="margin: 0px auto 10px auto" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
-                  <Button class="form-object" @click="CancelLogin()">Cancelar</Button>
-              </FormItem>
-              <FormItem>
-                  <Button class="form-object" type="text">He olvidado mi contraseña</Button>
-              </FormItem>
-            </Form>
         </div>
-        </Card>
-      </i-col>
-    </Row>
-  </div>
+    </Card>
+  </Row>
 </template>
 
 <script>
@@ -66,7 +48,7 @@
     name: 'login',
     created: function () {
       // let Base = require('../../App.vue')
-      this.$parent.$refs.menufix.$el.style.display = 'none'
+      this.$parent.showTitleBar(false)
       let settings = require('../../libs/settings.js') // Instaciacion de la libreria de configuracion
       let defaultConnName = settings.getContentFromLocalKey('defaultConn')
       let i = 0
@@ -105,14 +87,14 @@
             this.$parent.handleSpinShow('Esperando respuesta del servidor, en modo desarrollador')
             // ejecuta el procedimiento de inicio de sesion con los datos del usuario ROOT
             require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass({
-              // username: 'ROOT',
-              // pass: '1234567890'
-              username: 'LCV',
-              pass: 'gata1125'
+              username: 'ROOT',
+              pass: '1234567890'
+              // username: 'LCV',
+              // pass: 'gata1125'
             }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
               if (rta.userConsult !== undefined) {
                 require('../../libs/settings.js').createSesion(rta.userConsult, this.connectionSelected)
-                this.$parent.$refs.menufix.$el.style.display = ''
+                this.$parent.showTitleBar(true)
                 this.$parent.changePath('/')
                 this.$parent.verifySesion()
               }
@@ -192,6 +174,17 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-position: right;
+  }
+  .cardcontent{
+    position: fixed;
+    top: 100px;
+    bottom: 80px;
+    padding: 0;
+    width: 45%;
+  }
+  .background-row{
+    background-image: url('~@/assets/images/bga.jpg');
+    position: fixed;
   }
   .layout-text-item{
     margin: 8px 0px;

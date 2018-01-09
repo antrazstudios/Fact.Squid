@@ -93,8 +93,12 @@
             <Icon type="link"/>
             Conectado a: {{ require('./libs/settings.js').getConnectionName()}}
           </Tag>
-          <Poptip trigger="hover" title="Conexiones a BD" content="Prueba" placement="left-end">
+          <Poptip trigger="hover" title="Conexiones a BD" placement="left-end">
             <Tag class="footer-item-tag clicker" style="background-color: #16A085">Conexiones</Tag>
+            <div slot="content">
+              <Button @click="connectionsModal = !connectionsModal">Cambiar conexion actual</Button>
+              <Button>Asistente de conexiones</Button>
+            </div>
           </Poptip>
         </div>
       </Row>
@@ -142,6 +146,12 @@
         <i-col span="16">(C) 2016-2018 Todos los derechos reservados</i-col>
       </Row>
     </Modal>
+    <!-- Asistente de Cambio de Conexion -->
+    <Modal v-model="connectionsModal">
+      <Row>
+        PRueba
+      </Row>
+    </Modal>
   </div>
 </template>
 
@@ -151,6 +161,7 @@
     data () {
       return {
         maxHeightTable: 0,
+        connectionsModal: false,
         aboutModal: false,
         colorVersion: '',
         loaderMessage: '...',

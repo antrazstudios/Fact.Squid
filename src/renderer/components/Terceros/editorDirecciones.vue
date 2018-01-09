@@ -85,10 +85,10 @@
         tiposDirecciones: [],
         horarios: [],
         horariosColumns: [],
-        horariosIsLoading: true,
+        horariosIsLoading: false,
         contactos: [],
         contactosColumns: [],
-        contactosIsLoading: true,
+        contactosIsLoading: false,
         validations: {
           tipodireccion: { result: '' },
           dependenciadireccion: undefined
@@ -96,7 +96,9 @@
       }
     },
     mounted () {
+      this.createColumns()
       if (this.direccionEdit.id !== 0) {
+        this.getDireccionInfo()
         this.getTiposDireccion(() => {
           this.selectIdTipoDireccion = this.direccionEdit.tipodireccion.id
         })
@@ -105,6 +107,19 @@
       }
     },
     methods: {
+      getDireccionInfo () {
+        let storage = require('../../libs/storage')
+        this.horariosIsLoading = true
+        this.contactosIsLoading = true
+        storage._database_getDireccionHorariosContactos(this.direccionEdit.id).then((rta) => {
+          this.contactos = rta.contactos
+          this.horarios = rta.horarios
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
+        this.horariosIsLoading = false
+        this.contactosIsLoading = false
+      },
       getTiposDireccion (_callback = null) {
         let storage = require('../../libs/storage')
         storage._database_consultTiposDirecciones().then((rta) => {
@@ -206,6 +221,237 @@
             }).catch((err) => {
               this.$parent.$parent.$parent.handleSpinHide() // pendiente de mejorar
               this.$Message.error(err)
+            })
+          }
+        })
+      },
+      createColumns () {
+        // Creacion de columnas para tabla de horarios
+        this.horariosColumns = []
+        this.horariosColumns.push({
+          title: 'Periodo Dias',
+          render: (h, {row}) => {
+            return row.diainicio + ' - ' + row.diafinal
+          }
+        })
+        this.horariosColumns.push({
+          title: 'Periodo en Tiempo',
+          render: (h, {row}) => {
+            return 'Desde ' + row.horainicio + ' hasta ' + row.horafinal
+          }
+        })
+        this.horariosColumns.push({
+          title: 'Acciones',
+          key: 'actions',
+          width: 150,
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  content: 'Editar',
+                  placement: 'left'
+                }
+              }, [
+                h('i-button', {
+                  props: {
+                    type: 'info',
+                    size: 'small',
+                    shape: 'circle'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      // Cambiar el estado del editor
+                      this.updateDireccion(params.row)
+                    }
+                  }
+                }, [
+                  h('Icon', {
+                    props: {
+                      type: 'edit'
+                    }
+                  })
+                ])
+              ]),
+              h('Tooltip', {
+                props: {
+                  content: 'Eliminar',
+                  placement: 'bottom'
+                }
+              }, [
+                h('i-button', {
+                  props: {
+                    type: 'error',
+                    size: 'small',
+                    shape: 'circle',
+                    disabled: !require('../../libs/settings.js').getSesionProfile().verifyPermission('ROOT')
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.removeHorario(params.row)
+                    }
+                  }
+                }, [
+                  h('Icon', {
+                    props: {
+                      type: 'trash-b'
+                    }
+                  })
+                ])
+              ])
+            ])
+          }
+        })
+        // Creacion de columnas para tabla de contactos
+        this.contactosColumns = []
+        this.contactosColumns.push({
+          title: 'Nombre',
+          render: (h, {row}) => {
+            return row.nombre
+          }
+        })
+        this.contactosColumns.push({
+          title: 'Cargo',
+          render: (h, {row}) => {
+            return row.cargo
+          }
+        })
+        if (require('../../libs/settings.js').getSesionProfile().verifyPermission('ROOT') === true) {
+          this.contactosColumns.push({
+            title: 'Estado',
+            render: (h, {row}) => {
+              return h('div', {}, [
+                h('Icon', {
+                  props: {
+                    color: row.isactive === 1
+                      ? '#27ae60'
+                      : '#c0392b',
+                    type: row.isactive === 1
+                      ? 'checkmark-circled'
+                      : 'close-circled'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }),
+                h('label', {
+                  style: {
+                    marginLeft: '5px'
+                  }
+                }, row.isactive === 1 ? 'Activo' : 'Inactivo')
+              ])
+            },
+            width: 100
+          })
+        }
+        this.contactosColumns.push({
+          title: 'Acciones',
+          key: 'actions',
+          width: 150,
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  content: 'Editar',
+                  placement: 'left'
+                }
+              }, [
+                h('i-button', {
+                  props: {
+                    type: 'info',
+                    size: 'small',
+                    shape: 'circle'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      // Cambiar el estado del editor
+                      this.updateDireccion(params.row)
+                    }
+                  }
+                }, [
+                  h('Icon', {
+                    props: {
+                      type: 'edit'
+                    }
+                  })
+                ])
+              ]),
+              h('Tooltip', {
+                props: {
+                  content: 'Cambiar Estado',
+                  placement: 'bottom'
+                }
+              }, [
+                h('i-button', {
+                  props: {
+                    type: 'warning',
+                    size: 'small',
+                    shape: 'circle',
+                    disabled: !require('../../libs/settings.js').getSesionProfile().verifyPermission('ROOT')
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.updateContactoState(params.row)
+                    }
+                  }
+                }, [
+                  h('Icon', {
+                    props: {
+                      type: 'ios-loop-strong'
+                    }
+                  })
+                ])
+              ])
+            ])
+          }
+        })
+      },
+      updateContactoState (item) {
+        console.log(item)
+        this.$parent.$parent.$parent.handleSpinShow('Actualizando Contacto')
+        const storage = require('../../libs/storage')
+        storage._database_updateContactoState({
+          idContacto: item.id,
+          state: !item.isactive
+        }).then((rta) => {
+          this.$Message.info(rta.message)
+          this.$parent.$parent.$parent.handleSpinHide()
+          this.getDireccionInfo()
+        }).catch((err) => {
+          this.$Message.error(err)
+          this.$parent.$parent.$parent.handleSpinHide()
+        })
+      },
+      removeHorario (item) {
+        this.$Modal.confirm({
+          title: 'Confirmacion eliminacion',
+          content: '¿Esta seguro de querer eliminar este horario?, Esta accion no puede deshacerse',
+          okText: 'Si, eliminar',
+          cancelText: 'No',
+          closable: true,
+          onOk: () => {
+            this.$parent.$parent.$parent.handleSpinShow('Actualizando Contacto')
+            const storage = require('../../libs/storage')
+            storage._database_removeHorario(item.id).then((rta) => {
+              this.$Message.info(rta.message)
+              this.$parent.$parent.$parent.handleSpinHide()
+              this.getDireccionInfo()
+            }).catch((err) => {
+              this.$Message.error(err)
+              this.$parent.$parent.$parent.handleSpinHide()
             })
           }
         })

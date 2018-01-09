@@ -445,14 +445,12 @@ exports._database_createDireccion = (configuracion) => {
   // * configuracion. webString = Opcional, define la direccion de GoogleMaps para hacer renderizacion de la misma.
   // return:
   // ------------------------| End Description |------------------------
-  console.log(configuracion)
   let deferred = q.defer()
   this._database_runQuery({
     query: 'call createDireccion(?, ?, ?, ?, ?, ?, ?)',
     parameters: [ configuracion.idTercero, configuracion.idTipoDireccion, configuracion.dependencia, configuracion.direccion, configuracion.direcciontagsjson, configuracion.idCiudad, configuracion.webString ]
   }).then((rta) => {
     deferred.resolve(rta)
-    console.log(rta)
   }).catch((err) => {
     deferred.reject(err)
     console.log(err)
@@ -475,14 +473,12 @@ exports._database_updateDireccion = (configuracion) => {
   // * configuracion. webString = Opcional, define la direccion de GoogleMaps para hacer renderizacion de la misma.
   // return: una promesa
   // ------------------------| End Description |------------------------
-  console.log(configuracion)
   let deferred = q.defer()
   this._database_runQuery({
     query: 'call updateDireccion(?, ?, ?, ?, ?, ?, ?)',
     parameters: [ configuracion.idDireccion, configuracion.idTipoDireccion, configuracion.dependencia, configuracion.direccion, configuracion.direcciontagsjson, configuracion.idCiudad, configuracion.webString ]
   }).then((rta) => {
     deferred.resolve(rta)
-    console.log(rta)
   }).catch((err) => {
     deferred.reject(err)
     console.log(err)
@@ -500,14 +496,94 @@ exports._database_updateDireccionState = (configuracion) => {
   // * configuracion. state = Estado a utilizarse que puede ser 0 o 1
   // return: una promesa
   // ------------------------| End Description |------------------------
-  console.log(configuracion)
   let deferred = q.defer()
   this._database_runQuery({
     query: 'call updateDireccionState(?, ?)',
     parameters: [ configuracion.idDireccion, configuracion.state ]
   }).then((rta) => {
     deferred.resolve(rta)
-    console.log(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_getDireccionHorariosContactos = (idDireccion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Consulta en la BD todas las ID de direccion
+  // Parameters:
+  // * idDireccion = Numero de id de la Direccion a actualizarse
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  const objetos = require('./objects')
+  let deferred = q.defer()
+  let horarios = []
+  let contactos = []
+  this._database_runQuery({
+    query: 'call getDireccionHorariosContactos(?)',
+    parameters: [ idDireccion ]
+  }).then((rta) => {
+    if (rta.result !== 0 && rta.result !== null) {
+      for (let i = 0; i < rta.result[0].length; i++) {
+        const dbhorario = rta.result[0][i]
+        horarios.push(objetos.createHorario(dbhorario.idtb_terceroshorarios, idDireccion, dbhorario.tb_terceroshorarios_diainicio, dbhorario.tb_terceroshorarios_diafin, dbhorario.tb_terceroshorarios_horainicio, dbhorario.tb_terceroshorarios_horafin))
+      }
+      for (let i = 0; i < rta.result[1].length; i++) {
+        const dbcontacto = rta.result[1][i]
+        contactos.push(objetos.createContacto(dbcontacto.idtb_terceroscontactos, idDireccion, dbcontacto.tb_terceroscontactos_nombre, dbcontacto.tb_terceroscontactos_cargo, dbcontacto.tb_terceroscontactos_isactive))
+      }
+      deferred.resolve({horarios, contactos})
+    } else {
+      deferred.reject('La consulta no ha arrojado resultados')
+    }
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateContactoState = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: actualiza unicamente el estado de un contacto asociada a una direccion
+  // Parameters:
+  // * configuracion. idContacto = Numero de id del contacto a actualizarse
+  // * configuracion. state = Estado a utilizarse que puede ser 0 o 1
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateContactosState(?, ?)',
+    parameters: [ configuracion.idContacto, configuracion.state ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_removeHorario = (idHorario) => {
+  // --------------------------| Description |--------------------------
+  // Description: elimina permanentemente un horario del sistema
+  // Parameters:
+  // * idHorario = Numero de id del horario a eliminarse permanentemente
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call removeHorario(?)',
+    parameters: [ idHorario ]
+  }).then((rta) => {
+    deferred.resolve(rta)
   }).catch((err) => {
     deferred.reject(err)
     console.log(err)

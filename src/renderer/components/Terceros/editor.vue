@@ -318,8 +318,7 @@
                   on: {
                     click: () => {
                       // Cambiar el estado del editor
-                      this.selectDireccionesEdit = params.row
-                      this.editorDirecciones = !this.editorDirecciones
+                      this.updateDireccion(params.row)
                     }
                   }
                 }, [
@@ -443,6 +442,10 @@
         }).catch((err) => {
           this.$Message.error(err)
         })
+      },
+      updateDireccion (item) {
+        this.selectDireccionesEdit = item
+        this.editorDirecciones = !this.editorDirecciones
       }
     }
   }

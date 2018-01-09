@@ -164,3 +164,24 @@ exports.createPais = (vid, vnombre) => {
     nombre: vnombre
   }
 }
+
+exports.createHorario = (vid, viddireccion, vdiainicio, vdiafinal, vhorainicio, vhorafinal) => {
+  return {
+    id: vid,
+    iddireccion: viddireccion,
+    diainicio: vdiainicio,
+    diafinal: vdiafinal,
+    horainicio: vhorainicio,
+    horafinal: vhorafinal
+  }
+}
+
+exports.createContacto = (vid, viddireccion, vnombre, vcargo, visactive) => {
+  return {
+    id: vid,
+    iddireccion: viddireccion,
+    nombre: vnombre,
+    cargo: vcargo,
+    isactive: visactive
+  }
+}

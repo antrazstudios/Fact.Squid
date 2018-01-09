@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <Row style="margin: 0px 20px 10px 0px;">
+    <Row style="margin: 0px 10px 10px 0px;">
       <i-col span="6">
         <i-button icon="arrow-left-c" type="text" @click="$router.go(-1)">Regresar</i-button>
       </i-col>
@@ -285,7 +285,7 @@ export default {
   .content{
     width: 100%;
     min-height: 100%;
-    padding: 20px;
+    padding: 10px;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: right;

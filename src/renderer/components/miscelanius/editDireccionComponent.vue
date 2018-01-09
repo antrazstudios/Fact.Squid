@@ -2,7 +2,7 @@
   <div>
     <Form v-if="configuracion.direccion.use === true" ref="FormVisorText" :label-width="configuracion.labelWidth">
       <FormItem label="Direccion: " :required="configuracion.direccion.validation" :error="direccionError">
-        <Input v-model="direccionText" :readonly="true" type="text" v-bind:style="{ width: configuracion.objectsWidth, textTransform: 'uppercase' }" placeholder="Aqui veras la direccion final">
+        <Input v-model="direccionText" :readonly="true" type="text" v-bind:style="{ width: configuracion.objectsWidth, textTransform: 'uppercase' }" placeholder="Aqui veras la direccion final" @on-enter="() => { isEdition = !isEdition }">
           <Button slot="append" :icon="isEdition === false ? 'edit' : 'checkmark-round'" @click="() => { isEdition = !isEdition }"></Button>
         </Input>
       </FormItem>

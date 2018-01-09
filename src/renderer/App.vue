@@ -498,7 +498,7 @@
     overflow-y: scroll;
     position: relative;
     height: 100%;
-    bottom: 30px;
+    bottom: 32px;
     overflow-x: hidden;
   }
   .layout-nav{

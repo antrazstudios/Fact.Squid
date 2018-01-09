@@ -64,7 +64,7 @@
     <!-- Botones de accion -->
     <Row type="flex" align="bottom" justify="center">
       <i-col>
-        <i-button style="margin-top: 10px" type="error" @click="() => { $router.go(-1) }">CANCELAR</i-button>
+        <i-button style="margin-top: 10px" type="error" @click="() => { this.$parent.$parent.editorDirecciones = false }">CANCELAR</i-button>
         <i-button style="margin-top: 10px" type="info" @click="direccionEdit.id === 0 ? createDireccion() : updateDireccion()">{{ direccionEdit.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
       </i-col>
     </Row>

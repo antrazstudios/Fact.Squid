@@ -23,21 +23,6 @@
                 <Button class="form-object" type="text">He olvidado mi contraseña</Button>
             </FormItem>
           </Form>
-          <div>
-          <div id="divConexionChange" class="layout-text-item" style="display: none">
-            <h4 style="display: inline">Conexion: </h4>
-            <i-select v-model="connectionSelected" style="width: 250px" clearable>
-              <i-option v-for="item in connectionsList" :value="item.name" :key="item.id">{{ item.name }}</i-option>
-            </i-select>
-            <i-button @click="changeViewConnection('divConexionActual', 'divConexionChange', 'yes')">OK</i-button>
-          </div>
-          <div id="divConexionActual" class="layout-text-item">
-            <h4 style="display: inline">Conexion seleccionada: </h4>
-            <label style="margin: 0px 20px 0px 0px">{{ connectionSelected }}</label>
-            <i-button @click="changeViewConnection('divConexionChange', 'divConexionActual')">Cambiar conexion</i-button>
-          </div>
-          <Button @click="ConnectionsAssitantShow()">Asistente de Conexiones</Button>
-        </div>
         </div>
     </Card>
   </Row>
@@ -49,19 +34,9 @@
     created: function () {
       // let Base = require('../../App.vue')
       this.$parent.showTitleBar(false)
-      let settings = require('../../libs/settings.js') // Instaciacion de la libreria de configuracion
-      let defaultConnName = settings.getContentFromLocalKey('defaultConn')
-      let i = 0
-      this.connectionsList = settings.getContentFromLocalKey('connections')
-      for (i; i <= this.connectionsList.length - 1; i++) {
-        if (this.connectionsList[i].id === defaultConnName) {
-          this.connectionSelected = this.connectionsList[i].name
-        }
-      }
     },
     data () {
       return {
-        connectionsList: [],
         formInline: {
           user: '',
           password: ''
@@ -74,8 +49,7 @@
             { required: true, message: 'Este campo no puede ser nulo', trigger: 'blur' },
             { type: 'string', min: 8, message: 'La contraseña no puede ser menos de 8 caracteres', trigger: 'blur' }
           ]
-        },
-        connectionSelected: ''
+        }
       }
     },
     methods: {
@@ -93,7 +67,7 @@
               // pass: 'gata1125'
             }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
               if (rta.userConsult !== undefined) {
-                require('../../libs/settings.js').createSesion(rta.userConsult, this.connectionSelected)
+                require('../../libs/settings.js').createSesion(rta.userConsult, this.$parent.connectionSelected)
                 this.$parent.showTitleBar(true)
                 this.$parent.changePath('/')
                 this.$parent.verifySesion()
@@ -118,7 +92,7 @@
                 pass: this.formInline.password
               }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
                 if (rta.userConsult !== undefined) {
-                  require('../../libs/settings.js').createSesion(rta.userConsult, this.connectionSelected)
+                  require('../../libs/settings.js').createSesion(rta.userConsult, this.$parent.connectionSelected)
                   this.$parent.$refs.menufix.$el.style.display = ''
                   this.$parent.changePath('/')
                   this.$parent.verifySesion()
@@ -140,24 +114,6 @@
             }
           }
         })
-      },
-      changeViewConnection (idShow, idHide, changeDefault = 'none') { // Funcion que cambia la visualizacion de los controles de cambio de conexion
-        document.getElementById(idShow).style.display = ''
-        document.getElementById(idHide).style.display = 'none'
-        if (changeDefault === 'yes') {
-          this.changeDefaultConnection()
-        }
-      },
-      changeDefaultConnection () {
-        for (let i = 0; i < this.connectionsList.length; i++) {
-          console.log(this.connectionsList[i])
-          if (this.connectionsList[i].name === this.connectionSelected) {
-            require('../../libs/settings.js').addContentToLocalKey('defaultConn', this.connectionsList[i].id)
-          }
-        }
-      },
-      ConnectionsAssitantShow () {
-        this.$parent.changePath('/sql/connectionsassistant')
       },
       CancelLogin () {
         require('electron').remote.getCurrentWindow().close()

@@ -91,13 +91,17 @@
         <div class="footer-container">
           <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
             <Icon type="link"/>
-            Conectado a: {{ require('./libs/settings.js').getConnectionName()}}
+            Conectado a: {{ require('./libs/settings.js').getConnectionName() }}
           </Tag>
           <Poptip trigger="hover" title="Conexiones a BD" placement="left-end">
             <Tag class="footer-item-tag clicker" style="background-color: #16A085">Conexiones</Tag>
             <div slot="content">
-              <Button @click="connectionsModal = !connectionsModal">Cambiar conexion actual</Button>
-              <Button>Asistente de conexiones</Button>
+              <Row>
+                <Button @click="connectionsModal = !connectionsModal" style="width: 100%; margin-bottom: 5px">Cambiar conexion actual</Button>
+              </Row>
+              <Row>
+                <Button @click="ConnectionsAssitantShow()" style="width: 100%">Asistente de conexiones</Button>
+              </Row>
             </div>
           </Poptip>
         </div>
@@ -147,10 +151,13 @@
       </Row>
     </Modal>
     <!-- Asistente de Cambio de Conexion -->
-    <Modal v-model="connectionsModal">
-      <Row>
-        PRueba
-      </Row>
+    <Modal v-model="connectionsModal" :ok-text="'CAMBIAR CONEXION'" :cancel-text="'CANCELAR'" :title="'Asistente de Cambio de conexion'" @on-ok="changeDefaultConnection()" :mask-closable="false">
+      <div id="divConexionActual" class="layout-text-item">
+        <h4 style="display: inline">Conexion: </h4>
+        <i-select v-model="connectionSelected" clereable>
+          <i-option v-for="item in connectionsList" :value="item.name" :key="item.id">{{ item.name }}</i-option>
+        </i-select>
+      </div>
     </Modal>
   </div>
 </template>
@@ -160,6 +167,8 @@
     name: 'billsdelivery-vue',
     data () {
       return {
+        connectionsList: [],
+        connectionSelected: '',
         maxHeightTable: 0,
         connectionsModal: false,
         aboutModal: false,
@@ -200,7 +209,6 @@
     },
     mounted () {
       this.handleSpinHide()
-      console.log(this.$refs.menufix.$el.style.display)
     },
     created: function () {
       // Obtencion del maximo de una tabla dependiendo del tamaño de la app
@@ -245,8 +253,33 @@
       // Se modifica la vista actual y el app
       // document.getElementById('menufix').style.visibility = 'hidden'
       this.changePath('/login')
+      let defaultConnName = settings.getContentFromLocalKey('defaultConn')
+      let i = 0
+      this.connectionsList = settings.getContentFromLocalKey('connections')
+      for (i; i <= this.connectionsList.length - 1; i++) {
+        if (this.connectionsList[i].id === defaultConnName) {
+          this.connectionSelected = this.connectionsList[i].name
+        }
+      }
     },
     methods: {
+      ConnectionsAssitantShow () {
+        this.changePath('/sql/connectionsassistant')
+      },
+      changeDefaultConnection () {
+        for (let i = 0; i < this.connectionsList.length; i++) {
+          if (this.connectionsList[i].name === this.connectionSelected) {
+            require('./libs/settings.js').addContentToLocalKey('defaultConn', this.connectionsList[i].id)
+          }
+        }
+        // Se elimina cualquier sesion que pueda existir
+        this.closeSesion()
+        this.$Message.warning({
+          content: 'Se ha reiniciado su sesion para que se conecte con el nuevo servidor',
+          duration: 10
+        })
+        this.changePath('/login')
+      },
       showTitleBar (show) {
         if (show === true) {
           this.$refs.menufix.$el.style.display = ''

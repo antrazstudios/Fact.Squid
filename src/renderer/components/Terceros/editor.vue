@@ -348,7 +348,7 @@
                   },
                   on: {
                     click: () => {
-                      this.changeState(params.row)
+                      this.updateDireccionState(params.row)
                     }
                   }
                 }, [
@@ -429,6 +429,20 @@
         const objects = require('../../libs/objects')
         this.selectDireccionesEdit = objects.createDireccion(0, objects.createTipoDireccion(0, '', '', '', ''), '', '', '[]', objects.createCiudad('', '', objects.createDepartamento('', '', objects.createPais('', ''))), '', '')
         this.editorDirecciones = !this.editorDirecciones
+      },
+      updateDireccionState (item) {
+        this.$parent.handleSpinShow('Actualizando direccion')
+        const storage = require('../../libs/storage')
+        storage._database_updateDireccionState({
+          idDireccion: item.id,
+          state: !item.isactive
+        }).then((rta) => {
+          this.$Message.info(rta.message)
+          this.$parent.handleSpinHide()
+          this.getTerceroInfo()
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
       }
     }
   }

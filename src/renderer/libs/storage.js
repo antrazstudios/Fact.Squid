@@ -460,3 +460,58 @@ exports._database_createDireccion = (configuracion) => {
   // retorna la promesa
   return deferred.promise
 }
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateDireccion = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: actualiza una direccion existente asociada a un tercero
+  // Parameters:
+  // * configuracion. idDireccion = Numero de id de la Direccion a actualizarse
+  // * configuracion. idTipoDireccion = Numero de id del tipo de direccion asociada
+  // * configuracion. dependencia = Opcional, define la dependencia de la direccion solo en caso que el tipo de direccion lo requiera
+  // * configuracion. direccion = define la direccion en modo texto
+  // * configuracion. direcciontagsjson = define la direccion en modo json para postestructuracion, lo recibe en texto para ser almancenado
+  // * configuracion. idCiudad = Numero de id de la ciudad a donde pertenece la direccion
+  // * configuracion. webString = Opcional, define la direccion de GoogleMaps para hacer renderizacion de la misma.
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  console.log(configuracion)
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateDireccion(?, ?, ?, ?, ?, ?, ?)',
+    parameters: [ configuracion.idDireccion, configuracion.idTipoDireccion, configuracion.dependencia, configuracion.direccion, configuracion.direcciontagsjson, configuracion.idCiudad, configuracion.webString ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+    console.log(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateDireccionState = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: actualiza unicamente el estado de una direccion asociada a un tercero
+  // Parameters:
+  // * configuracion. idDireccion = Numero de id de la Direccion a actualizarse
+  // * configuracion. state = Estado a utilizarse que puede ser 0 o 1
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  console.log(configuracion)
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateDireccionState(?, ?)',
+    parameters: [ configuracion.idDireccion, configuracion.state ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+    console.log(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}

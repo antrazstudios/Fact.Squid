@@ -125,7 +125,6 @@
       }
     },
     mounted () {
-      console.log(this.selections)
       this.updateDireccionText()
       if (this.selections !== null) {
         this.selectPais = this.selections.pais

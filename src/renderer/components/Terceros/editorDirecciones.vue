@@ -16,13 +16,13 @@
       <i-col span="12">
         <Form ref="FormDireccion" :label-width="130">
           <!-- Tipo de Direccion -->
-          <FormItem prop="tipoDireccion" label="Tipo de Direccion: " :required="true" :result="validations.tiposdireccion.result">
+          <FormItem prop="tipodireccion" label="Tipo de Direccion: " :required="true" :error="validations.tipodireccion.result">
             <Select v-model="selectIdTipoDireccion" v-on:on-change="updateTipoDireccion()">
               <Option v-for="item in tiposDirecciones" :value="item.id" :key="item.id">{{item.nombre}}</Option>
             </Select>
           </FormItem>
           <!-- Dependencia de la Direccion en caso que aplique -->
-          <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciaDireccion" label="Dependencia: " :required="true" :result="validations.dependencia !== undefined ? validations.dependencia.result : ''">
+          <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciadireccion" label="Dependencia: " :required="true" :error="validations.dependenciadireccion !== undefined ? validations.dependenciadireccion.result : ''">
             <Input style="text-transform:uppercase" type="text" v-model="direccionEdit.dependencia"/>
           </FormItem>
           <!-- Componente de Ciudad-Departamento-Ciudad -->
@@ -90,8 +90,8 @@
         contactosColumns: [],
         contactosIsLoading: true,
         validations: {
-          tiposdireccion: { result: '' },
-          dependencia: undefined
+          tipodireccion: { result: '' },
+          dependenciadireccion: undefined
         }
       }
     },
@@ -124,15 +124,14 @@
             this.selectTipoDireccion = tipoDireccion
           }
         }
-        this.createRules()
       },
       createRules () {
-        this.validations = { tiposdireccion: { result: '' }, dependencia: undefined }
-        this.validations.tiposdireccion = {
+        this.validations = { tiposdireccion: { result: '' }, dependenciadireccion: undefined }
+        this.validations.tipodireccion = {
           result: '',
           rules: [
             {
-              prop: 'tipoDireccion',
+              prop: 'tipodireccion',
               typevalidation: 'content-null',
               message: 'Debes elegir un tipo de Direccion como minimo',
               args: ''
@@ -140,11 +139,11 @@
           ]
         }
         if (this.selectTipoDireccion.reqdependencia === 1) {
-          this.validations.dependencia = {
+          this.validations.dependenciadireccion = {
             result: '',
             rules: [
               {
-                prop: 'dependenciaDireccion',
+                prop: 'dependenciadireccion',
                 typevalidation: 'content-null',
                 message: 'El tipo de direccion seleccionado, requiere dependencia',
                 args: ''
@@ -155,20 +154,21 @@
       },
       createDireccion () {
         const rules = require('../../libs/rules')
-        let dataCreate = {
-          idTercero: this.idTercero,
-          idTipoDireccion: this.selectIdTipoDireccion,
-          dependencia: this.direccionEdit.dependencia,
-          direccion: this.$refs.editordireccion._component_getdireccionText(),
-          direcciontagsjson: JSON.stringify(this.$refs.editordireccion._component_getdireccionTags()),
-          idCiudad: this.$refs.editordireccion._component_getciudad().id,
-          webString: ''
-        }
+        this.createRules()
         rules.validateRulesFormField(this.$refs.FormDireccion, this.validations).then((rta) => {
           this.validations = rta.rules
           if (rta.resultValidation === false || this.$refs.editordireccion._component_validate() === false) {
-            this.$Message.error('Aun hay campos por diligenciar')
+            this.$Message.error('Aun hay campos obligatorios por diligenciar')
           } else {
+            let dataCreate = {
+              idTercero: this.idTercero,
+              idTipoDireccion: this.selectIdTipoDireccion,
+              dependencia: this.direccionEdit.dependencia,
+              direccion: this.$refs.editordireccion._component_getdireccionText(),
+              direcciontagsjson: JSON.stringify(this.$refs.editordireccion._component_getdireccionTags()),
+              idCiudad: this.$refs.editordireccion._component_getciudad().id,
+              webString: ''
+            }
             this.$parent.$parent.$parent.handleSpinShow('Creando direccion') // pendiente de mejorar
             require('../../libs/storage')._database_createDireccion(dataCreate).then((rta) => {
               this.$Message.info(rta.message)
@@ -181,7 +181,35 @@
           }
         })
       },
-      updateDireccion () {}
+      updateDireccion () {
+        const rules = require('../../libs/rules')
+        this.createRules()
+        rules.validateRulesFormField(this.$refs.FormDireccion, this.validations).then((rta) => {
+          this.validations = rta.rules
+          if (rta.resultValidation === false || this.$refs.editordireccion._component_validate() === false) {
+            this.$Message.error('aun hay campos obligatorios por diligenciar')
+          } else {
+            let dataCreate = {
+              idDireccion: this.direccionEdit.id,
+              idTipoDireccion: this.selectIdTipoDireccion,
+              dependencia: this.direccionEdit.dependencia,
+              direccion: this.$refs.editordireccion._component_getdireccionText(),
+              direcciontagsjson: JSON.stringify(this.$refs.editordireccion._component_getdireccionTags()),
+              idCiudad: this.$refs.editordireccion._component_getciudad().id,
+              webString: ''
+            }
+            this.$parent.$parent.$parent.handleSpinShow('Actualizando direccion') // pendiente de mejorar
+            require('../../libs/storage')._database_updateDireccion(dataCreate).then((rta) => {
+              this.$Message.info(rta.message)
+              this.$parent.$parent.getTerceroInfo()
+              this.$parent.$parent.editorDirecciones = false // pendiente de mejorar
+            }).catch((err) => {
+              this.$parent.$parent.$parent.handleSpinHide() // pendiente de mejorar
+              this.$Message.error(err)
+            })
+          }
+        })
+      }
     }
   }
 </script>

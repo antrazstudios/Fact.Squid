@@ -15,8 +15,13 @@
       </transition>
     </Row>
     <!-- Editor de Contactos -->
-    <Row type="flex">
-      
+    <Row>
+      <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }" >
+        <div class="extern-contenedor--components-sub" v-if="editContactosShow === true">
+          <i-button shape="circle" size="small" icon="close-round" @click="() => { this.editContactosShow = !this.editContactosShow }"></i-button>
+          <edit-contactos-component :contactoEdit="contactoSelect"></edit-contactos-component>
+        </div>
+      </transition>
     </Row>
     <!-- Editor de Direccion -->
     <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
@@ -49,7 +54,7 @@
         <i-col v-if="direccionEdit.id !== 0" span="12">
           <i-table size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="240" :loading="contactosIsLoading">
             <div slot="footer" style="text-align: center;">
-              <i-button>Agregar Contacto</i-button>
+              <i-button @click="createContacto">Agregar Contacto</i-button>
             </div>
             <div slot="loading" style="text-align: center;">
               <div class="modal-contenedor--img"></div>
@@ -87,9 +92,10 @@
 <script>
   import EditDireccionComponent from '../miscelanius/editDireccionComponent'
   import EditHorariosComponent from './editorHorario'
+  import EditContactosComponent from './editorContactos'
   export default {
     name: 'direcciones-editor',
-    components: { EditDireccionComponent, EditHorariosComponent },
+    components: { EditDireccionComponent, EditHorariosComponent, EditContactosComponent },
     props: ['direccionEdit', 'actionsCallback', 'idTercero'],
     data () {
       return {
@@ -103,6 +109,7 @@
         horarios: [],
         horariosColumns: [],
         horariosIsLoading: false,
+        contactoSelect: require('../../libs/objects').createContacto(0, this.direccionEdit.id, '', '', 1),
         contactos: [],
         contactosColumns: [],
         contactosIsLoading: false,
@@ -392,7 +399,7 @@
                   on: {
                     click: () => {
                       // Cambiar el estado del editor
-                      this.updateDireccion(params.row)
+                      this.updateContacto(params.row)
                     }
                   }
                 }, [
@@ -451,6 +458,14 @@
           this.$Message.error(err)
           this.$parent.$parent.$parent.handleSpinHide()
         })
+      },
+      createContacto () {
+        this.contactoSelect = require('../../libs/objects').createContacto(0, this.direccionEdit.id, '', '', 1)
+        this.editContactosShow = true
+      },
+      updateContacto (item) {
+        this.contactoSelect = item
+        this.editContactosShow = true
       },
       removeHorario (item) {
         this.$Modal.confirm({
@@ -520,5 +535,16 @@
     padding-right: 20px;
     margin-left: 20%;
     margin-right: 20%;
+  }
+  .extern-contenedor--components-sub{
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: #DDDEE1;
+    background-color: white;
+    margin-bottom: 20px;
+    padding-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 </style>

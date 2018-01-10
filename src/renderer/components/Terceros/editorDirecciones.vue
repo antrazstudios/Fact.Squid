@@ -1,81 +1,95 @@
 <template>
   <div class="content">
     <!-- Titulo del WebComponent -->
-    <h2 style="text-align: center; margin-bottom: 20px;">Editor de Direcciones</h2>
+    <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
+      <h2 v-if="editContactosShow === false && editHorariosShow === false" style="text-align: center; margin-bottom: 20px;">Editor de Direcciones</h2>
+    </transition>
     <!-- Contenido del WebComponent -->
     <!-- Editor de Horarios -->
-    <Row type="flex">
-      
+    <Row>
+      <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }" >
+        <div class="extern-contenedor--components" v-if="editHorariosShow === true">
+          <i-button shape="circle" size="small" icon="close-round" @click="() => { this.editHorariosShow = !this.editHorariosShow }"></i-button>
+          <edit-horarios-component style="margin-left: 20px" :horarioEdit="horarioSelect"></edit-horarios-component>
+        </div>
+      </transition>
     </Row>
     <!-- Editor de Contactos -->
     <Row type="flex">
       
     </Row>
     <!-- Editor de Direccion -->
-    <Row type="flex" :gutter="16">
-      <i-col span="12">
-        <Form ref="FormDireccion" :label-width="130">
-          <!-- Tipo de Direccion -->
-          <FormItem prop="tipodireccion" label="Tipo de Direccion: " :required="true" :error="validations.tipodireccion.result">
-            <Select v-model="selectIdTipoDireccion" v-on:on-change="updateTipoDireccion()">
-              <Option v-for="item in tiposDirecciones" :value="item.id" :key="item.id">{{item.nombre}}</Option>
-            </Select>
-          </FormItem>
-          <!-- Dependencia de la Direccion en caso que aplique -->
-          <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciadireccion" label="Dependencia: " :required="true" :error="validations.dependenciadireccion !== undefined ? validations.dependenciadireccion.result : ''">
-            <Input style="text-transform:uppercase" type="text" v-model="direccionEdit.dependencia"/>
-          </FormItem>
-          <!-- Componente de Ciudad-Departamento-Ciudad -->
-          <edit-direccion-component ref="editordireccion" :direccionTags="direccionEdit.direccionjson" :selections="{ pais: this.direccionEdit.ciudad.departamento.pais.id, departamento: this.direccionEdit.ciudad.departamento.id, ciudad: this.direccionEdit.ciudad.id }"></edit-direccion-component>
-        </Form>
-      </i-col>
-      <i-col span="12">
-        <Alert type="warning" show-icon>Geolocalizacion de tercero desactivada, el servicio de Geolocalizacion se encuentra desactivado directamente desde el servidor de AntrazStudios.</Alert>
-      </i-col>
-    </Row>
+    <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
+      <Row type="flex" :gutter="16" v-if="editContactosShow === false && editHorariosShow === false">
+        <i-col span="12">
+          <Form ref="FormDireccion" :label-width="130">
+            <!-- Tipo de Direccion -->
+            <FormItem prop="tipodireccion" label="Tipo de Direccion: " :required="true" :error="validations.tipodireccion.result">
+              <Select v-model="selectIdTipoDireccion" v-on:on-change="updateTipoDireccion()">
+                <Option v-for="item in tiposDirecciones" :value="item.id" :key="item.id">{{item.nombre}}</Option>
+              </Select>
+            </FormItem>
+            <!-- Dependencia de la Direccion en caso que aplique -->
+            <FormItem v-if="selectTipoDireccion.reqdependencia === 1" prop="dependenciadireccion" label="Dependencia: " :required="true" :error="validations.dependenciadireccion !== undefined ? validations.dependenciadireccion.result : ''">
+              <Input style="text-transform:uppercase" type="text" v-model="direccionEdit.dependencia"/>
+            </FormItem>
+            <!-- Componente de Ciudad-Departamento-Ciudad -->
+            <edit-direccion-component ref="editordireccion" :direccionTags="direccionEdit.direccionjson" :selections="{ pais: this.direccionEdit.ciudad.departamento.pais.id, departamento: this.direccionEdit.ciudad.departamento.id, ciudad: this.direccionEdit.ciudad.id }"></edit-direccion-component>
+          </Form>
+        </i-col>
+        <i-col span="12">
+          <Alert type="warning" show-icon>Geolocalizacion de tercero desactivada, el servicio de Geolocalizacion se encuentra desactivado directamente desde el servidor de AntrazStudios.</Alert>
+        </i-col>
+      </Row>
+    </transition>
     <!-- Tablas de informacion adicional -->
-    <Row v-if="direccionEdit.id !== 0" type="flex" :gutter="16">
-      <!-- Tabla de Contactos -->
-      <i-col span="12">
-        <i-table size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="240" :loading="contactosIsLoading">
-          <div slot="footer" style="text-align: center;">
-            <i-button>Agregar Contacto</i-button>
-          </div>
-          <div slot="loading" style="text-align: center;">
-            <div class="modal-contenedor--img"></div>
-            <label class="modal-contenedor--label">Cargando contactos</label>
-          </div>
-        </i-table>
-      </i-col>
-      <!-- Tabla de Horarios -->
-      <i-col span="12">
-        <i-table v-if="selectTipoDireccion.reqhorario === 1" size="small" :columns="horariosColumns" :data="horarios" :stripe="false" :height="240" :loading="horariosIsLoading">
-          <div slot="footer" style="text-align: center;">
-            <i-button>Agregar Horario</i-button>
-          </div>
-          <div slot="loading" style="text-align: center;">
-            <div class="modal-contenedor--img"></div>
-            <label class="modal-contenedor--label">Cargando horarios</label>
-          </div>
-        </i-table>
-        <Alert v-if="selectTipoDireccion.reqhorario !== 1" type="warning" show-icon>Este tipo de Direccion no require el uso de horarios para el envio de documentacion</Alert>
-      </i-col>
-    </Row>
+    <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
+      <Row v-if="editContactosShow === false && editHorariosShow === false" type="flex" :gutter="16">
+        <!-- Tabla de Contactos -->
+        <i-col v-if="direccionEdit.id !== 0" span="12">
+          <i-table size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="240" :loading="contactosIsLoading">
+            <div slot="footer" style="text-align: center;">
+              <i-button>Agregar Contacto</i-button>
+            </div>
+            <div slot="loading" style="text-align: center;">
+              <div class="modal-contenedor--img"></div>
+              <label class="modal-contenedor--label">Cargando contactos</label>
+            </div>
+          </i-table>
+        </i-col>
+        <!-- Tabla de Horarios -->
+        <i-col v-if="direccionEdit.id !== 0" span="12">
+          <i-table v-if="selectTipoDireccion.reqhorario === 1" size="small" :columns="horariosColumns" :data="horarios" :stripe="false" :height="240" :loading="horariosIsLoading">
+            <div slot="footer" style="text-align: center;">
+              <i-button @click="createHorario">Agregar Horario</i-button>
+            </div>
+            <div slot="loading" style="text-align: center;">
+              <div class="modal-contenedor--img"></div>
+              <label class="modal-contenedor--label">Cargando horarios</label>
+            </div>
+          </i-table>
+          <Alert v-if="selectTipoDireccion.reqhorario !== 1" type="warning" show-icon>Este tipo de Direccion no require el uso de horarios para el envio de documentacion</Alert>
+        </i-col>
+      </Row>
+    </transition>
     <!-- Botones de accion -->
-    <Row type="flex" align="bottom" justify="center">
-      <i-col>
-        <i-button style="margin-top: 10px" type="error" @click="() => { this.$parent.$parent.editorDirecciones = false }">CANCELAR</i-button>
-        <i-button style="margin-top: 10px" type="info" @click="direccionEdit.id === 0 ? createDireccion() : updateDireccion()">{{ direccionEdit.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
-      </i-col>
-    </Row>
+    <transition enter-active-class="animated slideInDown" :duration="{ enter: 1000 }">
+      <Row v-if="editContactosShow === false && editHorariosShow === false" type="flex" align="bottom" justify="center">
+        <i-col>
+          <i-button style="margin-top: 10px" type="error" @click="() => { this.$parent.$parent.editorDirecciones = false }">CANCELAR</i-button>
+          <i-button style="margin-top: 10px" type="info" @click="direccionEdit.id === 0 ? createDireccion() : updateDireccion()">{{ direccionEdit.id === 0 ? 'CREAR' : 'ACTUALIZAR' }}</i-button>
+        </i-col>
+      </Row>
+    </transition>
   </div>
 </template>
 
 <script>
   import EditDireccionComponent from '../miscelanius/editDireccionComponent'
+  import EditHorariosComponent from './editorHorario'
   export default {
     name: 'direcciones-editor',
-    components: { EditDireccionComponent },
+    components: { EditDireccionComponent, EditHorariosComponent },
     props: ['direccionEdit', 'actionsCallback', 'idTercero'],
     data () {
       return {
@@ -83,6 +97,9 @@
         selectIdTipoDireccion: '',
         selectTipoDireccion: '',
         tiposDirecciones: [],
+        editHorariosShow: false,
+        editContactosShow: false,
+        horarioSelect: require('../../libs/objects').createHorario(0, this.direccionEdit.id, 1, 30, '08:00:00', '16:00:00'),
         horarios: [],
         horariosColumns: [],
         horariosIsLoading: false,
@@ -265,7 +282,7 @@
                   on: {
                     click: () => {
                       // Cambiar el estado del editor
-                      this.updateDireccion(params.row)
+                      this.updateHorario(params.row)
                     }
                   }
                 }, [
@@ -455,6 +472,14 @@
             })
           }
         })
+      },
+      createHorario () {
+        this.horarioSelect = require('../../libs/objects').createHorario(0, this.direccionEdit.id, 1, 30, '08:00:00', '16:00:00')
+        this.editHorariosShow = true
+      },
+      updateHorario (item) {
+        this.horarioSelect = item
+        this.editHorariosShow = true
       }
     }
   }
@@ -482,5 +507,18 @@
     margin: 4%;
     text-align: center;
     color: rgba(41, 41, 41, 0.6);
+  }
+  .extern-contenedor--components{
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: #DDDEE1;
+    background-color: white;
+    margin-bottom: 20px;
+    padding-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
   }
 </style>

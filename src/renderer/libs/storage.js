@@ -591,3 +591,55 @@ exports._database_removeHorario = (idHorario) => {
   // retorna la promesa
   return deferred.promise
 }
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createHorario = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: crea un nuevo horario de una direccion en el sistema
+  // Parameters:
+  // * configuracion .idDireccion = Numero de id de la direccion a la que ira asociada el horario
+  // * configuracion .diainicio = Numero del dia en que inicia el horario
+  // * configuracion .diafinal = Numero del dia en que finaliza el horario
+  // * configuracion .horainicio = Hora en que inicia el horario
+  // * configuracion .horafinal = Hora en que finaliza el horario
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createHorario(?, ?, ?, ?, ?)',
+    parameters: [ configuracion.idDireccion, configuracion.diainicio, configuracion.diafinal, configuracion.horainicio, configuracion.horafinal ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateHorario = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: actualiza un horario de una direccion en el sistema
+  // Parameters:
+  // * configuracion .idHorario = Numero de id de la direccion a la que ira asociada el horario
+  // * configuracion .diainicio = Numero del dia en que inicia el horario
+  // * configuracion .diafinal = Numero del dia en que finaliza el horario
+  // * configuracion .horainicio = Hora en que inicia el horario
+  // * configuracion .horafinal = Hora en que finaliza el horario
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateHorario(?, ?, ?, ?, ?)',
+    parameters: [ configuracion.idHorario, configuracion.diainicio, configuracion.diafinal, configuracion.horainicio, configuracion.horafinal ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}

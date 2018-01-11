@@ -9,7 +9,7 @@
           <Input type="text" v-model="contactoEdit.nombre"/>
         </FormItem>
         <FormItem prop="cargo" label="Cargo: " :required="true" :error="validations.cargo.result">
-          <Input type="text" v-model="contactoEdit.nombre"/>
+          <Input type="text" v-model="contactoEdit.cargo"/>
         </FormItem>
       </Form>
     </Row>
@@ -32,15 +32,73 @@
       return {
         validations: {
           nombre: {
-            result: ''
+            result: '',
+            rules: [
+              {
+                prop: 'nombre',
+                typevalidation: 'content-null',
+                message: 'Este campo es obligatorio',
+                args: ''
+              }
+            ]
           },
           cargo: {
-            result: ''
+            result: '',
+            rules: [
+              {
+                prop: 'cargo',
+                typevalidation: 'content-null',
+                message: 'Este campo es obligatorio',
+                args: ''
+              }
+            ]
           }
         }
       }
     },
     methods: {
+      createContacto () {
+        const rules = require('../../libs/rules')
+        rules.validateRulesFormField(this.$refs.FormContacto, this.validations).then((rta) => {
+          if (rta.resultValidation === true) {
+            const storage = require('../../libs/storage')
+            storage._database_createContacto({
+              idDireccion: this.contactoEdit.iddireccion,
+              nombre: this.contactoEdit.nombre,
+              cargo: this.contactoEdit.cargo
+            }).then((rta) => {
+              this.$Message.info(rta.message)
+              this.$parent.$parent.getDireccionInfo()
+              this.$parent.$parent.editContactosShow = false
+            }).catch((err) => {
+              this.$Message.error(err)
+            })
+          }
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
+      },
+      updateContacto () {
+        const rules = require('../../libs/rules')
+        rules.validateRulesFormField(this.$refs.FormContacto, this.validations).then((rta) => {
+          if (rta.resultValidation === true) {
+            const storage = require('../../libs/storage')
+            storage._database_updateContacto({
+              idContacto: this.contactoEdit.id,
+              nombre: this.contactoEdit.nombre,
+              cargo: this.contactoEdit.cargo
+            }).then((rta) => {
+              this.$Message.info(rta.message)
+              this.$parent.$parent.getDireccionInfo()
+              this.$parent.$parent.editContactosShow = false
+            }).catch((err) => {
+              this.$Message.error(err)
+            })
+          }
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
+      }
     }
   }
 </script>

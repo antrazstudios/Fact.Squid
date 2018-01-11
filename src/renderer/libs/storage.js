@@ -643,3 +643,51 @@ exports._database_updateHorario = (configuracion) => {
   // retorna la promesa
   return deferred.promise
 }
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createContacto = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: crea un nuevo contacto de una direccion en el sistema
+  // Parameters:
+  // * configuracion .idDireccion = Numero de id de la direccion a la que ira asociada el horario
+  // * configuracion .nombre = Nombre del contacto a crearse
+  // * configuracion .cargo = Cargo del contacto a crearse
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createContacto(?, ?, ?)',
+    parameters: [ configuracion.idDireccion, configuracion.nombre, configuracion.cargo ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateContacto = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: crea un nuevo contacto de una direccion en el sistema
+  // Parameters:
+  // * configuracion .idContacto = Numero de id del contacto a actualizarse
+  // * configuracion .nombre = Nombre del contacto a actualizarse
+  // * configuracion .cargo = Cargo del contacto a actualizarse
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateContacto(?, ?, ?)',
+    parameters: [ configuracion.idContacto, configuracion.nombre, configuracion.cargo ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}

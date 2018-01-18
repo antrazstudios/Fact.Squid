@@ -13,30 +13,38 @@
         </FormItem>
       </Form>
     </Row>
-    <Row :gutter="6">
+    <Row v-if="contactoEdit.id !== 0" :gutter="6">
       <!-- Tabla de Telefonos -->
       <i-col span="12">
-        <i-table size="small" :columns="telefonosColumnas" :data="telefonos" :stripe="false" :height="240" :loading="telefonosLoading">
+        <i-table v-if="showstelefonosEdit === false" size="small" :columns="telefonosColumnas" :data="telefonos" :stripe="false" :height="240" :loading="telefonosLoading">
           <div slot="footer" style="text-align: center;">
-            <i-button>Agregar telefono</i-button>
+            <i-button @click="createTelefono">Agregar telefono</i-button>
           </div>
           <div slot="loading" style="text-align: center;">
             <div class="modal-contenedor--img"></div>
             <label class="modal-contenedor--label">Cargando telefonos</label>
           </div>
         </i-table>
+        <!-- Editor de telefonos -->
+        <div v-if="showstelefonosEdit === true" style="padding: 20px; border-color: #DDDEE1;  border-width: 1px; border-style: solid;">
+          <edit-telefonos-component :editTelefono="telefonosEdit"></edit-telefonos-component>
+        </div>
       </i-col>
       <!-- Tabla de emails -->
       <i-col span="12">
-        <i-table size="small" :columns="emailsColumnas" :data="emails" :stripe="false" :height="240" :loading="emailsLoading">
+        <i-table v-if="showsemailsEdit === false" size="small" :columns="emailsColumnas" :data="emails" :stripe="false" :height="240" :loading="emailsLoading">
           <div slot="footer" style="text-align: center;">
-            <i-button>Agregar Emails</i-button>
+            <i-button @click="createEmail">Agregar Emails</i-button>
           </div>
           <div slot="loading" style="text-align: center;">
             <div class="modal-contenedor--img"></div>
             <label class="modal-contenedor--label">Cargando emails</label>
           </div>
         </i-table>
+        <!-- Editor de Emails -->
+        <div v-if="showsemailsEdit === true" style="padding: 20px; border-color: #DDDEE1; border-width: 1px; border-style: solid;">
+          <edit-emails-component :editEmails="emailsEdit"></edit-emails-component>
+        </div>
       </i-col>
     </Row>
     <!-- Botones de accion -->
@@ -49,8 +57,11 @@
   </div>
 </template>
 <script>
+  import EditTelefonosComponent from './editorTelefonos'
+  import EditEmailsComponent from './editorEmails'
   export default {
     name: 'contactos-editor',
+    components: { EditTelefonosComponent, EditEmailsComponent },
     props: [ 'contactoEdit' ],
     data () {
       return {
@@ -82,10 +93,12 @@
         telefonosColumnas: [],
         telefonosEdit: '',
         telefonosLoading: false,
+        showstelefonosEdit: false,
         emails: [],
         emailsColumnas: [],
         emailsEdit: '',
-        emailsLoading: false
+        emailsLoading: false,
+        showsemailsEdit: false
       }
     },
     mounted () {
@@ -140,7 +153,6 @@
         this.emailsLoading = true
         let storage = require('../../libs/storage')
         storage._database_getContactoInfo(this.contactoEdit.id).then((rta) => {
-          console.log(rta)
           this.telefonos = rta.telefonos
           this.emails = rta.mails
           this.telefonosLoading = false
@@ -325,28 +337,58 @@
         })
       },
       removeTelefono (row) {
-        let storage = require('../../libs/storage')
-        storage._database_removeTelefono(row.id).then((rta) => {
-          this.$Message.info(rta.message)
-          this.getContactoInfo()
-        }).catch((err) => {
-          this.$Message.error(err)
+        this.$Modal.confirm({
+          title: 'Confirmacion eliminacion',
+          content: '¿Esta seguro de querer eliminar este horario?, Esta accion no puede deshacerse',
+          okText: 'Si, eliminar',
+          cancelText: 'No',
+          closable: true,
+          onOk: () => {
+            let storage = require('../../libs/storage')
+            storage._database_removeTelefono(row.id).then((rta) => {
+              this.$Message.info(rta.message)
+              this.getContactoInfo()
+            }).catch((err) => {
+              this.$Message.error(err)
+            })
+          }
         })
       },
       removeEmail (row) {
-        let storage = require('../../libs/storage')
-        storage._database_removeEmail(row.id).then((rta) => {
-          this.$Message.info(rta.message)
-          this.getContactoInfo()
-        }).catch((err) => {
-          this.$Message.error(err)
+        this.$Modal.confirm({
+          title: 'Confirmacion eliminacion',
+          content: '¿Esta seguro de querer eliminar este horario?, Esta accion no puede deshacerse',
+          okText: 'Si, eliminar',
+          cancelText: 'No',
+          closable: true,
+          onOk: () => {
+            let storage = require('../../libs/storage')
+            storage._database_removeEmail(row.id).then((rta) => {
+              this.$Message.info(rta.message)
+              this.getContactoInfo()
+            }).catch((err) => {
+              this.$Message.error(err)
+            })
+          }
         })
       },
       editTelefono (row) {
-
+        this.telefonosEdit = row
+        this.showstelefonosEdit = true
       },
       editEmail (row) {
-
+        this.emailsEdit = row
+        this.showsemailsEdit = true
+      },
+      createTelefono () {
+        const objects = require('../../libs/objects')
+        this.telefonosEdit = objects.createContactoTelefono(0, 0, '', 0, this.contactoEdit.id)
+        this.showstelefonosEdit = true
+      },
+      createEmail () {
+        const objects = require('../../libs/objects')
+        this.emailsEdit = objects.createContactoEmail(0, '', 0, this.contactoEdit.id)
+        this.showsemailsEdit = true
       }
     }
   }
@@ -365,7 +407,7 @@
     width: 30px;
     height: 30px;
     /* background-image: url("~@/assets/images/ajax-loader.gif"); */
-    background-image: url("~@/assets/images/loading.gif");
+    background-image: url("~@/assets/images/ajax-loader.gif");
     background-size: contain;
   }
   .modal-contenedor--label{

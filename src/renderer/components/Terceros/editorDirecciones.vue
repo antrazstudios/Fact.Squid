@@ -514,7 +514,7 @@
     width: 30px;
     height: 30px;
     /* background-image: url("~@/assets/images/ajax-loader.gif"); */
-    background-image: url("~@/assets/images/loading.gif");
+    background-image: url("~@/assets/images/ajax-loader.gif");
     background-size: contain;
   }
   .modal-contenedor--label{

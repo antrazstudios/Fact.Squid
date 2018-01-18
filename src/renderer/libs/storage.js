@@ -728,7 +728,7 @@ exports._database_updateEmail = (configuracion) => {
   let deferred = q.defer()
   this._database_runQuery({
     query: 'call updateEmail(?, ?, ?)',
-    parameters: [ configuracion.idemail, configuracion.mail, configuracion.isdefault ]
+    parameters: [ configuracion.idmail, configuracion.mail, configuracion.isdefault ]
   }).then((rta) => {
     deferred.resolve(rta)
   }).catch((err) => {

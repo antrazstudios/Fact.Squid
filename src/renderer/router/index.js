@@ -27,14 +27,6 @@ export default new Router({
         return route.query || {}
       }
     },
-    // {
-    //   path: '/terceros/editordirecciones',
-    //   name: 'direcciones-editor',
-    //   component: require('@/components/Terceros/editorDirecciones').default,
-    //   props (route) {
-    //     return route.query || {}
-    //   }
-    // },
     {
       path: '/login',
       name: 'login',
@@ -54,6 +46,11 @@ export default new Router({
       path: '/Settings/about/:id',
       name: 'settings-about',
       component: require('@/components/Settings/about/').default
+    },
+    {
+      path: '/Facturacion/index',
+      name: 'facturacion-index',
+      component: require('@/components/Facturacion/index/').default
     }
   ]
 })

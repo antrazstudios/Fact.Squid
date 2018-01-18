@@ -24,8 +24,10 @@
             </router-link>
           </MenuItem>
           <MenuItem name="3">
-            <icon type="social-usd"/>
-            Facturacion
+            <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
+              <icon type="social-usd"/>
+              Facturacion
+            </router-link>
           </MenuItem>
           <MenuItem name="4">
             <icon type="paper-airplane"/>

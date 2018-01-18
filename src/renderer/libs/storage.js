@@ -691,3 +691,181 @@ exports._database_updateContacto = (configuracion) => {
   // retorna la promesa
   return deferred.promise
 }
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createEmail = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea un nuevo email en la base de datos
+  // Parameters:
+  // * configuracion. mail = direccion del correo electronico
+  // * configuracion. idcontacto = numero de identificacion del contacto a donde se enlazara el correo electronico
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createEmail(?, ?)',
+    parameters: [ configuracion.mail, configuracion.idcontacto ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateEmail = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: actualizar un email en la base de datos
+  // Parameters:
+  // * configuracion. idmail = numero de identificacion del email a editar
+  // * configuracion. mail = direccion del correo electronico
+  // * configuracion. isdefault = define que si es predefinada esta direccion para enviar correos electronicos
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateEmail(?, ?, ?)',
+    parameters: [ configuracion.idemail, configuracion.mail, configuracion.isdefault ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_removeEmail = (idEmail) => {
+  // --------------------------| Description |--------------------------
+  // Description: Elimina un telefono
+  // Parameters:
+  // * configuracion. idTelefono = numero de id principal del Telefono a editarse
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call removeEmail(?)',
+    parameters: [ idEmail ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createTelefono = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea un nuevo telefono en la base de datos
+  // Parameters:
+  // * configuracion. tipo = define el tipo de Telefono que se creara 0 para el Telefono fijo, 1 telefono celular
+  // * configuracion. numero = especifica el numero de telefono a guardarse
+  // * configuracion. ext = opcional, define el numero de la extension en caso de que sea requerido
+  // * configuracion. idContacto = define el numero de llave principal del contacto a enlzar el telefono
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createTelefono(?, ?, ?, ?)',
+    parameters: [ configuracion.tipo, configuracion.numero, configuracion.ext, configuracion.idContacto ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateTelefono = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea un nuevo telefono en la base de datos
+  // Parameters:
+  // * configuracion. idTelefono = numero de id principal del Telefono a editarse
+  // * configuracion. tipo = tipo de telefono siendo 0 un telefono fijo y 1 un celular
+  // * configuracion. numero = numero de telefono
+  // * configuracion. ext = opcional, define el numero de la extension en caso de que sea requerido
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call updateTelefono(?, ?, ?, ?)',
+    parameters: [ configuracion.idTelefono, configuracion.tipo, configuracion.numero, configuracion.ext ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_removeTelefono = (idTelefono) => {
+  // --------------------------| Description |--------------------------
+  // Description: Elimina un telefono
+  // Parameters:
+  // * configuracion. idTelefono = numero de id principal del Telefono a editarse
+  // return: una promesa
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call removeTelefono(?)',
+    parameters: [ idTelefono ]
+  }).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_getContactoInfo = (idContacto) => {
+  // --------------------------| Description |--------------------------
+  // Description: Obtiene la informacion adicional del contacto
+  // Parameters:
+  // * idContacto = Numero del id
+  // return: una coleccion con la informacion recolectada
+  // ------------------------| End Description |------------------------
+  const objects = require('./objects')
+  let deferred = q.defer()
+  let telefonos = []
+  let mails = []
+  this._database_runQuery({
+    query: 'call getContactoInfo(?)',
+    parameters: [ idContacto ]
+  }).then((rta) => {
+    if (rta.result !== 0 && rta.result !== null) {
+      for (let i = 0; i < rta.result[0].length; i++) {
+        const dbtelefono = rta.result[0][i]
+        telefonos.push(objects.createContactoTelefono(dbtelefono.idtb_tercerostelefonos, dbtelefono.tb_tercerostelefonos_tipo, dbtelefono.tb_tercerostelefonos_numero, dbtelefono.tb_tercerostelefonos_ext, idContacto))
+      }
+      for (let i = 0; i < rta.result[1].length; i++) {
+        const dbmail = rta.result[1][i]
+        mails.push(objects.createContactoEmail(dbmail.idtb_tercerosmails, dbmail.tb_tercerosmails_mail, dbmail.tb_tercerosmails_isdefault, idContacto))
+      }
+      deferred.resolve({telefonos, mails})
+    } else {
+      deferred.reject('La consulta no ha arrojado resultados')
+    }
+  }).catch((err) => {
+    deferred.reject(err)
+    console.log(err)
+  })
+
+  return deferred.promise
+}

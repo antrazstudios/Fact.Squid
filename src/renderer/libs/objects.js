@@ -185,3 +185,22 @@ exports.createContacto = (vid, viddireccion, vnombre, vcargo, visactive) => {
     isactive: visactive
   }
 }
+
+exports.createContactoEmail = (vid, vmail, visdefault, vidcontacto) => {
+  return {
+    id: vid,
+    mail: vmail,
+    isdefault: visdefault,
+    idcontacto: vidcontacto
+  }
+}
+
+exports.createContactoTelefono = (vid, vtipo, vnumero, vext, vidcontacto) => {
+  return {
+    id: vid,
+    tipo: vtipo,
+    numero: vnumero,
+    ext: vext,
+    idcontacto: vidcontacto
+  }
+}

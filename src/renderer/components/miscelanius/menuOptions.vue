@@ -2,8 +2,8 @@
   <div class="principal">
     <div class="middle">
       <div class="inner">
-        <h1 style="margin-bottom: 20px;">Configuracion del sistema</h1>
-        <Card class="buttons-options" v-for="item in options" :key="item.key">
+        <h1 style="margin-bottom: 20px;">{{titleMenu}}</h1>
+        <Card class="buttons-options" v-for="item in optionsMenu" :key="item.key">
           <i-button type="text" style="width: 100%; height: 165px; margin: 0%;" @click="clickeditem('')">
             <Icon :type="item.icon_type" size="100" style="display:block"/>
             <h3>{{ item.text }}</h3>
@@ -15,7 +15,8 @@
 </template>
 <script>
 export default {
-  name: 'settings_index',
+  name: 'menu-options',
+  props: [ 'optionsMenu', 'titleMenu' ],
   data: () => ({
     options: [
       {
@@ -62,6 +63,26 @@ export default {
         icon_type: 'clipboard',
         text: 'Cargos',
         toPath: null
+      },
+      {
+        icon_type: 'person',
+        text: 'Usuarios',
+        toPath: null
+      },
+      {
+        icon_type: 'document-text',
+        text: 'Formatos',
+        toPath: null
+      },
+      {
+        icon_type: 'map',
+        text: 'Localizacion',
+        toPath: null
+      },
+      {
+        icon_type: 'cube',
+        text: 'Soft. Externo',
+        toPath: null
       }
     ]
   }),
@@ -70,39 +91,20 @@ export default {
       if (toPath === 'info') {
         this.$parent.aboutModal = true
       }
-      this.$Message.info('error')
     }
   }
 }
 </script>
-<style>
-  .principal{
-    display: table;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-  }
-  .middle{
-    display: table-cell;
-    vertical-align: middle;
-  }
-  .inner{
-    margin-left: 5%;
-    margin-right: 5%;
-    text-align: center;
-  }
+<style lang="css" scoped>
   .content-buttons{
     margin: 2%;
   }
   .buttons-options{
-    width: 200px;
-    height: 200px;
+    width: 120px;
+    height: 120px;
     margin-left: 5px;
     margin-right: 5px;
     margin-top: 5px;
     margin-bottom: 3px;
-    display: inline-block;
-    cursor: pointer;
-    padding: 0%;
   }
 </style>

@@ -34,7 +34,7 @@
     <!-- Area del Feed -->
     <i-col span="14">
       <!-- En caso que existan noticias en el feed -->
-      <div v-if="list_notice.length !== 0 || list_notice.length !== null">
+      <div v-if="list_notice.length !== 0 && list_notice.length !== null">
         <Row v-for="notice in list_notice" :key="notice.key">
           <Card class="slides">
             <Row>
@@ -183,6 +183,7 @@
     },
     mounted () {
       // do something after mounting vue instance
+      console.log(this.list_notice)
     },
     methods: {
       clickMoreInfo (link) {

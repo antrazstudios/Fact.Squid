@@ -1,26 +1,27 @@
 <template>
   <div class="principal">
     <div class="middle">
-      <transition enter-class="display-off" enter-active-class="animated fadeIn" :duration="{ enter: 800 }">
-        <div v-if="showFolder === false" class="inner">
-          <h1 v-if="sizeMenu === 'large'" style="margin-bottom: 20px;">{{titleMenu}}</h1>
-          <h2 v-if="sizeMenu === 'normal'" style="margin-bottom: 10px;">{{titleMenu}}</h2>
-          <h3 v-if="sizeMenu === 'small'" style="margin-bottom: 5px;">{{titleMenu}}</h3>
-          <Card :class="sizeMenu === 'large' ? 'buttons-options buttons-options--large' : sizeMenu === 'normal' ? 'buttons-options buttons-options--normal' : 'buttons-options buttons-options--small'" v-for="item in optionsMenu" :key="item.key">
-            <i-button :class="sizeMenu === 'large' ? 'sub-buttons-options sub-buttons-options--large' : sizeMenu === 'normal' ? 'sub-buttons-options sub-buttons-options--normal' : 'sub-buttons-options sub-buttons-options--small'" type="text" @click="clickeditem(item)">
-              <Icon v-if="item.isFolder === true" :class="sizeMenu === 'large' ? 'folder-icon--large' : sizeMenu === 'normal' ? 'folder-icon--normal' : 'folder-icon--small'" type="android-folder"></Icon>
-              <Icon :type="item.icon_type" :size="sizeMenu === 'large' ? 100 : sizeMenu === 'normal' ? 60 : 25" style="display:block"/>
-              <div class="content-text">
-                <label v-bind:style="sizeMenu === 'large' ? { fontSize: '16px' } : sizeMenu === 'normal' ? { fontSize: '12px' } : { fontSize: '10px' }">{{ item.text }}</label>
-              </div>
-            </i-button>
-          </Card>
-        </div>
-      </transition>
-      <transition enter-active-class="animated zoomIn" leave-active-class="animated slideOutDown" :duration="{ enter: 600, leave: 300 }">
-        <Card v-if="showFolder === true" class="inner--folder" :borderer="true" :shadow="true">
+      <!-- <transition-group tag="div" name="flip-list"> -->
+      <div class="inner">
+        <h1 v-if="sizeMenu === 'large'" style="margin-bottom: 20px;">{{titleMenu}}</h1>
+        <h2 v-if="sizeMenu === 'normal'" style="margin-bottom: 10px;">{{titleMenu}}</h2>
+        <h3 v-if="sizeMenu === 'small'" style="margin-bottom: 5px;">{{titleMenu}}</h3>
+        <Card :style="transformsCardSizeSelectInitial(item.key)" :dis-hover="showFolder" v-for="item in optionsMenu" :key="item.key" :padding="0">
+          <i-button :disabled="showFolder" :style="transformsButtonSizeSelectInitial()" type="text" @click="clickeditem(item)">
+            <Icon :size="transformsIconFolderSizeSelectInitial().sizeIcon" ref="icon" :style="transformsIconFolderSizeSelectInitial().style" v-if="showIconFolder(item.isFolder) === true" type="android-folder"></Icon>
+            <Icon :type="item.icon_type" :size="transformsIconSizeSelectInitial()" style="display:block"/>
+            <div v-if="showFolder === false" class="content-text">
+              <label v-bind:style="sizeMenu === 'large' ? { fontSize: '16px' } : sizeMenu === 'normal' ? { fontSize: '12px' } : { fontSize: '10px' }">{{ item.text }}</label>
+            </div>
+          </i-button>
+        </Card>
+      </div>
+      <Card v-if="showFolder === true" class="inner--folder" :borderer="true" :shadow="true" style="margin-top: 10px">
           <Row type="flex" justify="space-between">
-            <i-button class="footer-container" style="flex: left" shape="circle" size="small" icon="close-round" @click="() => { this.showFolder = !this.showFolder }"></i-button>
+            <i-button class="footer-container" style="flex: left" shape="circle" size="small" icon="close-round" @click="() => { 
+              this.showFolder = !this.showFolder 
+              this.itemClicked = ''
+              }"></i-button>
             <Icon class="footer-container" type="android-folder-open" :size="20"></Icon>
           </Row>
           <h2 v-if="sizeMenu === 'large'" style="margin-bottom: 10px; margin-top: -30px">{{ titleFolder }}</h2>
@@ -35,7 +36,6 @@
             </i-button>
           </Card>
         </Card>
-      </transition>
     </div>
   </div>
 </template>
@@ -46,17 +46,144 @@ export default {
   data: () => ({
     showFolder: false,
     titleFolder: 'Prueba',
-    optionsFolder: []
+    optionsFolder: [],
+    itemClicked: '',
+    minusPercent: 0.60
   }),
+  mounted () {
+    for (let i = 0; i < this.optionsMenu.length; i++) {
+      const element = this.optionsMenu[i]
+      element.key = i
+    }
+  },
   methods: {
     clickeditem (item) {
       if (item.isFolder === true) {
         this.titleFolder = item.text
         this.showFolder = !this.showFolder
+        this.itemClicked = item.key
         this.optionsFolder = item.folderContent
       } else if (item.isFolder === false) {
         item.clickAction()
       }
+    },
+    transformsIconSizeSelectInitial () {
+      let sizeReal
+      switch (this.sizeMenu) {
+        case 'large':
+          sizeReal = 100
+          break
+        case 'normal':
+          sizeReal = 60
+          break
+        case 'small':
+          sizeReal = 40
+          break
+      }
+      if (this.showFolder === true) {
+        sizeReal = sizeReal - (sizeReal * this.minusPercent)
+      }
+      return sizeReal
+    },
+    transformsButtonSizeSelectInitial () {
+      let heightReal, widthReal
+      widthReal = 100
+      switch (this.sizeMenu) {
+        case 'large':
+          heightReal = 198
+          break
+        case 'normal':
+          heightReal = 118
+          break
+        case 'small':
+          heightReal = 78
+          break
+      }
+      if (this.showFolder === true) {
+        heightReal = heightReal - (heightReal * this.minusPercent)
+        widthReal = widthReal - (widthReal * this.minusPercent)
+      }
+      return {
+        width: widthReal + '%',
+        height: heightReal + 'px',
+        margin: '0%',
+        padding: '0%'
+      }
+    },
+    transformsCardSizeSelectInitial (itemID) {
+      let heightReal, widthReal, cursorReal, opacityReal
+      cursorReal = 'pointer'
+      opacityReal = 1
+      switch (this.sizeMenu) {
+        case 'large':
+          heightReal = 200
+          widthReal = 200
+          break
+        case 'normal':
+          heightReal = 120
+          widthReal = 120
+          break
+        case 'small':
+          heightReal = 80
+          widthReal = 80
+          break
+      }
+      if (this.showFolder === true) {
+        cursorReal = 'no-drop'
+        if (this.itemClicked !== itemID) {
+          opacityReal = 0.27
+        }
+        heightReal = heightReal - (heightReal * this.minusPercent)
+        widthReal = widthReal - (widthReal * this.minusPercent)
+      }
+      return {
+        marginLeft: '5px',
+        marginRight: '5px',
+        marginTop: '5px',
+        marginBottom: '3px',
+        display: 'inline-block',
+        padding: '0%',
+        height: heightReal + 'px',
+        width: widthReal + 'px',
+        cursor: cursorReal,
+        opacity: opacityReal
+      }
+    },
+    transformsIconFolderSizeSelectInitial () {
+      let marginLeftReal, marginTopReal, sizeIconReal
+      switch (this.sizeMenu) {
+        case 'large':
+          marginTopReal = -30
+          marginLeftReal = 72
+          sizeIconReal = 20
+          break
+        case 'normal':
+          marginTopReal = -18
+          marginLeftReal = 41
+          sizeIconReal = 15
+          break
+        case 'small':
+          marginTopReal = -8
+          marginLeftReal = 25
+          sizeIconReal = 12
+          break
+      }
+      return {
+        style: {
+          position: 'fixed',
+          opacity: 0.3,
+          marginLeft: marginLeftReal + 'px',
+          marginTop: marginTopReal + 'px'
+        },
+        sizeIcon: sizeIconReal
+      }
+    },
+    showIconFolder (itemFolder) {
+      let rta = itemFolder
+      if (this.showFolder === true) {
+        rta = false
+      }
+      return rta
     }
   }
 }
@@ -99,7 +226,6 @@ export default {
     margin-top: 5px;
     margin-bottom: 3px;
     display: inline-block;
-    cursor: pointer;
     padding: 0%;
   }
   .buttons-options--large{
@@ -127,24 +253,6 @@ export default {
   }
   .sub-buttons-options--small{
     height: 45px;
-  }
-  .folder-icon--large{
-    position: fixed;
-    margin-top: -30px;
-    margin-left: 80px;
-    opacity: 0.3;
-  }
-  .folder-icon--normal{
-    position: fixed;
-    margin-top: -20px;
-    margin-left: 45px;
-    opacity: 0.3;
-  }
-  .folder-icon--small{
-    position: fixed;
-    margin-top: -15px;
-    margin-left: 22px;
-    opacity: 0.3
   }
   .footer-container{
     display: inline-block;

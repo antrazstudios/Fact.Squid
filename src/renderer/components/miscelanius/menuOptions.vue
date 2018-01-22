@@ -15,6 +15,9 @@
             </div>
           </i-button>
         </Card>
+        <Card v-if="optionsMenu.length === 0" style="opacity: 0.6" dis-hover>
+          Aun existen opciones para mostrar en este modulo
+        </Card>
       </div>
       <Card v-if="showFolder === true" class="inner--folder" :borderer="true" :shadow="true" style="margin-top: 10px">
           <Row type="flex" justify="space-between">

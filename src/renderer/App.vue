@@ -1,73 +1,85 @@
-<template lang="html">
+<template>
   <div id="app" style="user-select: none">
+    
+    <!-- Cotenido -->
     <!-- Menu superior fixed-->
-    <Menu ref="menufix" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" style="background: white !important;">
+    <Menu v-if="showMenuBar === true" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" >
       <div class="layout-fixed" v-bind:style="{marginTop: margintop + 'px'}">
-        <div class="layout-return" v-bind:style="{ visibility: visibleReturnButton }">
-          <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
-            <i-button type="text" @click="returnPath()">
-              <Icon type="chevron-left"></Icon>
-            </i-button>
-          </Tooltip>
-        </div>
-        <div class="layout-nav">
-          <MenuItem name="1" @click="changePath('/')">
-            <router-link style="color: inherit" :to="{ name: 'landing-page'}">
-              <icon type="ios-home"/>
-              Inicio
-            </router-link>
-          </MenuItem>
-          <MenuItem name="2">
-            <router-link style="color: inherit" :to="{ name: 'terceros' }">
-              <icon type="ios-body"/>
-              Terceros
-            </router-link>
-          </MenuItem>
-          <MenuItem name="3">
-            <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
-              <icon type="social-usd"/>
-              Facturacion
-            </router-link>
-          </MenuItem>
-          <MenuItem name="4">
-            <icon type="paper-airplane"/>
-            Radicacion
-          </MenuItem>
-          <MenuItem name="5">
-            <icon type="cash"/>
-            Cartera
-          </MenuItem>
-          <MenuItem name="6">
-            <icon type="ios-analytics"/>
-            Reporteador
-          </MenuItem>
-        </div>
-        <div class="layout-buttons">
-          <Poptip placement="bottom-start" trigger="click" title="Buscar" v-model="visibleSearch">
-            <div slot="content">
-              <Input style="margin: 10px 0px">
-                <i-button slot="append" icon="search"></i-button>
-              </Input>
+        <Row type="flex" justify="space-between">
+          <!-- Columna de retorno de vista -->
+          <i-col span="6">
+            <div v-bind:style="{ visibility: visibleReturnButton }">
+              <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
+                <i-button type="text" @click="returnPath()">
+                  <Icon type="chevron-left"></Icon>
+                </i-button>
+              </Tooltip>
             </div>
-          </Poptip>
-          <ButtonGroup>
-            <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
-            <i-button title="Ayuda" type="text" icon="help" @click="gotoDocumentation()"></i-button>
-            <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
-            <i-button title="Notificaciones" type="text" icon="android-notifications" @click="profileClick()"></i-button>
-            <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
-          </ButtonGroup>
-          <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
-            <div slot="content">
-              <img class="img-circle" :src="actualProfile.imagenperfil"/>
-              <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
-              <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
-              <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
-              <i-button class="button-center">Editar perfil</i-button>
-              <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+          </i-col>
+          <!-- Columna de accesos del menu -->
+          <i-col span="12">
+            <div>
+              <MenuItem name="1" @click="changePath('/')">
+                <router-link style="color: inherit" :to="{ name: 'landing-page'}">
+                  <icon type="ios-home"/>
+                  Inicio
+                </router-link>
+              </MenuItem>
+              <MenuItem name="2">
+                <router-link style="color: inherit" :to="{ name: 'terceros' }">
+                  <icon type="ios-body"/>
+                  Terceros
+                </router-link>
+              </MenuItem>
+              <MenuItem name="3">
+                <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
+                  <icon type="social-usd"/>
+                  Facturacion
+                </router-link>
+              </MenuItem>
+              <MenuItem name="4">
+                <router-link style="color: inherit" :to="{ name: 'radicacion-index' }">
+                  <icon type="cube"/>
+                  Radicacion
+                </router-link>
+              </MenuItem>
+              <MenuItem name="5">
+                <router-link style="color: inherit" :to="{ name: 'cartera-index' }">
+                  <icon type="cash"/>
+                  Cartera
+                </router-link>
+              </MenuItem>
+              <MenuItem name="6">
+                <router-link style="color: inherit" :to="{ name: 'reporteador-index' }">
+                  <icon type="ionic"/>
+                  Reporteador
+                </router-link>
+              </MenuItem>
             </div>
-          </Poptip>
-        </div>
+          </i-col>
+          <!-- Columna de acciones del toolbar -->
+          <i-col span="6" class-name="text-right-layout">
+            <div>
+              <ButtonGroup>
+                <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
+                <i-button title="Ayuda" type="text" icon="help" @click="gotoDocumentation()"></i-button>
+                <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
+                <i-button title="Notificaciones" type="text" icon="android-notifications" @click="profileClick()"></i-button>
+                <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
+              </ButtonGroup>
+              <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
+                <div slot="content">
+                  <img class="img-circle" :src="actualProfile.imagenperfil"/>
+                  <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
+                  <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
+                  <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
+                  <i-button class="button-center">Editar perfil</i-button>
+                  <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+                </div>
+              </Poptip>
+            </div>
+          </i-col>
+        </Row>
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
@@ -120,6 +132,8 @@
         </label>
       </div>
     </Row>
+
+    <!-- Modals -->
     <!-- Informacion del sistema -->
     <Modal v-model="aboutModal">
       <div style="text-align: center;">
@@ -169,6 +183,7 @@
     name: 'billsdelivery-vue',
     data () {
       return {
+        showMenuBar: false,
         connectionsList: [],
         connectionSelected: '',
         maxHeightTable: 0,
@@ -283,11 +298,7 @@
         this.changePath('/login')
       },
       showTitleBar (show) {
-        if (show === true) {
-          this.$refs.menufix.$el.style.display = ''
-        } else {
-          this.$refs.menufix.$el.style.display = 'none'
-        }
+        this.showMenuBar = show
         this.showTitlebar = show
       },
       createMenu () {
@@ -509,6 +520,7 @@
   }
   .layout-fixed{
     margin-top: 0px;
+    margin-bottom: 0px;
     width: 100%;
     background-color: white;
     position: fixed;
@@ -558,5 +570,11 @@
     color: #a3a3a3;
     margin: 5px 0px;
     text-align: center;
+  }
+  .text-center-layout{
+    text-align: center;
+  }
+  .text-right-layout{
+    text-align: right;
   }
 </style>

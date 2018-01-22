@@ -1,7 +1,7 @@
 <template>
   <div class="principal">
     <div class="middle">
-      <transition enter-class="display-off" enter-active-class="animated fadeIn" :duration="{ enter: 8000 }">
+      <transition enter-class="display-off" enter-active-class="animated fadeIn" :duration="{ enter: 800 }">
         <div v-if="showFolder === false" class="inner">
           <h1 v-if="sizeMenu === 'large'" style="margin-bottom: 20px;">{{titleMenu}}</h1>
           <h2 v-if="sizeMenu === 'normal'" style="margin-bottom: 10px;">{{titleMenu}}</h2>
@@ -10,14 +10,14 @@
             <i-button :class="sizeMenu === 'large' ? 'sub-buttons-options sub-buttons-options--large' : sizeMenu === 'normal' ? 'sub-buttons-options sub-buttons-options--normal' : 'sub-buttons-options sub-buttons-options--small'" type="text" @click="clickeditem(item)">
               <Icon v-if="item.isFolder === true" :class="sizeMenu === 'large' ? 'folder-icon--large' : sizeMenu === 'normal' ? 'folder-icon--normal' : 'folder-icon--small'" type="android-folder"></Icon>
               <Icon :type="item.icon_type" :size="sizeMenu === 'large' ? 100 : sizeMenu === 'normal' ? 60 : 25" style="display:block"/>
-              <h3 v-if="sizeMenu === 'large'">{{ item.text }}</h3>
-              <h4 v-if="sizeMenu === 'normal'">{{ item.text }}</h4>
-              <h5 v-if="sizeMenu === 'small'">{{ item.text }}</h5>
+              <div class="content-text">
+                <label v-bind:style="sizeMenu === 'large' ? { fontSize: '16px' } : sizeMenu === 'normal' ? { fontSize: '12px' } : { fontSize: '10px' }">{{ item.text }}</label>
+              </div>
             </i-button>
           </Card>
         </div>
       </transition>
-      <transition enter-active-class="animated zoomIn" leave-active-class="animated slideOutDown" :duration="{ enter: 800, leave: 300 }">
+      <transition enter-active-class="animated zoomIn" leave-active-class="animated slideOutDown" :duration="{ enter: 600, leave: 300 }">
         <Card v-if="showFolder === true" class="inner--folder" :borderer="true" :shadow="true">
           <Row type="flex" justify="space-between">
             <i-button class="footer-container" style="flex: left" shape="circle" size="small" icon="close-round" @click="() => { this.showFolder = !this.showFolder }"></i-button>
@@ -29,9 +29,9 @@
           <Card style="background-color: #f9f9f9" :class="sizeMenu === 'large' ? 'buttons-options buttons-options--large' : sizeMenu === 'normal' ? 'buttons-options buttons-options--normal' : 'buttons-options buttons-options--small'" v-for="item in optionsFolder" :key="item.key">
             <i-button :class="sizeMenu === 'large' ? 'sub-buttons-options sub-buttons-options--large' : sizeMenu === 'normal' ? 'sub-buttons-options sub-buttons-options--normal' : 'sub-buttons-options sub-buttons-options--small'" type="text" @click="clickeditem('')">
               <Icon :type="item.icon_type" :size="sizeMenu === 'large' ? 100 : sizeMenu === 'normal' ? 60 : 25" style="display:block"/>
-              <h3 v-if="sizeMenu === 'large'">{{ item.text }}</h3>
-              <h4 v-if="sizeMenu === 'normal'">{{ item.text }}</h4>
-              <h5 v-if="sizeMenu === 'small'">{{ item.text }}</h5>
+              <div class="content-text">
+                <label v-bind:style="sizeMenu === 'large' ? { fontSize: '16px' } : sizeMenu === 'normal' ? { fontSize: '12px' } : { fontSize: '10px' }">{{ item.text }}</label>
+              </div>
             </i-button>
           </Card>
         </Card>
@@ -75,6 +75,12 @@ export default {
     margin-left: 5%;
     margin-right: 5%;
     text-align: center;
+  }
+  .content-text{
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
   }
   .inner--folder{
     margin-left: 5%;

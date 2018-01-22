@@ -1,7 +1,7 @@
 <template>
   <div>
     <Row>
-      <menu-selector :optionsMenu="options" titleMenu="Acciones con Facturacion" sizeMenu="normal"></menu-selector>
+      <menu-selector :optionsMenu="options" titleMenu="Acciones para Radicacion" sizeMenu="normal"></menu-selector>
     </Row>
     <Row>
       <Card style="width: 100%; margin-top: 20px"></Card>
@@ -11,15 +11,15 @@
 <script>
 import MenuSelector from '../miscelanius/menuOptions'
 export default {
-  name: 'facturacion-index',
+  name: 'radicacion-index',
   components: { MenuSelector },
   data () {
     return {
       options: [
-        // Recepcion de facturacion
+        // Movimiento de facturacion
         {
-          icon_type: 'ios-plus-outline',
-          text: 'Recepcion facturacion',
+          icon_type: 'ios-compose-outline',
+          text: 'Movimientos facturacion',
           clickAction: () => {},
           isFolder: false
         },
@@ -31,17 +31,17 @@ export default {
           folderContent: [
             {
               icon_type: 'ios-list-outline',
-              text: 'Editor Glosas',
+              text: 'Editor No Aceptaciones',
               clickAction: () => {}
             },
             {
               icon_type: 'ios-list-outline',
-              text: 'Editor Devoluciones',
+              text: 'Editor Re-envio',
               clickAction: () => {}
             },
             {
               icon_type: 'ios-list-outline',
-              text: 'Editor Conciliaciones',
+              text: 'Editor Recorrido',
               clickAction: () => {}
             },
             {
@@ -51,24 +51,51 @@ export default {
             }
           ]
         },
-        // Requerimientos a Centros de Costos
+        // Acciones de Correspondencia por parte de radicacion
         {
-          icon_type: 'ios-bookmarks-outline',
-          text: 'Requerimientos',
-          clickAction: () => {},
-          isFolder: false
+          icon_type: 'ios-box-outline',
+          text: 'Correspondencia',
+          isFolder: true,
+          folderContent: [
+            {
+              icon_type: 'ios-list-outline',
+              text: 'Confirmar documentos',
+              clickAction: () => {}
+            },
+            {
+              icon_type: 'ios-paperplane-outline',
+              text: 'Trazabilidad documento',
+              clickAction: () => {}
+            },
+            {
+              icon_type: 'ios-bookmarks-outline',
+              text: 'Cargar desde Sipost',
+              clickAction: () => {}
+            },
+            {
+              icon_type: 'ios-book-outline',
+              text: 'Planilla de Sipost',
+              clickAction: () => {}
+            }
+          ]
         },
-        // Ordenes de salida de Correspondencia
+        // Cargas de radicacion
         {
-          icon_type: 'ios-albums-outline',
-          text: 'Ordenes',
-          clickAction: () => {},
-          isFolder: false
+          icon_type: 'ios-pie-outline',
+          text: 'Cargas masivas',
+          isFolder: true,
+          folderContent: [
+            {
+              icon_type: 'ios-pie-outline',
+              text: 'Carga de rad. en DGH',
+              clickAction: () => {}
+            }
+          ]
         },
         // Busqueda de Contenido en 360º
         {
           icon_type: 'ios-search',
-          text: 'Busqueda 360º',
+          text: 'Trazabilidad documento',
           clickAction: () => {},
           isFolder: false
         }

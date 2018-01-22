@@ -51,6 +51,21 @@ export default new Router({
       path: '/Facturacion/index',
       name: 'facturacion-index',
       component: require('@/components/Facturacion/index/').default
+    },
+    {
+      path: '/Radicacion/index',
+      name: 'radicacion-index',
+      component: require('@/components/Radicacion/index/').default
+    },
+    {
+      path: '/Cartera/index',
+      name: 'cartera-index',
+      component: require('@/components/Cartera/index/').default
+    },
+    {
+      path: '/Reporteador/index',
+      name: 'reporteador-index',
+      component: require('@/components/Reporteador/index/').default
     }
   ]
 })

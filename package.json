@@ -32,19 +32,12 @@
       "dist/electron/**/*"
     ],
     "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
+      "background": "build/factsquid_installerBackground.png",
+      "icon": "build/icons/factsquid_iconInstall.icns",
+      "window": {
+        "width": "540",
+        "height": "380"
+      }
     },
     "mac": {
       "icon": "build/icons/factsquid_iconColor.icns",
@@ -58,21 +51,14 @@
     "linux": {
       "icon": "build/icons/factsquid_iconColor256x256.png"
     },
-    "dmg":{
-      "background": "build/factsquid_installerBackground.png",
-      "icon": "build/icons/factsquid_iconInstall.icns",
-      "window": {
-        "width" : "540",
-        "height" : "380"
-      }
-    },
-    "nsis":{
+    "nsis": {
       "installerIcon": "build/icons/factsquid_iconInstall.icon",
       "uninstallerIcon": "build/icons/factsquid_iconUninstall.icon",
       "installerHeaderIcon": "build/icons/factsquid_iconInstall.icon"
     }
   },
   "dependencies": {
+    "animate.css": "^3.5.2",
     "axios": "^0.16.1",
     "electron-config": "^1.0.0",
     "electron-download-manager": "^1.3.1",
@@ -109,7 +95,7 @@
     "css-loader": "^0.28.4",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^1.7.5",
+    "electron": "^1.7.11",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
     "electron-builder": "^19.19.1",

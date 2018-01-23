@@ -1,101 +1,130 @@
-<template lang="html">
+<template>
   <div id="app" style="user-select: none">
+    
+    <!-- Cotenido -->
     <!-- Menu superior fixed-->
-    <Menu ref="menufix" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" style="background: white !important;">
+    <Menu v-if="showMenuBar === true" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" >
       <div class="layout-fixed" v-bind:style="{marginTop: margintop + 'px'}">
-        <div class="layout-return" v-bind:style="{ visibility: visibleReturnButton }">
-          <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
-            <i-button type="text" @click="returnPath()">
-              <Icon type="chevron-left"></Icon>
-            </i-button>
-          </Tooltip>
-        </div>
-        <div class="layout-nav">
-          <MenuItem name="1" @click="changePath('/')">
-            <router-link style="color: inherit" :to="{ name: 'landing-page'}">
-              <icon type="ios-home"/>
-              Inicio
-            </router-link>
-          </MenuItem>
-          <MenuItem name="2">
-            <router-link style="color: inherit" :to="{ name: 'system-information' }">
-              <icon type="ios-body"/>
-              Terceros
-            </router-link>
-          </MenuItem>
-          <MenuItem name="3">
-            <icon type="social-usd"/>
-            Facturacion
-          </MenuItem>
-          <MenuItem name="4">
-            <icon type="paper-airplane"/>
-            Radicacion
-          </MenuItem>
-          <MenuItem name="5">
-            <icon type="cash"/>
-            Cartera
-          </MenuItem>
-          <MenuItem name="6">
-            <icon type="ios-analytics"/>
-            Reporteador
-          </MenuItem>
-        </div>
-        <div class="layout-buttons">
-          <Poptip placement="bottom-start" trigger="click" title="Buscar" v-model="visibleSearch">
-            <div slot="content">
-              <Input style="margin: 10px 0px">
-                <i-button slot="append" icon="search"></i-button>
-              </Input>
+        <Row type="flex" justify="space-between">
+          <!-- Columna de retorno de vista -->
+          <i-col span="6">
+            <div v-bind:style="{ visibility: visibleReturnButton }">
+              <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
+                <i-button type="text" @click="returnPath()">
+                  <Icon type="chevron-left"></Icon>
+                </i-button>
+              </Tooltip>
             </div>
-          </Poptip>
-          <ButtonGroup>
-            <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
-            <i-button title="Ayuda" type="text" icon="help" @click="gotoDocumentation()"></i-button>
-            <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
-            <i-button title="Notificaciones" type="text" icon="android-notifications" @click="profileClick()"></i-button>
-            <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
-          </ButtonGroup>
-          <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
-            <div slot="content">
-              <img class="img-circle" :src="actualProfile.imagenperfil"/>
-              <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
-              <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
-              <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
-              <i-button class="button-center">Editar perfil</i-button>
-              <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+          </i-col>
+          <!-- Columna de accesos del menu -->
+          <i-col span="12">
+            <div>
+              <MenuItem name="1" @click="changePath('/')">
+                <router-link style="color: inherit" :to="{ name: 'landing-page'}">
+                  <icon type="ios-home"/>
+                  Inicio
+                </router-link>
+              </MenuItem>
+              <MenuItem name="2">
+                <router-link style="color: inherit" :to="{ name: 'terceros' }">
+                  <icon type="ios-body"/>
+                  Terceros
+                </router-link>
+              </MenuItem>
+              <MenuItem name="3">
+                <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
+                  <icon type="social-usd"/>
+                  Facturacion
+                </router-link>
+              </MenuItem>
+              <MenuItem name="4">
+                <router-link style="color: inherit" :to="{ name: 'radicacion-index' }">
+                  <icon type="cube"/>
+                  Radicacion
+                </router-link>
+              </MenuItem>
+              <MenuItem name="5">
+                <router-link style="color: inherit" :to="{ name: 'cartera-index' }">
+                  <icon type="cash"/>
+                  Cartera
+                </router-link>
+              </MenuItem>
+              <MenuItem name="6">
+                <router-link style="color: inherit" :to="{ name: 'reporteador-index' }">
+                  <icon type="ionic"/>
+                  Reporteador
+                </router-link>
+              </MenuItem>
             </div>
-          </Poptip>
-        </div>
+          </i-col>
+          <!-- Columna de acciones del toolbar -->
+          <i-col span="6" class-name="text-right-layout">
+            <div>
+              <ButtonGroup>
+                <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
+                <i-button title="Ayuda" type="text" icon="help" @click="gotoDocumentation()"></i-button>
+                <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
+                <i-button title="Notificaciones" type="text" icon="android-notifications" @click="profileClick()"></i-button>
+                <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
+              </ButtonGroup>
+              <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
+                <div slot="content">
+                  <img class="img-circle" :src="actualProfile.imagenperfil"/>
+                  <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
+                  <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
+                  <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
+                  <i-button class="button-center">Editar perfil</i-button>
+                  <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
+                </div>
+              </Poptip>
+            </div>
+          </i-col>
+        </Row>
       </div>
     </Menu>
     <!-- Contenido del complement actual -->
-    <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
+    <transition enter-active-class="animated fadeIn" :duration="{ enter: 500 }" >
+      <router-view class="content" v-bind:style="{ top: 10 + margintop + 'px' }"></router-view>
+    </transition>
     <!-- Footer-->
     <div class="footer">
       <Row type="flex" justify="space-between">
-        <div class="footer-release" v-bind:style="{ backgroundColor: colorVersion}" @click="gotoAbout()">
-          <h4>{{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}</h4>
+        <!-- Contenedor Izquierdo -->
+        <div class="footer-container">
+          <Tag class="footer-item-tag clicker" v-bind:style="{ backgroundColor: colorVersion}" @click="gotoAbout()">
+            {{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}
+          </Tag>
+          <Tag class="footer-item-tag noclicker" v-if="developerMode === true">
+            Modo Desarrollador
+          </Tag>
+          <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
+            <h4 style="display: inline-block;">Usuario actaul: {{actualProfile.username}}</h4>
+          </Tag>
         </div>
-        <div v-if="actualProfile !== ''" class="footer-connection">
-          <Icon style="display: inline-block" type="link"/>
-          <h4 style="display: inline-block">Conectado a: {{require('./libs/settings.js').getConnectionName()}}</h4>
-          <h4 style="display: inline-block; margin-left: 10px">Usuario actaul: {{actualProfile.username}}</h4>
-          <div v-if="developerMode === true" class="footer-release" style="background-color: #444444; cursor: inherit">
-            <h4>Modo desarrollador</h4>
-          </div>
+        <!-- Contenedor Derecho -->
+        <div class="footer-container">
+          <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
+            <Icon type="link"/>
+            Conectado a: {{ require('./libs/settings.js').getConnectionName() }}
+          </Tag>
+          <Poptip trigger="hover" title="Conexiones a BD" placement="left-end">
+            <Tag class="footer-item-tag clicker" style="background-color: #16A085">Conexiones</Tag>
+            <div slot="content">
+              <Row>
+                <Button @click="connectionsModal = !connectionsModal" style="width: 100%; margin-bottom: 5px">Cambiar conexion actual</Button>
+              </Row>
+              <Row>
+                <Button @click="ConnectionsAssitantShow()" style="width: 100%">Asistente de conexiones</Button>
+              </Row>
+            </div>
+          </Poptip>
         </div>
       </Row>
     </div>
-    <!-- Interfaz de carga -->
-    <div ref="loaderfix" class="modal">
-      <div class="modal-contenedor">
-        <div class="modal-contenedor--img"></div>
-        <label class="modal-contenedor--label">{{loaderMessage}}</label>
-      </div>
-    </div>
     <!-- Titlebar - Barra de titulo -->
     <Row v-if="platform === 'darwin'">
-      <div class="titlebar">
+      <div :class="this.showTitlebar === false ? 'titlebar titlebar-darwin-close' : 'titlebar'">
+      <!-- <div class="titlebar"> -->
         <label class="titlebar-title">Fact
           <div class="titlebar-icon">
             .Squid
@@ -103,6 +132,49 @@
         </label>
       </div>
     </Row>
+
+    <!-- Modals -->
+    <!-- Informacion del sistema -->
+    <Modal v-model="aboutModal">
+      <div style="text-align: center;">
+        <img src="./assets/images/factsquid_iconColor.png" style="width: 100px;">
+        <h1>Fact.Squid version {{ require('./libs/settings.js').getVersionApp() }}</h1>
+        <h4>Fact.Squid es desarrollado por Carlos Vasquez de AntrazStudios, Colombia</h4>
+        <p style="margin-top: 30px">Utilizamos tecnologias punteras Web adaptadas a escritorio y de codigo abierto:</p>
+        <Row style="margin-top: 15px; margin-bottom: 15px">
+          <i-col span="12">
+            <img src="./assets/images/vueelectronjs_logo.png" style="width: auto; height: 30px; margin-left: 5px; margin-right: 5px;">
+          </i-col>
+          <i-col span="12">
+            <img src="./assets/images/electronjs_logo.svg" style="width: auto; height: 30px; margin-left: 5px; margin-right: 5px;">
+          </i-col>
+        </Row>
+        <p>Fact.Squid utiliza VueJS y ElectronJS, ademas de otros asombrosos proyectos opensource.</p>
+        <Row style="margin-top: 15px">
+          <i-col span="12">
+            <i-button type="ghost">Contrato de usuario final</i-button>
+          </i-col>
+          <i-col span="12">
+            <i-button type="ghost">Listado de librerias de codigo libro</i-button>
+          </i-col>
+        </Row>
+      </div>
+      <Row slot="footer">
+        <i-col span="8">
+          <img src="./assets/images/antrazstudios.png" style="width: auto; height: 20px">
+        </i-col>
+        <i-col span="16">(C) 2016-2018 Todos los derechos reservados</i-col>
+      </Row>
+    </Modal>
+    <!-- Asistente de Cambio de Conexion -->
+    <Modal v-model="connectionsModal" :ok-text="'CAMBIAR CONEXION'" :cancel-text="'CANCELAR'" :title="'Asistente de Cambio de conexion'" @on-ok="changeDefaultConnection()" :mask-closable="false">
+      <div id="divConexionActual" class="layout-text-item">
+        <h4 style="display: inline">Conexion: </h4>
+        <i-select v-model="connectionSelected" clereable>
+          <i-option v-for="item in connectionsList" :value="item.name" :key="item.id">{{ item.name }}</i-option>
+        </i-select>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -111,6 +183,12 @@
     name: 'billsdelivery-vue',
     data () {
       return {
+        showMenuBar: false,
+        connectionsList: [],
+        connectionSelected: '',
+        maxHeightTable: 0,
+        connectionsModal: false,
+        aboutModal: false,
         colorVersion: '',
         loaderMessage: '...',
         actualProfile: '',
@@ -121,6 +199,7 @@
         activeName: '1',
         platform: 'win32',
         margintop: 0,
+        showTitlebar: false,
         routeIndexes: [
           {
             id: '1',
@@ -149,6 +228,12 @@
       this.handleSpinHide()
     },
     created: function () {
+      // Obtencion del maximo de una tabla dependiendo del tamaño de la app
+      require('electron').remote.getCurrentWindow().on('resize', () => {
+        this.maxHeightTable = require('electron').remote.getCurrentWindow().getSize()[1] - 240
+      })
+      // Creacion del menu
+      this.createMenu()
       // Carga la plataforma
       this.platform = process.platform
       if (this.platform === 'win32') {
@@ -185,10 +270,62 @@
       // Se modifica la vista actual y el app
       // document.getElementById('menufix').style.visibility = 'hidden'
       this.changePath('/login')
+      let defaultConnName = settings.getContentFromLocalKey('defaultConn')
+      let i = 0
+      this.connectionsList = settings.getContentFromLocalKey('connections')
+      for (i; i <= this.connectionsList.length - 1; i++) {
+        if (this.connectionsList[i].id === defaultConnName) {
+          this.connectionSelected = this.connectionsList[i].name
+        }
+      }
     },
     methods: {
-      changePath (to) {
-        this.$router.push(to)
+      ConnectionsAssitantShow () {
+        this.changePath('/sql/connectionsassistant')
+      },
+      changeDefaultConnection () {
+        for (let i = 0; i < this.connectionsList.length; i++) {
+          if (this.connectionsList[i].name === this.connectionSelected) {
+            require('./libs/settings.js').addContentToLocalKey('defaultConn', this.connectionsList[i].id)
+          }
+        }
+        // Se elimina cualquier sesion que pueda existir
+        this.closeSesion()
+        this.$Message.warning({
+          content: 'Se ha reiniciado su sesion para que se conecte con el nuevo servidor',
+          duration: 10
+        })
+        this.changePath('/login')
+      },
+      showTitleBar (show) {
+        this.showMenuBar = show
+        this.showTitlebar = show
+      },
+      createMenu () {
+        // Creacion del menu de la aplicacion
+        const {remote} = require('electron')
+        const {Menu} = remote
+        console.log(Menu.getApplicationMenu())
+        // // Creacion del template del menu
+        // const templateMenu = [
+        //   {
+        //     label: 'Fact.Squid',
+        //     submenu: [
+        //       {
+        //         label: 'Acerca de',
+        //         click () { this.aboutModal = true }
+        //       }
+        //     ]
+        //   }
+        // ]
+        // const menu = Menu.buildFromTemplate(templateMenu)
+        // Menu.setApplicationMenu(menu)
+      },
+      changePath (to, params = null) {
+        this.$router.push({
+          path: to,
+          query: params
+        })
         for (let i = 0; i < this.routeIndexes.length; i++) {
           if (this.routeIndexes[i].name === this.$route.name) {
             this.activeName = this.routeIndexes[i].id
@@ -225,11 +362,21 @@
         this.$router.push('/login')
       },
       handleSpinShow (message = 'Espere un momento por favor') {
-        this.$refs.loaderfix.style.display = ''
-        this.loaderMessage = message
+        this.$Spin.show({
+          render: (h) => {
+            return h('div', [
+              h('div', {
+                'class': 'modal-contenedor--img'
+              }),
+              h('label', {
+                'class': 'modal-contenedor--label'
+              }, message)
+            ])
+          }
+        })
       },
       handleSpinHide () {
-        this.$refs.loaderfix.style.display = 'none'
+        this.$Spin.hide()
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
@@ -256,57 +403,6 @@
       },
       gotoDocumentation () {
         this.changePath('/Settings/about/1')
-      },
-      // Funciones adicionales
-      downloadFunction (configuracion) {
-        return new Promise((resolve, reject) => {
-          let receivedBytes = 0
-          let totalBytes = 0
-          let req = require('request')({
-            method: 'GET',
-            uri: configuracion.remoteuri
-          })
-          let out = require('fs').createWriteStream(configuracion.localuri)
-          req.pipe(out)
-
-          req.on('response', (data) => {
-            totalBytes = parseInt(data.headers['content-length'])
-          })
-
-          if (configuracion.hasOwnProperty('onProgress')) {
-            req.on('data', (chunk) => {
-              receivedBytes += chunk.length
-
-              configuracion.onProgress(receivedBytes, totalBytes)
-            })
-          } else {
-            req.on('data', (chunk) => {
-              receivedBytes += chunk.length
-            })
-          }
-
-          req.on('end', () => {
-            resolve()
-          })
-
-          req.on('error', () => {
-            reject(new Error('no ha sido posible descargar el paquete, revise su conexion a internet, si el problema persiste contacte a su proveedor'))
-          })
-        })
-      },
-      unzipFunction (configuracion) {
-        return new Promise((resolve, reject) => {
-          const extractZip = require('extract-zip')
-          extractZip(configuracion.uri, { dir: configuracion.path }, (err) => {
-            if (err) {
-              reject(new Error('ha ocurrido un error durante la extraccion del paquete: ' + err))
-            }
-            require('fs').unlink(configuracion.uri, (err) => {
-              reject(new Error('ha ocurrido un error al eliminar el cache del paquete: ' + err))
-            })
-            resolve('Extraccion del paquete exitosa')
-          })
-        })
       }
     }
   }
@@ -368,41 +464,55 @@
     z-index: 1000;
     background-color: white;
   }
+  .titlebar-darwin-close{
+    -webkit-box-shadow: 0 4px 6px -6px #222;
+    -moz-box-shadow: 0 4px 6px -6px #222;
+    box-shadow: 0 4px 6px -6px #222;
+    z-index: 999;
+  }
   .footer{
     position: fixed;
     bottom: 0;
     width: 100%;
-    background-color: rgb(228, 228, 228);
+    background-color: white;
     color: rgba(0, 0, 0, 0.43);
+    -webkit-box-shadow: 0px -6px 4px -6px #949494;
+    -moz-box-shadow: 0px -6px 4px -6px #949494;
+    box-shadow: 0px -6px 4px -6px #949494;
+    z-index: 999;
   }
-  .footer-release{
+  .footer-container{
     display: inline-block;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 8px;
-    padding-right: 8px;
-    margin: 2px;
-    margin-left: 10px;
-    font-size: 10px;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
+  }
+  .footer-item-tag{
+    margin-top: 1px;
+    margin-bottom: 0px;
     vertical-align: middle;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+    border-radius: 6px;
   }
-  .footer-connection{
-    display: inline-block;
-    color: rgb(117, 117, 117);
-    font-size: 12px;
+  .footer-item-tag.clicker{
+    cursor: pointer;
+    color: white;
+  }
+  .footer-item-tag.noclicker{
     cursor: not-allowed;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 2.5px;
+    background-color: #444444;
+    color: white;
+  }
+  .footer-item-tag.text{
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
   }
   .content {
     overflow-y: scroll;
     position: relative;
     height: 100%;
-    bottom: 30px;
+    bottom: 32px;
+    overflow-x: hidden;
   }
   .layout-nav{
       display: block;
@@ -410,6 +520,7 @@
   }
   .layout-fixed{
     margin-top: 0px;
+    margin-bottom: 0px;
     width: 100%;
     background-color: white;
     position: fixed;
@@ -427,26 +538,6 @@
     float: left;
     position: relative;
     left: 0px;
-  }
-  .modal {
-      display: '';
-      position:   fixed;
-      z-index:    1000;
-      top:        0;
-      left:       0;
-      height:     100%;
-      width:      100%;
-      background: rgba( 255, 255, 255, .94 )
-
-                  50% 50%
-                  no-repeat;
-      background-size: 10%;
-  }
-  .modal-contenedor{
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
   }
   .modal-contenedor--img{
       display: block;
@@ -479,5 +570,11 @@
     color: #a3a3a3;
     margin: 5px 0px;
     text-align: center;
+  }
+  .text-center-layout{
+    text-align: center;
+  }
+  .text-right-layout{
+    text-align: right;
   }
 </style>

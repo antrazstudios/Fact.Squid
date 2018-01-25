@@ -108,7 +108,7 @@
             Conectado a: {{ require('./libs/settings.js').getConnectionName() }}
           </Tag>
           <Poptip trigger="hover" title="Conexiones a BD" placement="left-end">
-            <Tag class="footer-item-tag clicker" style="background-color: #16A085">Conexiones</Tag>
+            <Tag class="footer-item-tag clicker" style="background-color: #81ecec">Conexiones</Tag>
             <div slot="content">
               <Row>
                 <Button @click="connectionsModal = !connectionsModal" style="width: 100%; margin-bottom: 5px">Cambiar conexion actual</Button>
@@ -246,16 +246,16 @@
       // Define el color dependiendo del tipo de Deploy
       switch (settings.getDeployVersionApp()) {
         case 'ALPHA':
-          this.colorVersion = '#bf0000'
+          this.colorVersion = '#ff7675'
           break
         case 'BETA':
-          this.colorVersion = '#f09e00'
+          this.colorVersion = '#fab1a0'
           break
         case 'RELEASE CANDIDATE':
-          this.colorVersion = '#dac400'
+          this.colorVersion = '#ffeaa7'
           break
         case 'STABLE':
-          this.colorVersion = '#2ccb04'
+          this.colorVersion = '#55efc4'
           break
       }
       // Se crea el archivo de configuracion general
@@ -495,11 +495,11 @@
   }
   .footer-item-tag.clicker{
     cursor: pointer;
-    color: white;
+    color: white!important;
   }
   .footer-item-tag.noclicker{
     cursor: not-allowed;
-    background-color: #444444;
+    background-color: #dfe6e9;
     color: white;
   }
   .footer-item-tag.text{

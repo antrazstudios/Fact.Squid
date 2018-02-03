@@ -176,7 +176,7 @@
       </div>
     </Modal>
     <Modal v-model="visibleNotifications" title="Notificaciones">
-      <notifications-view v-if="showMenuBar === true" :notified="true" ref="notificationsManager"></notifications-view>
+      <notifications-view v-if="showMenuBar === true" :notified="true" refresh="mounted"></notifications-view>
       <div slot="footer"></div>
     </Modal>
   </div>

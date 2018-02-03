@@ -80,7 +80,7 @@
 <script>
   export default {
     name: 'notifications',
-    props: [ 'notified' ],
+    props: [ 'notified', 'refresh' ],
     data () {
       return {
         firebase: '',
@@ -134,6 +134,74 @@
           })
           this.notificationsShowed.push(item)
         }
+      },
+      update () {
+        // obtener fecha actual
+        let actualDate = new Date()
+        // inicializar libreria de configuraciones
+        let cnf = require('../../libs/settings')
+        // inicializar libreria de objetos
+        let objects = require('../../libs/objects')
+        // creamos la referencia de la base de datos
+        this.firebaseDatabaseRef = this.firebaseDatabase.ref('notifications/' + cnf.getSesionProfile().id)
+        // obtenemos datos en cada actualizacion de contenido
+        this.firebaseDatabaseRef.on('value', (snap) => {
+          // añadimos un valor al contador de refrescos
+          this.countRefresh++
+          // obtenemos el valor de la captura
+          this.firebaseDbRender = snap.val()
+          // limpiamos las notificaciones para renderizar
+          this.firebaseDbRenderToday = []
+          this.firebaseDbRenderOthers = []
+          // contador de notificaciones sin leer
+          let notiUnread = 0
+          // recorremos el valor de la captura item por item
+          for (const noti in this.firebaseDbRender) {
+            if (this.firebaseDbRender.hasOwnProperty(noti)) {
+              const element = this.firebaseDbRender[noti]
+              let typeNoti = 0
+              // crear notificacion
+              let notificacion = objects.createNotifications(noti, element.content, element.from, element.kind, element.time, element.type, element.state)
+              // verificamos si es una notificacion de hoy o es mas antigua
+              if (new Date(element.time).toDateString() === actualDate.toDateString()) {
+                this.firebaseDbRenderToday.push(notificacion)
+                typeNoti = 0
+              } else if (new Date(element.time).toDateString() !== actualDate.toDateString()) {
+                this.firebaseDbRenderOthers.push(notificacion)
+                typeNoti = 1
+              }
+              // verificamos si la notificacion ya fue noticiada en la sesion actual
+              let isShowed = false
+              for (const showed in this.notificationsShowed) {
+                if (this.notificationsShowed.hasOwnProperty(showed)) {
+                  const elementS = this.notificationsShowed[showed]
+                  if (notificacion.key === elementS.key) {
+                    isShowed = true
+                  }
+                }
+              }
+              // si no se ha mostrado en la sesion se notifica al usuario
+              if (isShowed === false) {
+                if (this.countRefresh === 1) {
+                  if (notificacion.state === 0) {
+                    notiUnread++
+                  }
+                  this.notificationsShowed.push(notificacion)
+                } else if (this.countRefresh !== 1) {
+                  this.showNotification(notificacion, typeNoti)
+                }
+              }
+            }
+          }
+          if (this.countRefresh === 1 && this.notified === true && notiUnread !== 0) {
+            this.$Notice.open({
+              title: 'Tienes ' + notiUnread + ' notificaciones sin leer',
+              duration: 8
+            })
+          }
+          this.firebaseDbRenderTodayCharge = false
+          this.firebaseDbRenderOthersCharge = false
+        })
       }
     },
     created: function () {
@@ -154,74 +222,16 @@
       }
       // creacion de la base de datos
       this.firebaseDatabase = this.firebase.database()
+      // ejecutacion del proceso de actualizacion si esta desde create
+      if (this.refresh === 'created') {
+        this.update()
+      }
     },
     mounted () {
-      // obtener fecha actual
-      let actualDate = new Date()
-      // inicializar libreria de configuraciones
-      let cnf = require('../../libs/settings')
-      // inicializar libreria de objetos
-      let objects = require('../../libs/objects')
-      // creamos la referencia de la base de datos
-      this.firebaseDatabaseRef = this.firebaseDatabase.ref('notifications/' + cnf.getSesionProfile().id)
-      // obtenemos datos en cada actualizacion de contenido
-      this.firebaseDatabaseRef.on('value', (snap) => {
-        // añadimos un valor al contador de refrescos
-        this.countRefresh++
-        // obtenemos el valor de la captura
-        this.firebaseDbRender = snap.val()
-        // limpiamos las notificaciones para renderizar
-        this.firebaseDbRenderToday = []
-        this.firebaseDbRenderOthers = []
-        // contador de notificaciones sin leer
-        let notiUnread = 0
-        // recorremos el valor de la captura item por item
-        for (const noti in this.firebaseDbRender) {
-          if (this.firebaseDbRender.hasOwnProperty(noti)) {
-            const element = this.firebaseDbRender[noti]
-            let typeNoti = 0
-            // crear notificacion
-            let notificacion = objects.createNotifications(noti, element.content, element.from, element.kind, element.time, element.type, element.state)
-            // verificamos si es una notificacion de hoy o es mas antigua
-            if (new Date(element.time).toDateString() === actualDate.toDateString()) {
-              this.firebaseDbRenderToday.push(notificacion)
-              typeNoti = 0
-            } else if (new Date(element.time).toDateString() !== actualDate.toDateString()) {
-              this.firebaseDbRenderOthers.push(notificacion)
-              typeNoti = 1
-            }
-            // verificamos si la notificacion ya fue noticiada en la sesion actual
-            let isShowed = false
-            for (const showed in this.notificationsShowed) {
-              if (this.notificationsShowed.hasOwnProperty(showed)) {
-                const elementS = this.notificationsShowed[showed]
-                if (notificacion.key === elementS.key) {
-                  isShowed = true
-                }
-              }
-            }
-            // si no se ha mostrado en la sesion se notifica al usuario
-            if (isShowed === false) {
-              if (this.countRefresh === 1) {
-                if (notificacion.state === 0) {
-                  notiUnread++
-                }
-                this.notificationsShowed.push(notificacion)
-              } else if (this.countRefresh !== 1) {
-                this.showNotification(notificacion, typeNoti)
-              }
-            }
-          }
-        }
-        if (this.countRefresh === 1 && this.notified === true && notiUnread !== 0) {
-          this.$Notice.open({
-            title: 'Tienes ' + notiUnread + ' notificaciones sin leer',
-            duration: 8
-          })
-        }
-        this.firebaseDbRenderTodayCharge = false
-        this.firebaseDbRenderOthersCharge = false
-      })
+      // ejecutacion del proceso de actualizacion si esta desde mounted
+      if (this.refresh === 'mounted') {
+        this.update()
+      }
     }
   }
 </script>

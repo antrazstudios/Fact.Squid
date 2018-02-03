@@ -33,68 +33,73 @@
     </i-col>
     <!-- Area del Feed -->
     <i-col span="14">
-      <!-- En caso que existan noticias en el feed -->
-      <div v-if="list_notice.length !== 0 && list_notice.length !== null">
-        <Row v-for="notice in list_notice" :key="notice.key">
-          <Card class="slides">
-            <Row>
-              <i-col span="2">
-                <Avatar :src="notice.imgsrc"/>
-              </i-col>
-              <i-col span="8">
-                <h4>{{notice.author}}</h4>
-                <h4>{{notice.date}}</h4>
-              </i-col>
-              <i-col span="14">
+      <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+        <div v-if="firebaseCharge === false">
+          <!-- En caso que existan noticias en el feed -->
+          <div v-if="list_notice.length !== 0 && list_notice.length !== null">
+            <Row v-for="notice in list_notice" :key="notice.key">
+              <Card class="slides">
                 <Row>
-                  <div class="slides-origin">
-                    <label class="slides-text--origin">{{notice.origin}}</label>
-                    <Icon class="slides-text--origin" :type="notice.origin_icon"></Icon>
-                    <div v-if="notice.isOutstanding === true" class="slides-star slides-origin">
-                      <Icon type="android-star" color="white"></Icon>
-                    </div>
-                    <i-button v-if="notice.link !== null" type="ghost" style="margin: 5px;" @click="clickMoreInfo(notice.link)">
-                      <Icon type="link"></Icon>
-                       Quiero saber mas
-                    </i-button>
-                  </div>
+                  <i-col span="2">
+                    <Avatar :src="notice.imgsrc"/>
+                  </i-col>
+                  <i-col span="8">
+                    <h4>{{notice.author}}</h4>
+                    <h4>{{notice.date}}</h4>
+                  </i-col>
+                  <i-col span="14">
+                    <Row>
+                      <div class="slides-origin">
+                        <label class="slides-text--origin">{{notice.origin}}</label>
+                        <Icon class="slides-text--origin" :type="notice.origin_icon"></Icon>
+                        <div v-if="notice.isOutstanding === true" class="slides-star slides-origin">
+                          <Icon type="android-star" color="white"></Icon>
+                        </div>
+                        <i-button v-if="notice.link !== null && notice.link !== undefined" type="ghost" style="margin: 5px;" @click="clickMoreInfo(notice.link)">
+                          <Icon type="link"></Icon>
+                            Quiero saber mas
+                        </i-button>
+                      </div>
+                    </Row>
+                  </i-col>
                 </Row>
-              </i-col>
+                <hr />
+                <Row>
+                  <h1 class="slides-text--title">{{notice.title}}</h1>
+                  <p class="slides-text--content">{{notice.description}}</p>
+                  <img class="slides-img" :src="notice.banner"/>
+                  <p class="slides-text--description">{{notice.content}}</p>
+                </Row>
+              </Card>
             </Row>
-            <hr />
             <Row>
-              <h1 class="slides-text--title">{{notice.title}}</h1>
-              <p class="slides-text--content">{{notice.description}}</p>
-              <img class="slides-img" :src="notice.banner"/>
-              <p class="slides-text--description">{{notice.content}}</p>
+              <div class="slides-end">
+                Final de la lista
+              </div>
             </Row>
-          </Card>
-        </Row>
-        <Row>
-          <div class="slides-end">
-            Final de la lista
           </div>
-        </Row>
-      </div>
-      <!-- En caso de que NO existan noticias en el feed -->
-      <div v-if="list_notice.length === 0 || list_notice.length === null">
-        <Card class="slides slides-notitems--text">
-          <img src=".././assets/images/emoji-72x72/1f61e.png"/>
-          <h2>No existen items para mostrar en tu feed</h2>
-          <p style="margin-top: 20px;">Esto puede deberse a varias cosas:</p>
-          <p style="margin-top: 20px;">⌾ Que no tengas acceso a internet</p>
-          <p>⌾ Que no se haya publicado ningun item desde el servidor para que los demas usuarios puedan verlos</p>
-          <p>⌾ Que seas muy productivo y no exista ningun necesidad de informarte nada, porque ya lo sabes todo</p>
-          <h4 style="margin-top: 20px;">Todo esto puede ser posible, pero si el problema persiste, contacta el administrador del sistema.</h4>
-        </Card>
-      </div>
+          <!-- En caso de que NO existan noticias en el feed -->
+          <div v-if="list_notice.length === 0 || list_notice.length === null">
+            <Card class="slides slides-notitems--text">
+              <img src=".././assets/images/emoji-72x72/1f61e.png"/>
+              <h2>No existen items para mostrar en tu feed</h2>
+              <p style="margin-top: 20px;">Esto puede deberse a varias cosas:</p>
+              <p style="margin-top: 20px;">⌾ Que no tengas acceso a internet</p>
+              <p>⌾ Que no se haya publicado ningun item desde el servidor para que los demas usuarios puedan verlos</p>
+              <p>⌾ Que seas muy productivo y no exista ningun necesidad de informarte nada, porque ya lo sabes todo</p>
+              <h4 style="margin-top: 20px;">Todo esto puede ser posible, pero si el problema persiste, contacta el administrador del sistema.</h4>
+            </Card>
+          </div>
+        </div>
+      </transition>
+      <div v-if="firebaseCharge === true" class="chargefeed"></div>
     </i-col>
     <!-- Area de notificacion -->
     <i-col span="6" >
       <Card class="slides">
         <h3>Notificaciones</h3>
         <hr/>
-        <notifications-view :notified="false"></notifications-view>
+        <notifications-view :notified="false" refresh="created"></notifications-view>
       </Card>
     </i-col>
     <!-- Boton de regresar al top -->
@@ -117,34 +122,13 @@
         value2: 0,
         height: 677,
         periodo: 'diciembre-2017',
-        list_notice: [
-          {
-            origin: 'antrazstudios.com',
-            origin_icon: 'ios-world',
-            date: '2017-12-08',
-            author: 'AntrazStudios',
-            imgsrc: 'https://pbs.twimg.com/profile_images/709902706698264576/YpX5dvPY.jpg',
-            title: 'Bienvenido al renovado BillsDelivery: Fact.Squid, el mismo aunque mucho mas poderoso',
-            description: 'Gracias a las nuevas tecnologias desarrolladas en AntrazStudios, Fact.Squid es mas potente, eficiente y rapido. Y esta preparado para las innovaciones futuras. Otra novedad es que mejora es que mejora las funcionalidades y modulos que usas todos los dias. En sintesis, es BillsDelivery en su maximo nivel.',
-            content: 'Estamos muy emocionados con que utilices esta hermosa version de Fact.Squid, aunque es importante decir que se encuentra en version BETA, y que algunas funciones no se encuentran activas del todo, lo que quiere decir que es posible que te encuentres con algunos problemas menores, pero no sera nada que no solucionemos en el menos tiempo posible.',
-            banner: 'https://www.chu.cam.ac.uk/media/assets/35/1de50922f08b3aafff073ecb0dcf052e3dc303.jpg',
-            isOutstanding: true,
-            link: 'http://www.antrazstudios.com'
-          },
-          {
-            origin: 'CootrasmarCTA, Bucaramanga',
-            origin_icon: 'ios-location',
-            date: '2018-01-01',
-            author: 'CootrasmarCTA',
-            imgsrc: 'http://www.cootrasmarcta.com/portals/12/imagenes/WebAmg/NuestrosClientes1.jpg',
-            title: 'Los mejores deseos para este 2018',
-            description: 'En CootrasmarCTA queremos desearte un feliz 2018, esperamos que sigas compartiendo nuestras experiencias profesionales con nosotros, y que todos tus deseos para este nuevo año que comienza se hagan realidad.',
-            content: '',
-            banner: 'https://www.theofficegroup.co.uk/wp-content/uploads/2016/09/Template_Single_Image_borough_3.jpg',
-            isOutstanding: false,
-            link: null
-          }
-        ],
+        firebase: '',
+        firebaseConfig: '',
+        firebaseDatabase: '',
+        firebaseDatabaseRef: '',
+        firebaseDbRender: null,
+        firebaseCharge: true,
+        list_notice: [],
         list_shortcuts: [
           {
             title: 'Mi perfil',
@@ -178,15 +162,61 @@
             icon_fontColor: '#fff',
             isDeletable: true
           }
-        ],
-        list_notifications: [
-
         ]
       }
     },
     mounted () {
-      // do something after mounting vue instance
-      console.log(this.list_notice)
+      // inicializar libreria de objetos
+      let objects = require('../libs/objects')
+      // inicializar libreria de firebase para obtener los datos
+      this.firebase = require('firebase')
+      // creacion de la configuracion de la aplicacion
+      this.firebaseConfig = {
+        apiKey: 'AIzaSyD0RbHghkmKo5vKPC_eKNhK-I4Yuod81ao',
+        authDomain: 'fact-squid.firebaseapp.com',
+        databaseURL: 'https://fact-squid.firebaseio.com',
+        projectId: 'fact-squid',
+        storageBucket: 'fact-squid.appspot.com',
+        messagingSenderId: '418617142482'
+      }
+      // inicializacion de la aplicacion, en caso que no se haya realizado
+      if (this.firebase.apps.length === 0) {
+        this.firebase.initializeApp(this.firebaseConfig)
+      }
+      // creacion de la base de datos
+      this.firebaseDatabase = this.firebase.database()
+      // creamos la referencia de la base de datos
+      this.firebaseDatabaseRef = this.firebaseDatabase.ref('news')
+      // obtenemos datos en cada actualizacion de contenido
+      this.firebaseDatabaseRef.on('value', (snap) => {
+        this.firebaseCharge = true
+        // Obtenemos la lista de datos para renderizar en pantalla
+        this.firebaseDbRender = snap.val()
+        // limpiamos la lista de noticias para ingresar las nuevas
+        this.list_notice = []
+        // recorremos la seleccion descargando los datos para mostrar
+        for (const notice in this.firebaseDbRender) {
+          if (this.firebaseDbRender.hasOwnProperty(notice)) {
+            const element = this.firebaseDbRender[notice]
+            // creamos la noticia para ingresar al feed
+            let noticiaToList = objects.createNotices(notice, element.origin, element.origin_icon, element.date, element.author, element.imgsrc, element.title, element.description, element.content, element.banner, element.isOutstanding, element.link)
+            // añadimos el item a la lista de noticias
+            this.list_notice.push(noticiaToList)
+          }
+        }
+        // Ordenamos la lista de noticias
+        this.list_notice.sort(function (a, b) {
+          if (a.isOutstanding === true && b.isOutstanding === false) {
+            return -1
+          }
+          if (a.isOutstanding === false && b.isOutstanding === true) {
+            return 1
+          }
+          return 0
+        })
+        this.firebaseCharge = false
+        console.log(this.list_notice)
+      })
     },
     methods: {
       clickMoreInfo (link) {
@@ -300,5 +330,13 @@
     text-align: center;
     border-radius: 8px;
     box-shadow: 0px 0px 6px 0.5px #949494;
+  }
+  .chargefeed{
+    display: block;
+    margin: auto;
+    width: 30px;
+    height: 30px;
+    background-image: url("~@/assets/images/ajax-loader.gif");
+    background-size: contain;
   }
 </style>

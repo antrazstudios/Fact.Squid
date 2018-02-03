@@ -216,3 +216,20 @@ exports.createNotifications = (vkey, vcontent, vfrom, vkind, vtime, vtype, vstat
     state: vstate
   }
 }
+
+exports.createNotices = (vkey, vorigin, voriginicon, vdate, vauthor, vimgsrc, vtitle, vdescription, vcontent, vbanner, visOutStanding, vlink) => {
+  return {
+    key: vkey,
+    origin: vorigin,
+    origin_icon: voriginicon,
+    date: vdate,
+    author: vauthor,
+    imgsrc: vimgsrc,
+    title: vtitle,
+    description: vdescription,
+    content: vcontent,
+    banner: vbanner,
+    isOutstanding: visOutStanding,
+    link: vlink
+  }
+}

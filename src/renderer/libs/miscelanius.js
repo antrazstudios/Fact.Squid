@@ -21,3 +21,8 @@ exports.filterMethod = (obj, columns, value) => {
 exports.getEmojiURL = (code) => {
   return '/assets/images/emoji-72x72/' + code + '.png'
 }
+
+exports.convertDateToStringStorage = (val) => {
+  let dateWork = new Date(val)
+  return dateWork.toLocaleDateString() + ' ' + dateWork.toLocaleTimeString()
+}

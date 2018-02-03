@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="content">
     <!-- Area de accesos directos -->
     <i-col span="4">
@@ -94,6 +94,7 @@
       <Card class="slides">
         <h3>Notificaciones</h3>
         <hr/>
+        <notifications-view :notified="false"></notifications-view>
       </Card>
     </i-col>
     <!-- Boton de regresar al top -->
@@ -106,8 +107,10 @@
 </template>
 
 <script>
+  import NotificationsView from './miscelanius/notificationsView'
   export default {
     name: 'landing-page',
+    components: { NotificationsView },
     data () {
       return {
         value1: 0,

@@ -204,3 +204,15 @@ exports.createContactoTelefono = (vid, vtipo, vnumero, vext, vidcontacto) => {
     idcontacto: vidcontacto
   }
 }
+
+exports.createNotifications = (vkey, vcontent, vfrom, vkind, vtime, vtype, vstate) => {
+  return {
+    key: vkey,
+    content: vcontent,
+    from: vfrom,
+    kind: vkind,
+    time: new Date(vtime),
+    type: vtype,
+    state: vstate
+  }
+}

@@ -60,13 +60,13 @@
           <!-- Columna de acciones del toolbar -->
           <i-col span="6" class-name="text-right-layout">
             <div>
-              <ButtonGroup>
-                <i-button title="Buscar" type="text" icon="search" @click="searchClick()"></i-button>
-                <i-button title="Ayuda" type="text" icon="help" @click="gotoDocumentation()"></i-button>
-                <i-button title="Configuracion Sistema" type="text" icon="wrench" @click="gotoSettings()"></i-button>
-                <i-button title="Notificaciones" type="text" icon="android-notifications" @click="profileClick()"></i-button>
-                <i-button title="Mi perfil" type="text" icon="person" @click="profileClick()"></i-button>
-              </ButtonGroup>
+              <!-- <ButtonGroup> -->
+                <i-button title="Buscar" type="text" icon="search" size="small" @click="searchClick()"></i-button>
+                <i-button title="Ayuda" type="text" size="small" icon="help" @click="gotoDocumentation()"></i-button>
+                <i-button title="Configuracion Sistema" type="text" size="small" icon="wrench" @click="gotoSettings()"></i-button>
+                <i-button title="Notificaciones" type="text" size="small" icon="android-notifications" @click="visibleNotifications = !visibleNotifications"></i-button>
+                <i-button title="Mi perfil" type="text" size="small" icon="person" @click="profileClick()"></i-button>
+              <!-- </ButtonGroup> -->
               <Poptip placement="bottom-end" trigger="click" title="Mi perfil" v-model="visibleProfile">
                 <div slot="content">
                   <img class="img-circle" :src="actualProfile.imagenperfil"/>
@@ -175,12 +175,18 @@
         </i-select>
       </div>
     </Modal>
+    <Modal v-model="visibleNotifications" title="Notificaciones">
+      <notifications-view v-if="showMenuBar === true" :notified="true" ref="notificationsManager"></notifications-view>
+      <div slot="footer"></div>
+    </Modal>
   </div>
 </template>
 
 <script>
+  import NotificationsView from './components/miscelanius/notificationsView'
   export default {
     name: 'billsdelivery-vue',
+    components: { NotificationsView },
     data () {
       return {
         showMenuBar: false,
@@ -195,6 +201,7 @@
         developerMode: true,
         visibleProfile: false,
         visibleSearch: false,
+        visibleNotifications: false,
         visibleReturnButton: 'hidden',
         activeName: '1',
         platform: 'win32',
@@ -221,11 +228,13 @@
             name: 'settings-index',
             buttonReturn: true
           }
-        ]
+        ],
+        notificacionesManager: NotificationsView
       }
     },
     mounted () {
       this.handleSpinHide()
+      console.log(this.$children)
     },
     created: function () {
       // Obtencion del maximo de una tabla dependiendo del tamaño de la app
@@ -383,6 +392,21 @@
       },
       searchClick () {
         this.visibleSearch = !this.visibleSearch
+      },
+      verifyNotifications () {
+        // let notificacionesObtenidas = []
+        if (this.actualProfile !== '' && this.actualProfile !== undefined) {
+          // let idUser = this.actualProfile.id
+          // let storage = require('./libs/storage')
+          console.log('prueba')
+          // storage._database_getNotifications(this.actualProfile.id).then((rta) => {
+          //   this.notificaciones = rta
+          //   notificacionesObtenidas = rta
+          //   return notificacionesObtenidas
+          // }).catch((err) => {
+          //   this.$Message.error(err.message)
+          // })
+        }
       },
       gotoSettings () {
         if (this.actualProfile.verifyPermission('SETTINGS_INDEX') === true) {

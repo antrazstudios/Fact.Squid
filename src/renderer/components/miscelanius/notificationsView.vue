@@ -12,7 +12,7 @@
     <hr v-if="firebaseDbRenderToday.length !== 0" class="hrTitle">
     <!-- Contenido de las notificaciones de hoy -->
     <transition-group enter-active-class="animated fadeInRight">
-      <Alert v-for="item in firebaseDbRenderToday" :key="item.key" :type="item.type" :show-icon="item.state === 0 ? true : false" closable style="opacity: 0.8">
+      <Alert v-for="item in firebaseDbRenderToday" :key="item.key" :type="item.type" :show-icon="item.state === 0 ? true : false" closable style="opacity: 0.8" @on-close="deleteNotification(item)">
         <div v-if="item.state === 0" style="line-height: normal !important; opacity: 0.8s; margin-top: 8px">
           <span style="font-size: 12px; font-weight: bold;">{{item.from}}</span>
         </div>

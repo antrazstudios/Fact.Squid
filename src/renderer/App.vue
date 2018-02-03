@@ -3,12 +3,12 @@
     
     <!-- Cotenido -->
     <!-- Menu superior fixed-->
-    <Menu v-if="showMenuBar === true" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" >
+    <Menu ref="MenuFix" :width="widthMenu" v-if="showMenuBar === true" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" >
       <div class="layout-fixed" v-bind:style="{marginTop: margintop + 'px'}">
         <Row type="flex" justify="space-between">
           <!-- Columna de retorno de vista -->
-          <i-col span="6">
-            <div v-bind:style="{ visibility: visibleReturnButton }">
+          <i-col span="1" v-if="visibleReturnButton === 'visible'">
+            <div>
               <Tooltip content="Regresar a la vista anterior" placement="bottom-start">
                 <i-button type="text" @click="returnPath()">
                   <Icon type="chevron-left"></Icon>
@@ -17,42 +17,42 @@
             </div>
           </i-col>
           <!-- Columna de accesos del menu -->
-          <i-col span="12">
+          <i-col :span="actualWidthWindow > 1373 ? 12 : 17">
             <div>
               <MenuItem name="1" @click="changePath('/')">
                 <router-link style="color: inherit" :to="{ name: 'landing-page'}">
                   <icon type="ios-home"/>
-                  Inicio
+                  <span v-if="actualWidthWindow > 1373">Inicio</span>
                 </router-link>
               </MenuItem>
               <MenuItem name="2">
                 <router-link style="color: inherit" :to="{ name: 'terceros' }">
                   <icon type="ios-body"/>
-                  Terceros
+                  <span v-if="actualWidthWindow > 1373">Terceros</span>
                 </router-link>
               </MenuItem>
               <MenuItem name="3">
                 <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
                   <icon type="social-usd"/>
-                  Facturacion
+                  <span v-if="actualWidthWindow > 1373">Facturacion</span>
                 </router-link>
               </MenuItem>
               <MenuItem name="4">
                 <router-link style="color: inherit" :to="{ name: 'radicacion-index' }">
                   <icon type="cube"/>
-                  Radicacion
+                  <span v-if="actualWidthWindow > 1373">Radicacion</span>
                 </router-link>
               </MenuItem>
               <MenuItem name="5">
                 <router-link style="color: inherit" :to="{ name: 'cartera-index' }">
                   <icon type="cash"/>
-                  Cartera
+                  <span v-if="actualWidthWindow > 1373">Cartera</span>
                 </router-link>
               </MenuItem>
               <MenuItem name="6">
                 <router-link style="color: inherit" :to="{ name: 'reporteador-index' }">
                   <icon type="ionic"/>
-                  Reporteador
+                  <span v-if="actualWidthWindow > 1373">Reporteador</span>
                 </router-link>
               </MenuItem>
             </div>
@@ -189,9 +189,12 @@
     components: { NotificationsView },
     data () {
       return {
+        electronRemote: null,
+        widthMenu: '',
         showMenuBar: false,
         connectionsList: [],
         connectionSelected: '',
+        actualWidthWindow: 0,
         maxHeightTable: 0,
         connectionsModal: false,
         aboutModal: false,
@@ -237,9 +240,11 @@
       console.log(this.$children)
     },
     created: function () {
+      this.electronRemote = require('electron').remote
       // Obtencion del maximo de una tabla dependiendo del tamaño de la app
-      require('electron').remote.getCurrentWindow().on('resize', () => {
-        this.maxHeightTable = require('electron').remote.getCurrentWindow().getSize()[1] - 240
+      this.electronRemote.getCurrentWindow().on('resize', () => {
+        this.maxHeightTable = this.electronRemote.getCurrentWindow().getSize()[1] - 240
+        this.actualWidthWindow = this.electronRemote.getCurrentWindow().getSize()[0]
       })
       // Creacion del menu
       this.createMenu()
@@ -389,6 +394,8 @@
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
+        console.log(this.$refs.MenuFix.width)
+        console.log(this.widthMenu)
       },
       searchClick () {
         this.visibleSearch = !this.visibleSearch

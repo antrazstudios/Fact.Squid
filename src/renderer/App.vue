@@ -17,43 +17,55 @@
             </div>
           </i-col>
           <!-- Columna de accesos del menu -->
-          <i-col :span="actualWidthWindow > 1373 ? 12 : 17">
+          <i-col span="17">
             <div>
               <MenuItem name="1" @click="changePath('/')">
-                <router-link style="color: inherit" :to="{ name: 'landing-page'}">
-                  <icon type="ios-home"/>
-                  <span v-if="actualWidthWindow > 1373">Inicio</span>
-                </router-link>
+                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Inicio" placement="bottom">
+                  <router-link style="color: inherit" :to="{ name: 'landing-page'}">
+                    <icon type="ios-home"/>
+                    <span v-if="actualWidthWindow > 1373">Inicio</span>
+                  </router-link>
+                </Tooltip>
               </MenuItem>
               <MenuItem name="2">
-                <router-link style="color: inherit" :to="{ name: 'terceros' }">
-                  <icon type="ios-body"/>
-                  <span v-if="actualWidthWindow > 1373">Terceros</span>
-                </router-link>
+                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Terceros" placement="bottom">
+                  <router-link style="color: inherit" :to="{ name: 'terceros' }">
+                    <icon type="ios-body"/>
+                    <span v-if="actualWidthWindow > 1373">Terceros</span>
+                  </router-link>
+                </Tooltip>
               </MenuItem>
               <MenuItem name="3">
-                <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
-                  <icon type="social-usd"/>
-                  <span v-if="actualWidthWindow > 1373">Facturacion</span>
-                </router-link>
+                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Facturacion" placement="bottom">
+                  <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
+                    <icon type="social-usd"/>
+                    <span v-if="actualWidthWindow > 1373">Facturacion</span>
+                  </router-link>
+                </Tooltip>
               </MenuItem>
               <MenuItem name="4">
-                <router-link style="color: inherit" :to="{ name: 'radicacion-index' }">
-                  <icon type="cube"/>
-                  <span v-if="actualWidthWindow > 1373">Radicacion</span>
-                </router-link>
+                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Radicacion" placement="bottom">
+                  <router-link style="color: inherit" :to="{ name: 'radicacion-index' }">
+                    <icon type="cube"/>
+                    <span v-if="actualWidthWindow > 1373">Radicacion</span>
+                  </router-link>
+                </Tooltip>
               </MenuItem>
               <MenuItem name="5">
-                <router-link style="color: inherit" :to="{ name: 'cartera-index' }">
-                  <icon type="cash"/>
-                  <span v-if="actualWidthWindow > 1373">Cartera</span>
-                </router-link>
+                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Cartera" placement="bottom">
+                  <router-link style="color: inherit" :to="{ name: 'cartera-index' }">
+                    <icon type="cash"/>
+                    <span v-if="actualWidthWindow > 1373">Cartera</span>
+                  </router-link>
+                </Tooltip>
               </MenuItem>
               <MenuItem name="6">
-                <router-link style="color: inherit" :to="{ name: 'reporteador-index' }">
-                  <icon type="ionic"/>
-                  <span v-if="actualWidthWindow > 1373">Reporteador</span>
-                </router-link>
+                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Reporteador" placement="bottom">
+                  <router-link style="color: inherit" :to="{ name: 'reporteador-index' }">
+                    <icon type="ionic"/>
+                    <span v-if="actualWidthWindow > 1373">Reporteador</span>
+                  </router-link>
+                </Tooltip>
               </MenuItem>
             </div>
           </i-col>
@@ -459,10 +471,9 @@
   /* Body */
   body {
     font-family: "Helvetica Neue",Arial;
+    width: 100%;
     height:100%;
-    margin:0;
-    padding:0;
-    background-color: rgb(250, 250, 250);
+    background-color: white;
     overflow-x: hidden;
   }
   .titlebar-title{
@@ -542,8 +553,10 @@
     overflow-y: scroll;
     position: relative;
     height: 100%;
+    width: 100%;
     bottom: 32px;
     overflow-x: hidden;
+    background: transparent;
   }
   .layout-nav{
       display: block;

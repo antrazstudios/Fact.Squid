@@ -41,7 +41,9 @@ function createWindow () {
     autoHideMenuBar: true,
     titleBarStyle: titleBarStylev,
     enableLargerThanScreen: true,
-    show: false
+    show: false,
+    hasShadow: true,
+    backgroundColor: '#ecf0f1'
   })
 
   splashWindow = new BrowserWindow({
@@ -55,8 +57,10 @@ function createWindow () {
     alwaysOnTop: true,
     frame: false,
     center: true,
-    show: false
+    show: false,
+    hasShadow: true
   })
+
   splashWindow.loadURL('file://' + __static + '/loading.html')
   mainWindow.loadURL(winURL)
 

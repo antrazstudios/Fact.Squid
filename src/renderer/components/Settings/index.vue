@@ -20,6 +20,14 @@ export default {
           isFolder: false
         },
         {
+          icon_type: 'coffee',
+          text: 'Contenidos',
+          clickAction: () => {
+            this.$parent.changePath('/Contents')
+          },
+          isFolder: false
+        },
+        {
           icon_type: 'disc',
           text: 'Datos',
           isFolder: false

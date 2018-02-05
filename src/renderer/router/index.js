@@ -66,6 +66,11 @@ export default new Router({
       path: '/Reporteador/index',
       name: 'reporteador-index',
       component: require('@/components/Reporteador/index/').default
+    },
+    {
+      path: '/Contents',
+      name: 'content-editor',
+      component: require('@/components/Settings/content').default
     }
   ]
 })

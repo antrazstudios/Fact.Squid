@@ -213,8 +213,7 @@
         authDomain: 'fact-squid.firebaseapp.com',
         databaseURL: 'https://fact-squid.firebaseio.com',
         projectId: 'fact-squid',
-        storageBucket: 'fact-squid.appspot.com',
-        messagingSenderId: '418617142482'
+        storageBucket: 'gs://fact-squid.appspot.com'
       }
       // inicializacion de la aplicacion, en caso que no se haya realizado
       if (this.firebase.apps.length === 0) {

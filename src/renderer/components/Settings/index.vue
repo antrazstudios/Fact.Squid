@@ -17,7 +17,9 @@ export default {
           clickAction: () => {
             this.$parent.aboutModal = true
           },
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'coffee',
@@ -25,67 +27,93 @@ export default {
           clickAction: () => {
             this.$parent.changePath('/Contents')
           },
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'disc',
           text: 'Datos',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'gear-a',
           text: 'General',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'android-mail',
           text: 'Emails',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'locked',
           text: 'Seguridad',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'briefcase',
           text: 'Entidad',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'ios-medkit',
           text: 'Operadores',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'person-stalker',
           text: 'Oficinas',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'clipboard',
           text: 'Cargos',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'person',
           text: 'Usuarios',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'document-text',
           text: 'Formatos',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'map',
           text: 'Localizacion',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         {
           icon_type: 'cube',
           text: 'Soft. Externo',
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         }
       ]
     }

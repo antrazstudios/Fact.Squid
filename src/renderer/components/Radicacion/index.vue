@@ -21,33 +21,45 @@ export default {
           icon_type: 'ios-compose-outline',
           text: 'Movimientos facturacion',
           clickAction: () => {},
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         // Acciones de Documentacion
         {
           icon_type: 'ios-paper-outline',
           text: 'Documentos',
           isFolder: true,
+          icon_style: 'icon',
+          button_style: 'text',
           folderContent: [
             {
               icon_type: 'ios-list-outline',
               text: 'Editor No Aceptaciones',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Re-envio',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Recorrido',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Administrativo',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             }
           ]
         },
@@ -56,26 +68,36 @@ export default {
           icon_type: 'ios-box-outline',
           text: 'Correspondencia',
           isFolder: true,
+          icon_style: 'icon',
+          button_style: 'text',
           folderContent: [
             {
               icon_type: 'ios-list-outline',
               text: 'Confirmar documentos',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-paperplane-outline',
               text: 'Trazabilidad documento',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-bookmarks-outline',
               text: 'Cargar desde Sipost',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-book-outline',
               text: 'Planilla de Sipost',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             }
           ]
         },
@@ -84,11 +106,15 @@ export default {
           icon_type: 'ios-pie-outline',
           text: 'Cargas masivas',
           isFolder: true,
+          icon_style: 'icon',
+          button_style: 'text',
           folderContent: [
             {
               icon_type: 'ios-pie-outline',
               text: 'Carga de rad. en DGH',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             }
           ]
         },
@@ -97,7 +123,9 @@ export default {
           icon_type: 'ios-search',
           text: 'Trazabilidad documento',
           clickAction: () => {},
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         }
       ]
     }

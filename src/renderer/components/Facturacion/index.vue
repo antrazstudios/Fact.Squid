@@ -21,33 +21,45 @@ export default {
           icon_type: 'ios-plus-outline',
           text: 'Recepcion facturacion',
           clickAction: () => {},
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         // Acciones de Documentacion
         {
           icon_type: 'ios-paper-outline',
           text: 'Documentos',
           isFolder: true,
+          icon_style: 'icon',
+          button_style: 'text',
           folderContent: [
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Glosas',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Devoluciones',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Conciliaciones',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             },
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Administrativo',
-              clickAction: () => {}
+              clickAction: () => {},
+              icon_style: 'icon',
+              button_style: 'text'
             }
           ]
         },
@@ -56,21 +68,27 @@ export default {
           icon_type: 'ios-bookmarks-outline',
           text: 'Requerimientos',
           clickAction: () => {},
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         // Ordenes de salida de Correspondencia
         {
           icon_type: 'ios-albums-outline',
           text: 'Ordenes',
           clickAction: () => {},
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         },
         // Busqueda de Contenido en 360º
         {
           icon_type: 'ios-search',
           text: 'Busqueda 360º',
           clickAction: () => {},
-          isFolder: false
+          isFolder: false,
+          icon_style: 'icon',
+          button_style: 'text'
         }
       ]
     }

@@ -7,9 +7,10 @@
         <h2 v-if="sizeMenu === 'normal'" style="margin-bottom: 10px;">{{titleMenu}}</h2>
         <h3 v-if="sizeMenu === 'small'" style="margin-bottom: 5px;">{{titleMenu}}</h3>
         <Card :style="transformsCardSizeSelectInitial(item.key)" :dis-hover="showFolder" v-for="item in optionsMenu" :key="item.key" :padding="0">
-          <i-button :disabled="showFolder" :style="transformsButtonSizeSelectInitial()" type="text" @click="clickeditem(item)">
+          <i-button :disabled="showFolder" :style="transformsButtonSizeSelectInitial()" :type="item.button_style" @click="clickeditem(item)">
             <Icon :size="transformsIconFolderSizeSelectInitial().sizeIcon" ref="icon" :style="transformsIconFolderSizeSelectInitial().style" v-if="showIconFolder(item.isFolder) === true" type="android-folder"></Icon>
-            <Icon :type="item.icon_type" :size="transformsIconSizeSelectInitial()" style="display:block"/>
+            <Icon v-if="item.icon_style === 'icon'" :type="item.icon_type" :size="transformsIconSizeSelectInitial()" style="display:block"/>
+            <img v-if="item.icon_style === 'img'" :src="item.icon_type" :style="'width: ' + transformsIconSizeSelectInitial() + 'px'"/>
             <div v-if="showFolder === false" class="content-text">
               <label v-bind:style="sizeMenu === 'large' ? { fontSize: '16px' } : sizeMenu === 'normal' ? { fontSize: '12px' } : { fontSize: '10px' }">{{ item.text }}</label>
             </div>

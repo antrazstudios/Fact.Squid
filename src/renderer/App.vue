@@ -154,20 +154,15 @@
         <h4>Fact.Squid es desarrollado por Carlos Vasquez de AntrazStudios, Colombia</h4>
         <p style="margin-top: 30px">Utilizamos tecnologias punteras Web adaptadas a escritorio y de codigo abierto:</p>
         <Row style="margin-top: 15px; margin-bottom: 15px">
-          <i-col span="12">
-            <img src="./assets/images/vueelectronjs_logo.png" style="width: auto; height: 30px; margin-left: 5px; margin-right: 5px;">
-          </i-col>
-          <i-col span="12">
-            <img src="./assets/images/electronjs_logo.svg" style="width: auto; height: 30px; margin-left: 5px; margin-right: 5px;">
-          </i-col>
+          <menu-selector sizeMenu="small" :optionsMenu="tecnologies"></menu-selector>
         </Row>
-        <p>Fact.Squid utiliza VueJS y ElectronJS, ademas de otros asombrosos proyectos opensource.</p>
+        <!-- <p>Fact.Squid utiliza VueJS y ElectronJS, ademas de otros asombrosos proyectos opensource.</p> -->
         <Row style="margin-top: 15px">
           <i-col span="12">
             <i-button type="ghost">Contrato de usuario final</i-button>
           </i-col>
           <i-col span="12">
-            <i-button type="ghost">Listado de librerias de codigo libro</i-button>
+            <i-button type="ghost">Listado de librerias</i-button>
           </i-col>
         </Row>
       </div>
@@ -195,12 +190,114 @@
 </template>
 
 <script>
+  import MenuSelector from './components/miscelanius/menuOptions'
   import NotificationsView from './components/miscelanius/notificationsView'
   export default {
     name: 'billsdelivery-vue',
-    components: { NotificationsView },
+    components: { NotificationsView, MenuSelector },
     data () {
       return {
+        tecnologies: [
+          {
+            icon_type: 'https://cdn-images-1.medium.com/max/1600/0*gPcFC_SaJmZSuRas.png',
+            text: 'electron-vue.js',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://simulatedgreg.gitbooks.io/electron-vue/content/en/')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://vuejs.org/images/logo.png',
+            text: 'vue.js',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://vuejs.org/')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://camo.githubusercontent.com/79904b8ba0d1bce43022bbd5710f0ea1db33f54f/68747470733a2f2f7261776769742e636f6d2f73696e647265736f726875732f617765736f6d652d656c656374726f6e2f6d61737465722f656c656374726f6e2d6c6f676f2e737667',
+            text: 'electron.js',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://electronjs.org/')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://ih0.redbubble.net/image.317668688.2669/sticker,375x360-bg,ffffff.u5.png',
+            text: 'Firebase by Google',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://firebase.google.com/?hl=es-419')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://mc.qcloudimg.com/static/img/2742c21902443c72d3b0e198b7c49efb/11.png',
+            text: 'MySQL by Oracle',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('http://www.mysql.com')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'http://www.idlewilddigital.com/sites/default/files/jQurery_0.gif',
+            text: 'jQuery',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('http://www.jquery.com')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://lh3.googleusercontent.com/UAylvT-lNL3zfIefMgP9kiUwrhEnJxJiwq8hC0kne0qvSaOGYH8BVlJMYnNWRneb5AI=w300',
+            text: 'Animate.css',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://daneden.github.io/animate.css/')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://file.iviewui.com/dist/76ecb6e76d2c438065f90cd7f8fa7371.png',
+            text: 'iView',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://www.iviewui.com/')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          },
+          {
+            icon_type: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Unofficial_JavaScript_logo_2.svg/240px-Unofficial_JavaScript_logo_2.svg.png',
+            text: 'JavaScript',
+            clickAction: () => {
+              const {shell} = require('electron')
+              shell.openExternal('https://www.javascript.com/')
+            },
+            isFolder: false,
+            icon_style: 'img',
+            button_style: 'text'
+          }
+        ],
         electronRemote: null,
         widthMenu: '',
         showMenuBar: false,

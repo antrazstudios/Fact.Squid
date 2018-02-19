@@ -345,8 +345,11 @@
       }
     },
     mounted () {
+      if (this.maxHeightTable === 0) {
+        this.maxHeightTable = this.electronRemote.getCurrentWindow().getSize()[1] - 240
+        console.log(this.maxHeightTable)
+      }
       this.handleSpinHide()
-      console.log(this.$children)
     },
     created: function () {
       this.electronRemote = require('electron').remote

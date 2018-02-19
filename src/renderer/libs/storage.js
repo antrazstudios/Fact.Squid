@@ -43,7 +43,7 @@ exports.getActualConnection = () => {
 }
 
 // -----------------------------------------------------------------------------------------------------------
-exports._database_runQuery = (configuracion) => {
+exports._database_runQuery = (configuracion, connection = null) => {
   // --------------------------| Description |--------------------------
   // Description: Corre un query que puede o no regresar una serie de datos
   // Parameters:
@@ -53,13 +53,18 @@ exports._database_runQuery = (configuracion) => {
   // * configuracion. alterConn = Define una conexion alternativa en caso de definir la propiedad useActualConn en false
   // ------------------------| End Description |------------------------
   let deferred = q.defer()
-  let conn = configuracion.useActualConn === false ? configuracion.alterConn : this.getActualConnection()
-  // se intenta realizar la conexion
-  conn.connect((err) => {
-    if (err) { // en caso de presentarse un error se notifica a la promesa de ello
-      deferred.reject('Hha ocurrido un error al intentar conectarse al servidor: ' + conn.host + ' => ' + err)
-    }
-  })
+  let conn
+  if (connection !== null) {
+    conn = connection
+  } else {
+    conn = configuracion.useActualConn === false ? configuracion.alterConn : this.getActualConnection()
+    // se intenta realizar la conexion
+    conn.connect((err) => {
+      if (err) { // en caso de presentarse un error se notifica a la promesa de ello
+        deferred.reject('Hha ocurrido un error al intentar conectarse al servidor: ' + conn.host + ' => ' + err)
+      }
+    })
+  }
   // Se ejecuta el respectivo query con la consulta, y retorna el valor de la misma
   if (configuracion['parameters']) {
     conn.query(configuracion.query, configuracion.parameters, (err, results, fields) => {
@@ -86,8 +91,10 @@ exports._database_runQuery = (configuracion) => {
       }
     })
   }
-  // Finalizamos la conexion actual con el servidor
-  conn.end()
+  if (connection === null) {
+    // Finalizamos la conexion actual con el servidor
+    conn.end()
+  }
   // Regresa como respuesta una promesa
   return deferred.promise
 }
@@ -867,5 +874,161 @@ exports._database_getContactoInfo = (idContacto) => {
     console.log(err)
   })
 
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createFactura = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea una nueva factura en la base de datos
+  // Parameters:
+  // * configuracion. numero = numero real de la factura
+  // * configuracion. fecha = fecha de expedicion de la factura
+  // * configuracion. regimen = numero segun lineamientos de rips que definen el tipo de regimen de la factura
+  // * configuracion. valorfactura = valor de la factura
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // una clase que contiene el id creado de la factura.
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createFactura(?, ?, ?, ?)',
+    parameters: [ configuracion.numero, configuracion.fecha, configuracion.regimen, configuracion.valorfactura ]
+  }, configuracion.connection).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createDocumento = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea una nueva factura en la base de datos
+  // Parameters:
+  // * configuracion. idtipo = numero id del tipo de documento
+  // * configuracion. consecutivo = consecutivo del documento
+  // * configuracion. anexo = aqui va el documento anexo en blob
+  // * configuracion. anexoformat = extension del documento anexo
+  // * configuracion. observacion = Una observacion breve sobre el documento
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // una clase que contiene el id creado de la factura.
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createDocumento(?, ?, ?, ?, ?)',
+    parameters: [ configuracion.idtipo, configuracion.consecutivo, configuracion.anexo, configuracion.anexoformat, configuracion.observacion ]
+  }, configuracion.connection).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createRelationDocumentoFactura = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea una nueva relacion entre el documento y la factura
+  // Parameters:
+  // * configuracion. idfactura = numero id de la factura relacionada
+  // * configuracion. iddocumento = numero de id del documento que tiene este documento
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // nada
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createRelationDocumentoFactura(?, ?)',
+    parameters: [ configuracion.idfactura, configuracion.iddocumento ]
+  }, configuracion.connection).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports.createRelationFactura = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea acciones para la factura (trazbilidad)
+  // Parameters:
+  // * configuracion. idfactura = numero id de la factura relacionada
+  // * configuracion. idaccion = numero de id del documento que tiene este documento
+  // * configuracion. idusuario = numero del id del usuario que realiza el movimiento
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // nada
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createRelationFactura(?, ?, ?)',
+    parameters: [ configuracion.idfactura, configuracion.idaccion, configuracion.idusuario ]
+  }, configuracion.connection).then((rta) => {
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports.verifyDocumento = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Consulta si existe un documento o no
+  // Parameters:
+  // * configuracion. consecutivo = numero id de la factura relacionada
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // true or false si existe o no un documento
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call verifyDocumento(?)',
+    parameters: [ configuracion.consecutivo ]
+  }, configuracion.connection).then((rta) => {
+    if (rta.result[0].length === 0) {
+      deferred.resolve(false)
+    } else {
+      deferred.resolve(true)
+    }
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports.verifyFactura = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Consulta si existe un documento o no
+  // Parameters:
+  // * configuracion. numero = numero id de la factura relacionada
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // true or false si existe o no un documento
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call verifyFactura(?)',
+    parameters: [ configuracion.numero ]
+  }, configuracion.connection).then((rta) => {
+    if (rta.result[0].length === 0) {
+      deferred.resolve(false)
+    } else {
+      deferred.resolve(true)
+    }
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
   return deferred.promise
 }

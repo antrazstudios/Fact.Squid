@@ -71,6 +71,11 @@ export default new Router({
       path: '/Contents',
       name: 'content-editor',
       component: require('@/components/Settings/content').default
+    },
+    {
+      path: '/Facturacion/recepcion',
+      name: 'facturacion-recepcion',
+      component: require('@/components/Facturacion/recepcionFacturacion').default
     }
   ]
 })

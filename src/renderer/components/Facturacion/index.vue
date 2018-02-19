@@ -20,7 +20,9 @@ export default {
         {
           icon_type: 'ios-plus-outline',
           text: 'Recepcion facturacion',
-          clickAction: () => {},
+          clickAction: () => {
+            this.$parent.changePath('/Facturacion/recepcion')
+          },
           isFolder: false,
           icon_style: 'icon',
           button_style: 'text'

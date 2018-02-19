@@ -255,7 +255,6 @@ exports.createNotices = (vkey, vorigin, voriginicon, vdate, vauthor, vimgsrc, vt
 // Facturas de la DB
 exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfactura, vregimenRender = 0) => {
   // validacion del regimen segun estructura de los RIPS
-  // console.log(vregimen)
   // let vregimenRender
   if (vregimen === '1' || vregimen === 1) {
     vregimenRender = 'CONTRIBUTITVO'
@@ -312,7 +311,7 @@ exports.createCTfile = (vcodigoprestador, vfecharemision, vcodigoarchivo, vtotal
 exports.createAFfile = (vcodigoprestador, vrazonsocial, vtipoidentificacion, vnumeroidentificacion, vnumerofactura, vfechaexpedicionfactura, vfechainicio, vfechafinal, vcodigoentidadadm, vnombreentidadadm, vnumerocontrato, vplanbeneficios, vnumeropoliza, vvalorcopago, vvalorcomision, vvalordescuentos, vvalorpagar) => {
   // deserializar fecha
   let tempDate = vfechaexpedicionfactura.split('/')
-  vfechaexpedicionfactura = new Date(tempDate[2] + '-' + tempDate[1] + '-' + tempDate[0])
+  vfechaexpedicionfactura = new Date(tempDate[2] + '-' + tempDate[1] + '-' + tempDate[0] + 'T00:00:00')
   // evaluar el numero de caracteres del numero de factura y convertir el item al tipo de factura de dinamica
   let vnumerofacturaReal = ''
   if (vnumerofactura.length === 10) {

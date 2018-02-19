@@ -56,7 +56,8 @@ exports.convertDateToStringStorage = (val) => {
 
 exports.convertDateToStringSQL = (val) => {
   let dateWork = new Date(val)
-  return dateWork.getFullYear() + '-' + dateWork.getMonth() + '-' + dateWork.getDate()
+  let dateMatriz = dateWork.toLocaleDateString().split('/')
+  return dateMatriz[2] + '-' + dateMatriz[1] + '-' + dateMatriz[0]
 }
 
 exports.convertBase64ToBLOB = (val, contentType) => {

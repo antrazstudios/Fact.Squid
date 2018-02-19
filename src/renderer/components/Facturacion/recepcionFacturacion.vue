@@ -68,7 +68,6 @@
       },
       onFilePicked (event) {
         this.files = event.target.files
-        console.log(this.files)
         if (this.files.length !== 0) {
           this.$parent.handleSpinShow('Cargando RIPS')
           this.enabledConfirm = true
@@ -87,7 +86,7 @@
                   this.facturacionDb.push(objects.createFacturas(0, element.numeroFactura, element.numeroFacturaReal, element.fechaExpedicionFactura, 'SIN ESPECIFICAR', element.valorPagar))
                   this.valorFacturas = this.valorFacturas + element.valorPagar
                 })
-                this.numEnvio = this.rutaRips.replace(/\D/g, '')
+                this.numEnvio = parseInt(this.rutaRips.replace(/\D/g, ''))
                 this.createColumns()
                 this.$parent.handleSpinHide()
                 this.$Message.info('Facturas cargadas exitosamente')
@@ -133,7 +132,7 @@
           title: 'Fecha de la factura',
           render: (h, {row}) => {
             // return row.fecha.toLocaleDateString()
-            return row.fecha.getDate() + '-' + row.fecha.getMonth() + '-' + row.fecha.getFullYear()
+            return row.fecha.toLocaleDateString()
           }
         })
         // regimen temporal
@@ -354,14 +353,14 @@
                                 conn.end()
                               })
                             }).catch((err) => {
-                              console.log(err.result)
-                              this.$Message.error(err.result)
+                              console.log(err)
+                              this.$Message.error(err)
                               conn.end()
                             })
                           })
                         }).catch((err) => {
                           console.log(err)
-                          this.$Message.error(err.result)
+                          this.$Message.error(err)
                           conn.end()
                         })
                       }).catch((err) => {

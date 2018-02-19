@@ -50,7 +50,7 @@
             {
               id: '1',
               type: 'item',
-              title: 'Acerca de BillsDelivery',
+              title: 'Acerca de FactSquid',
               nameFile: 'README.md'
             },
             {

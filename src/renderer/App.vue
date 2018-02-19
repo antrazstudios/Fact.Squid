@@ -193,7 +193,7 @@
   import MenuSelector from './components/miscelanius/menuOptions'
   import NotificationsView from './components/miscelanius/notificationsView'
   export default {
-    name: 'billsdelivery-vue',
+    name: 'factsquid',
     components: { NotificationsView, MenuSelector },
     data () {
       return {

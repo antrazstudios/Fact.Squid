@@ -76,6 +76,11 @@ export default new Router({
       path: '/Facturacion/recepcion',
       name: 'facturacion-recepcion',
       component: require('@/components/Facturacion/recepcionFacturacion').default
+    },
+    {
+      path: '/Glosas/recepcion',
+      name: 'glosas-recepcion',
+      component: require('@/components/Facturacion/recepcionGlosas').default
     }
   ]
 })

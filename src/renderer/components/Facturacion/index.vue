@@ -38,7 +38,10 @@ export default {
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Glosas',
-              clickAction: () => {},
+              isFolder: false,
+              clickAction: () => {
+                this.$parent.changePath('/Glosas/recepcion')
+              },
               icon_style: 'icon',
               button_style: 'text'
             },

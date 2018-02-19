@@ -32,7 +32,7 @@
           <h3 v-if="sizeMenu === 'normal'" style="margin-bottom: 5px; margin-top: -30px">{{ titleFolder }}</h3>
           <h4 v-if="sizeMenu === 'small'" style="margin-bottom: 3px; margin-top: -30px">{{ titleFolder }}</h4>
           <Card style="background-color: #f9f9f9" :class="sizeMenu === 'large' ? 'buttons-options buttons-options--large' : sizeMenu === 'normal' ? 'buttons-options buttons-options--normal' : 'buttons-options buttons-options--small'" v-for="item in optionsFolder" :key="item.key">
-            <i-button :class="sizeMenu === 'large' ? 'sub-buttons-options sub-buttons-options--large' : sizeMenu === 'normal' ? 'sub-buttons-options sub-buttons-options--normal' : 'sub-buttons-options sub-buttons-options--small'" type="text" @click="clickeditem('')">
+            <i-button :class="sizeMenu === 'large' ? 'sub-buttons-options sub-buttons-options--large' : sizeMenu === 'normal' ? 'sub-buttons-options sub-buttons-options--normal' : 'sub-buttons-options sub-buttons-options--small'" type="text" @click="clickeditem(item)">
               <Icon :type="item.icon_type" :size="sizeMenu === 'large' ? 100 : sizeMenu === 'normal' ? 60 : 25" style="display:block"/>
               <div class="content-text">
                 <label v-bind:style="sizeMenu === 'large' ? { fontSize: '16px' } : sizeMenu === 'normal' ? { fontSize: '12px' } : { fontSize: '10px' }">{{ item.text }}</label>
@@ -62,6 +62,7 @@ export default {
   },
   methods: {
     clickeditem (item) {
+      console.log(item)
       if (item.isFolder === true) {
         this.titleFolder = item.text
         this.showFolder = !this.showFolder

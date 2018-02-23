@@ -275,6 +275,7 @@ exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfac
   }
   return {
     id: vid,
+    idtercero: 0,
     ripsnumero: vripsnumero,
     numero: vnumero,
     fecha: vfecha,

@@ -882,6 +882,7 @@ exports._database_createFactura = (configuracion) => {
   // --------------------------| Description |--------------------------
   // Description: Crea una nueva factura en la base de datos
   // Parameters:
+  // * configuracion. idtercero = llave principal del tercero necesario para incluir relacion entre factura y facturado
   // * configuracion. numero = numero real de la factura
   // * configuracion. fecha = fecha de expedicion de la factura
   // * configuracion. regimen = numero segun lineamientos de rips que definen el tipo de regimen de la factura
@@ -892,8 +893,8 @@ exports._database_createFactura = (configuracion) => {
   // ------------------------| End Description |------------------------
   let deferred = q.defer()
   this._database_runQuery({
-    query: 'call createFactura(?, ?, ?, ?)',
-    parameters: [ configuracion.numero, configuracion.fecha, configuracion.regimen, configuracion.valorfactura ]
+    query: 'call createFactura(?, ?, ?, ?, ?)',
+    parameters: [ configuracion.idtercero, configuracion.numero, configuracion.fecha, configuracion.regimen, configuracion.valorfactura ]
   }, configuracion.connection).then((rta) => {
     deferred.resolve(rta)
   }).catch((err) => {

@@ -62,7 +62,6 @@ export default {
   },
   methods: {
     clickeditem (item) {
-      console.log(item)
       if (item.isFolder === true) {
         this.titleFolder = item.text
         this.showFolder = !this.showFolder

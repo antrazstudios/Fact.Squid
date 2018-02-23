@@ -8,8 +8,15 @@
             <Button slot="append" icon="folder" @click="onPickFile"></Button>
           </Input>
         </FormItem>
+      </Form>
+      <Form inline :label-width="130">
         <FormItem label="Numero envio" :error="numEnvioError">
           <InputNumber type="" v-model="numEnvio"/>
+        </FormItem>
+        <FormItem label="Entidad" :error="numEntidadError">
+          <i-select v-model="numEntidad" filterable style="width: 500px">
+            <i-option v-for ="item in tercerosBD" :value="item.tercero.id" :key="item.tercero.id">{{item.tercero.identificacion + ' - ' + item.nombre}}</i-option>
+          </i-select>
         </FormItem>
       </Form>
       <Form inline :label-width="130">
@@ -49,6 +56,8 @@
       return {
         rutaRips: '',
         rutaRipsError: '',
+        numEntidad: '',
+        numEntidadError: '',
         numEnvio: 0,
         numEnvioError: '',
         valorFacturas: '0',
@@ -59,7 +68,8 @@
         facturacionDb: [],
         files: [],
         enabledConfirm: true,
-        visibleChargeInit: true
+        visibleChargeInit: true,
+        tercerosBD: []
       }
     },
     methods: {
@@ -108,6 +118,16 @@
               })
             }
           }
+          const storage = require('../../libs/storage.js')
+          storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
+            this.tercerosBD = data1
+          }).catch((err) => {
+            this.$parent.handleSpinHide()
+            this.$Message.error({
+              content: err,
+              duration: 8
+            })
+          })
         } else if (this.files.length === 0) {
           this.$Message.error('No ha seleccionado los RIPS')
         }
@@ -161,78 +181,88 @@
         })
       },
       verificarCarga () {
-        // Se realiza confirmacion del ingreso del numero de envio
-        if (this.numEnvio === '' || this.numEnvio === 0 || this.numEnvio === null) {
-          this.numEnvioError = 'El numero de envio no puede ser nulo o estar vacio'
+        // Se realiza confirmacion de la seleccion de una entidad
+        if (this.numEntidad === '' || this.numEntidad === 0 || this.numEntidad === null) {
+          this.numEntidadError = 'Es Neceserario seleccionar un tercero valido para asociar esta carga'
         } else {
-          this.numEnvioError = ''
-          // Se realiza confirmacion de la ruta de los rips
-          if (this.rutaRips === '' || this.rutaRips === '' || this.rutaRips === null) {
-            this.rutaRipsError = 'Debe seleccionar una ruta de ubicacion para los RIPS'
-            this.cantFacturasError = 'PATH==Null;;Invalid INT'
-            this.valorFacturasError = 'Cualquier valor es invalido sin una ruta de RIPS'
+          this.numEntidadError = ''
+          // Se realiza confirmacion del ingreso del numero de envio
+          if (this.numEnvio === '' || this.numEnvio === 0 || this.numEnvio === null) {
+            this.numEnvioError = 'El numero de envio no puede ser nulo o estar vacio'
           } else {
-            this.rutaRipsError = ''
-            this.cantFacturasError = ''
-            this.valorFacturasError = ''
-            // Se realiza confirmacion del contenido de las facturas
-            if (this.facturacionDb.length === 0) {
-              this.rutaRipsError = 'No se han cargado facturas suficientes para realizar un cargue'
+            this.numEnvioError = ''
+            // Se realiza confirmacion de la ruta de los rips
+            if (this.rutaRips === '' || this.rutaRips === '' || this.rutaRips === null) {
+              this.rutaRipsError = 'Debe seleccionar una ruta de ubicacion para los RIPS'
+              this.cantFacturasError = 'PATH==Null;;Invalid INT'
+              this.valorFacturasError = 'Cualquier valor es invalido sin una ruta de RIPS'
             } else {
               this.rutaRipsError = ''
-              this.$parent.handleSpinShow('Verificando la existencia de los datos en la BD')
-              // Contador de registros terminados en BD
-              let countFactsRegBd = 0
-              let countFactsNegativa = 0
-              let storage = require('../../libs/storage')
-              let conn = storage.getActualConnection()
-              conn.connect((err) => {
-                console.log(err)
-              })
-              // verificar si existe el envio en la BD
-              storage.verifyDocumento({
-                consecutivo: this.numEnvio,
-                connection: conn
-              }).then((result) => {
-                if (result === true) {
-                  this.numEnvioError = 'Este envio ya existe en la base de datos'
-                  this.$parent.handleSpinHide()
-                  conn.end()
-                } else {
-                  // verificar si existen las facturas
-                  this.facturacionDb.forEach(factura => {
-                    storage.verifyFactura({
-                      numero: factura.numero,
-                      connection: conn
-                    }).then((result) => {
-                      countFactsRegBd++
-                      factura.stateDB = result
-                      if (result === true) {
-                        countFactsNegativa++
-                      }
-                      if (countFactsRegBd === this.facturacionDb.length) {
+              this.cantFacturasError = ''
+              this.valorFacturasError = ''
+              // Se realiza confirmacion del contenido de las facturas
+              if (this.facturacionDb.length === 0) {
+                this.rutaRipsError = 'No se han cargado facturas suficientes para realizar un cargue'
+              } else {
+                this.rutaRipsError = ''
+                this.$parent.handleSpinShow('Verificando la existencia de los datos en la BD')
+                // Contador de registros terminados en BD
+                let countFactsRegBd = 0
+                let countFactsNegativa = 0
+                let storage = require('../../libs/storage')
+                let conn = storage.getActualConnection()
+                conn.connect((err) => {
+                  if (err) {
+                    console.log(err)
+                    this.$Message.error(err)
+                  }
+                })
+                // verificar si existe el envio en la BD
+                storage.verifyDocumento({
+                  consecutivo: this.numEnvio,
+                  connection: conn
+                }).then((result) => {
+                  if (result === true) {
+                    this.numEnvioError = 'Este envio ya existe en la base de datos'
+                    this.$parent.handleSpinHide()
+                    conn.end()
+                  } else {
+                    // verificar si existen las facturas
+                    this.facturacionDb.forEach(factura => {
+                      storage.verifyFactura({
+                        numero: factura.numero,
+                        connection: conn
+                      }).then((result) => {
+                        countFactsRegBd++
+                        factura.idtercero = this.numEntidad
+                        factura.stateDB = result
+                        if (result === true) {
+                          countFactsNegativa++
+                        }
+                        if (countFactsRegBd === this.facturacionDb.length) {
+                          this.$parent.handleSpinHide()
+                          conn.end()
+                          if (countFactsNegativa !== 0) {
+                            this.enabledConfirm = true
+                          } else {
+                            this.enabledConfirm = false
+                          }
+                        }
+                      }).catch((err) => {
                         this.$parent.handleSpinHide()
                         conn.end()
-                        if (countFactsNegativa !== 0) {
-                          this.enabledConfirm = true
-                        } else {
-                          this.enabledConfirm = false
-                        }
-                      }
-                    }).catch((err) => {
-                      this.$parent.handleSpinHide()
-                      conn.end()
-                      console.log(err)
-                      this.$Message.err(err)
+                        console.log(err)
+                        this.$Message.err(err)
+                      })
                     })
-                  })
-                }
-              }).catch((err) => {
-                this.$parent.handleSpinHide()
-                conn.end()
-                console.log(err)
-                this.$Message.err(err)
-              })
+                  }
+                }).catch((err) => {
+                  this.$parent.handleSpinHide()
+                  conn.end()
+                  console.log(err)
+                  this.$Message.err(err)
+                })
+              }
             }
           }
         }
@@ -317,6 +347,7 @@
                           // luego se realiza la carga factura por factura
                           this.facturacionDb.forEach(factura => {
                             storage._database_createFactura({
+                              idtercero: factura.idtercero,
                               numero: factura.numero,
                               fecha: miscelanius.convertDateToStringSQL(factura.fecha),
                               regimen: factura.regimen,

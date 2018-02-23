@@ -214,7 +214,6 @@
           return 0
         })
         this.firebaseCharge = false
-        console.log(this.list_notice)
       })
     },
     methods: {

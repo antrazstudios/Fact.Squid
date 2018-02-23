@@ -286,6 +286,24 @@ exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfac
   }
 }
 
+// Glosas de la DB
+exports.createGlosas = (vid, vtipo, vfactura, vfecha, vvalor, vvaloraceptado, vvalornoaceptado, vnumerotramiteinterno, vnumconcepto, vconcepto, vrespuesta) => {
+  return {
+    id: vid,
+    tipo: vtipo,
+    factura: vfactura,
+    fecha: vfecha,
+    valor: vvalor,
+    valoraceptado: vvaloraceptado,
+    valornoaceptado: vvalornoaceptado,
+    numerotramiteinterno: vnumerotramiteinterno,
+    numconcepto: vnumconcepto,
+    concepto: vconcepto,
+    respuesta: vrespuesta,
+    stateDB: 'SINVERIFICAR'
+  }
+}
+
 // Estructuras bases de archivos RIPS
 // ESTRUCTURA DEL ARCHIVO CT
 // el orden correcto del contenido de este archivo es el siguiente:

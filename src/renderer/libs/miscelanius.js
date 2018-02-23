@@ -120,3 +120,46 @@ exports.decodeFileRips = (tipoArchivo, Contenido) => {
   // retornamos la mtriz de resultado
   return result
 }
+
+exports.decodeXLSXGlosas = (documento) => {
+  let deferred = q.defer()
+  try {
+    const objects = require('./objects')
+    // Variable de Retorno
+    let glosa = {
+      documentoGestor: '',
+      fechaDocumento: '',
+      tipoDocumento: '',
+      nit: '',
+      facturas: []
+    }
+    // obtenemos la pagina que contiene la glosa
+    let worksheetDETAILS = documento.getWorksheet('DETAILS')
+    let worksheetGLOSAS = documento.getWorksheet('GLOSAS')
+    // verificamos la version del decodificador
+    // verificacion del decodificador version 1.0
+    if (worksheetDETAILS.getCell('B1').value === '1.0') {
+      worksheetGLOSAS.eachRow((row, rowNumber) => {
+        if (row.values[1] === 'DOCUMENTO GESTOR') {
+          glosa.documentoGestor = row.values[2]
+        } else if (row.values[1] === 'FECHA DOCUMENTO') {
+          glosa.fechaDocumento = row.values[2]
+        } else if (row.values[1] === 'TIPO') {
+          glosa.tipoDocumento = row.values[2].substr(0, 1)
+        } else if (row.values[1] === 'NIT') {
+          glosa.nit = row.values[2]
+        } else if (row.values[1] === 'FACTURA') {
+          console.log('Leyendo Encabezados de plantilla de glosas')
+        } else {
+          glosa.facturas.push(objects.createGlosas(0, glosa.tipoDocumento, row.values[1], row.values[2], row.values[3], row.values[4], row.values[5], row.values[6]))
+        }
+      })
+      deferred.resolve(glosa)
+    } else {
+      deferred.reject('La version de la plantilla no coincide con las admitidas por el sistema')
+    }
+  } catch (error) {
+    deferred.reject(error)
+  }
+  return deferred.promise
+}

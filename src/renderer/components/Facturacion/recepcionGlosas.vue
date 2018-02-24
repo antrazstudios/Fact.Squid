@@ -121,13 +121,32 @@
               storage._database_runQuery({
                 query: 'call consultGestorDatos(' + this.glosas.documentoGestor + ');'
               }).then((rta) => {
+                // Retornamos los datos del gestor verificados
                 this.numGestor = rta.result[0][0].tb_gestores_codigo
                 this.gestor = 'GESTOR Nº' + rta.result[0][0].tb_gestores_codigo + ' - ' + rta.result[0][0].tb_users_primernombre + ' ' + rta.result[0][0].tb_users_segundonombre + ' ' + rta.result[0][0].tb_users_primerapellido + ' ' + rta.result[0][0].tb_users_segundoapellido
-                this.glosas.facturas.forEach(factura => {
-                  storage._database_runQuery({
-                    query: 'SELECT * FROM tb_facturacion F INNER JOIN tb_terceros T ON T.idtb_terceros=F.tb_facturacion_tercero'
+                // creamos una bandera para establecer el limite de la conexion
+                let countFacturas = 0
+                // creamos una conexion temporal para ejecutar esta consulta por bloques
+                let connection = storage.getActualConnection()
+                connection.connect((err) => {
+                  if (err) {
+                    console.log(err)
+                    this.$Message.error(err)
+                  }
+                })
+                // Verificamos el tercero al que pertenece cada factura y los conmutamos
+                this.glosas.facturas.forEach(glosa => {
+                  storage.verifyFacturaTercero({
+                    numero: glosa.factura,
+                    connection: connection
+                  }).then((rta) => {
+                    countFacturas++
+                    console.log(rta)
+                    if (countFacturas === this.glosas.facturas.lenght) {
+                      connection.end()
+                    }
                   })
-                });
+                })
               }).catch((err) => {
                 this.$Message.error(err)
                 console.log(err)

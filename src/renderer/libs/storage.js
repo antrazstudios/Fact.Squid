@@ -1033,3 +1033,28 @@ exports.verifyFactura = (configuracion) => {
   // retorna la promesa
   return deferred.promise
 }
+
+// -----------------------------------------------------------------------------------------------------------
+exports.verifyFacturaTercero = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Consulta los datos de tercero de una factura
+  // Parameters:
+  // * configuracion. numero = numero de la factura
+  // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
+  // return:
+  // true or false si existe o no un documento
+  // ------------------------| End Description |------------------------
+  console.log('proceso de busqueda abierto')
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call verifyFacturaTercero(?)',
+    parameters: [ configuracion.numero ]
+  }, configuracion.connection).then((rta) => {
+    console.log(rta)
+    deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}

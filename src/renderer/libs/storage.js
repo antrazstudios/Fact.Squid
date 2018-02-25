@@ -1044,13 +1044,11 @@ exports.verifyFacturaTercero = (configuracion) => {
   // return:
   // true or false si existe o no un documento
   // ------------------------| End Description |------------------------
-  console.log('proceso de busqueda abierto')
   let deferred = q.defer()
   this._database_runQuery({
     query: 'call verifyFacturaTercero(?)',
     parameters: [ configuracion.numero ]
   }, configuracion.connection).then((rta) => {
-    console.log(rta)
     deferred.resolve(rta)
   }).catch((err) => {
     deferred.reject(err)

@@ -288,19 +288,51 @@ exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfac
 
 // Glosas de la DB
 exports.createGlosas = (vid, vtipo, vfactura, vfecha, vvalor, vvaloraceptado, vvalornoaceptado, vnumerotramiteinterno, vnumconcepto, vconcepto, vrespuesta) => {
+  vfecha.setDate(vfecha.getDate() + 1)
   return {
     id: vid,
     tipo: vtipo,
     factura: vfactura,
+    fechafactura: null,
     fecha: vfecha,
     valor: vvalor,
+    valorOriginal: null,
     valoraceptado: vvaloraceptado,
     valornoaceptado: vvalornoaceptado,
     numerotramiteinterno: vnumerotramiteinterno,
     numconcepto: vnumconcepto,
     concepto: vconcepto,
     respuesta: vrespuesta,
-    stateDB: 'SINVERIFICAR'
+    stateDB: 'SIN_VERIFICAR',
+    stateColor: 'red',
+    stateInfo: 'Pendiente de verificacion del sistema',
+    changeStateDB (state) {
+      if (state === 'SIN_VERIFICAR') {
+        this.stateDB = 'SIN VERIFICAR'
+        this.stateColor = 'blue'
+        this.stateInfo = 'Pendiente de verificacion del sistema'
+      } else if (state === 'GLOSA>VALOR') {
+        this.stateDB = 'VALOR GLOSA MAYOR QUE VALOR ORIGINAL'
+        this.stateColor = 'red'
+        this.stateInfo = 'El valor de la glosa no puede superar el valor de la factura, debe ser igual o inferior'
+      } else if (state === 'GLOSA>FACTURA') {
+        this.stateDB = 'FECHA GLOSA MENOR QUE FECHA FACTURA'
+        this.stateColor = 'red'
+        this.stateInfo = 'La fecha del tramite no puede ser menor o igual que la fecha de la factura'
+      } else if (state === '!FACTURA') {
+        this.stateDB = 'FACTURA NO EXISTE'
+        this.stateColor = 'red'
+        this.stateInfo = 'Esta factura no ha sido cargada en el sistema'
+      } else if (state === '!NIT') {
+        this.stateDB = 'NIT INCORRECTO'
+        this.stateColor = 'red'
+        this.stateInfo = 'El nit de la factura no concuerda con la especificada en la plantilla'
+      } else {
+        this.stateDB = 'LISTO PARA CREAR'
+        this.stateColor = 'green'
+        this.stateInfo = 'A espera de creacion en Plataforma'
+      }
+    }
   }
 }
 

@@ -151,6 +151,7 @@ exports.decodeXLSXGlosas = (documento) => {
         } else if (row.values[1] === 'FACTURA') {
           console.log('Leyendo Encabezados de plantilla de glosas')
         } else {
+          console.log(row.values[2].getDate() + 1)
           glosa.facturas.push(objects.createGlosas(0, glosa.tipoDocumento, row.values[1], row.values[2], row.values[3], row.values[4], row.values[5], row.values[6]))
         }
       })

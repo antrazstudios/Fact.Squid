@@ -151,7 +151,6 @@ exports.decodeXLSXGlosas = (documento) => {
         } else if (row.values[1] === 'FACTURA') {
           console.log('Leyendo Encabezados de plantilla de glosas')
         } else {
-          console.log(row.values[2].getDate() + 1)
           glosa.facturas.push(objects.createGlosas(0, glosa.tipoDocumento, row.values[1], row.values[2], row.values[3], row.values[4], row.values[5], row.values[6]))
         }
       })
@@ -162,5 +161,74 @@ exports.decodeXLSXGlosas = (documento) => {
   } catch (error) {
     deferred.reject(error)
   }
+  return deferred.promise
+}
+
+exports.createDocumento = (configuracion) => {
+  // configuracion. consecutivo = numero del consecutivo del documento para generar la glosas
+  // configuracion. entidadNombre = nombre de la entidad destinataria del paquete de glosas
+  // configuracion. nombreGestor = nombre del gestor remitente de la glosa
+  // configuracion. fechaDocumento = fecha en que se genera el documento
+  // configuracion. contenido = collecion de glosas que van dentro del paquete de glosas
+  // configuracion. formato = formato en modo buffer para ser trabajado
+  // configuracion. tipo = tipo de documento segun nomenclatura del modelo actual de la BD
+  // return:
+  // retorna un buffer listo para cargar a BD del archivo de la glosa
+  let deferred = q.defer()
+  // Primero se escribira el archivo temporal basandonos en el formato
+  var bufferBlob = Buffer.from(configuracion.formato, 'binary')
+  const pathDownload = require('./settings.js').getDocumentsPath()
+  require('fs').writeFile(pathDownload + 'temp_document.xlsx', bufferBlob, (err) => {
+    if (err) {
+      console.log('No ha sido posible guardar el archivo', err)
+      deferred.reject(err)
+    }
+    // luego se realizarse la escritura del archivo se procede a leer con la libreria de excel
+    var Excel = require('exceljs')
+    var workbook = new Excel.Workbook()
+    workbook.xlsx.readFile(pathDownload + 'temp_document.xlsx').then(() => {
+      if (configuracion.tipo === 0) {
+        let sheetFormato = workbook.getWorksheet('GLOSA INICIAL')
+        // definicion del consecutivo de la glosa
+        sheetFormato.getCell('C2').value = configuracion.consecutivo
+        // definicion del nombre de la entidad destinataria
+        sheetFormato.getCell('C3').value = configuracion.entidadNombre
+        // definicion del nombre del gestor remitente
+        sheetFormato.getCell('C4').value = configuracion.nombreGestor
+        // definicion de la fecha del documento
+        sheetFormato.getCell('G4').value = configuracion.fechaDocumento
+        // definicion del contenido del paquete de glosas
+        // primero definimos un punto de partida en las ROWs del libro
+        let countItems = 0
+        let row = 8 // linea de encabezados
+        let totalvalorglosas = 0
+        let totalvaloraceptado = 0
+        let totalvalornoaceptado = 0
+        configuracion.contenido.forEach(glosa => {
+          // Generamos las sumas de saldos
+          totalvalorglosas = totalvalorglosas + glosa.valor // suma de valor glosado
+          totalvaloraceptado = totalvaloraceptado + glosa.valoraceptado // suma de valor aceptado
+          totalvalornoaceptado = totalvalornoaceptado + glosa.valornoaceptado // suma de valor no aceptado
+          // Definimos el contenido del documento
+          row = row + 1 // nos movemos a la siguiente linea
+          countItems = countItems + 1 // añadimos un nuevo item al contador
+          sheetFormato.getCell('A' + row).value = countItems // definimos el numero de la lista o item
+          sheetFormato.getCell('B' + row).value = glosa.factura // definimos el numero de factura de la glosa
+          sheetFormato.getCell('C' + row).value = glosa.fecha // definimos la fecha del tramite
+          sheetFormato.getCell('D' + row).value = glosa.valor // definimos el valor del tramite
+          sheetFormato.getCell('E' + row).value = glosa.valoraceptado // definimos el valor aceptado del tramite por el gestor
+          sheetFormato.getCell('F' + row).value = glosa.valornoaceptado // definimos el valor no aceptado del tramite por el gestor
+          sheetFormato.getCell('G' + row).value = glosa.numerotramiteinterno // definimos el numero de tramite interno
+        })
+        // definimos los estilos para el contenido
+        sheetFormato.getColumn(4).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00' // Formato de moneda
+        sheetFormato.getColumn(5).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00' // Formato de moneda
+        sheetFormato.getColumn(6).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00' // Formato de moneda
+        workbook.xlsx.writeFile(pathDownload + 'temp_document.xlsx')
+      }
+    }).catch((err) => {
+      deferred.reject(err)
+    })
+  })
   return deferred.promise
 }

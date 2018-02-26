@@ -292,6 +292,7 @@ exports.createGlosas = (vid, vtipo, vfactura, vfecha, vvalor, vvaloraceptado, vv
   return {
     id: vid,
     tipo: vtipo,
+    idfactura: 0,
     factura: vfactura,
     fechafactura: null,
     fecha: vfecha,

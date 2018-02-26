@@ -132,8 +132,8 @@
     background-position: right;
   }
   .cardcontent{
-    position: fixed;
-    top: 100px;
+    /* position: fixed; */
+    top: 0px;
     bottom: 80px;
     padding: 0;
     width: 45%;

@@ -1023,9 +1023,15 @@ exports.verifyFactura = (configuracion) => {
     parameters: [ configuracion.numero ]
   }, configuracion.connection).then((rta) => {
     if (rta.result[0].length === 0) {
-      deferred.resolve(false)
+      deferred.resolve({
+        state: false,
+        content: rta.result[0][0]
+      })
     } else {
-      deferred.resolve(true)
+      deferred.resolve({
+        state: true,
+        content: rta.result[0][0]
+      })
     }
   }).catch((err) => {
     deferred.reject(err)
@@ -1050,6 +1056,44 @@ exports.verifyFacturaTercero = (configuracion) => {
     parameters: [ configuracion.numero ]
   }, configuracion.connection).then((rta) => {
     deferred.resolve(rta)
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_generaConsecutivoDocumento = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Genera un consecutivo nuevo
+  // Parameters:
+  // * configuracion. iddocumento = id del tipo de documento
+  // * configuracion. parameters = [ { param: ?, content: ? } ]
+  // return:
+  // un objeto con el consecutivo y el BLOB del formato
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call getLastIdDocumento(?)',
+    parameters: [ configuracion.iddocumento ]
+  }, configuracion.connection).then((rta) => {
+    // generamos el consecutivo
+    let numero = '"' + rta.result[0][0].consecutivo
+    while (numero.length < 7) {
+      numero = '0' + numero
+    }
+    numero = numero.replace('"', '')
+    let consecutivo = rta.result[1][0].tb_documentos_tipos_prefijo
+    consecutivo = consecutivo.replace('#CONSECUTIVE', numero)
+    configuracion.parameters.forEach(parameter => {
+      console.log(parameter)
+      consecutivo = consecutivo.replace(parameter.param, parameter.content)
+    })
+    deferred.resolve({
+      consecutivo: consecutivo,
+      formato: rta.result[1][0].tb_formatos_contenido
+    })
   }).catch((err) => {
     deferred.reject(err)
   })

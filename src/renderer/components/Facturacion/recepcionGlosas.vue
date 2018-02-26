@@ -57,7 +57,7 @@
     <Row v-if="visibleChargeInit === false" style="margin-top: 10px;" type="flex" justify="end">
       <i-button type="error" style="margin-right: 10px" @click="$router.go(-1)">CANCELAR</i-button>
       <i-button type="info" :disabled="!enabledConfirm" @click="verificarCarga()" style="margin-right: 10px" >VERIFICAR</i-button>
-      <i-button type="info" :disabled="enabledConfirm" >CONFIRMAR</i-button>
+      <i-button type="info" :disabled="enabledConfirm" @click="confirmarCarga()">CONFIRMAR</i-button>
     </Row>
   </div>
 </template>
@@ -111,7 +111,6 @@
           workbook.xlsx.readFile(this.files[0].path).then(() => {
             let miscelanius = require('../../libs/miscelanius')
             miscelanius.decodeXLSXGlosas(workbook).then((resolve) => {
-              console.log(resolve)
               this.glosas = resolve
               this.glosas.facturas.forEach(factura => {
                 this.totalvalorglosas = this.totalvalorglosas + factura.valor
@@ -351,10 +350,11 @@
                   connection: conn
                 }).then((rta) => {
                   countFact++
-                  if (rta === false) {
+                  if (rta.state === false) {
                     glosa.stateDB = '!FACTURA'
                     countFactNeg++
                   } else {
+                    glosa.idfactura = rta.content.idtb_facturacion
                     glosa.changeStateDB('OK')
                   }
                   if (countFact === this.glosas.facturas.length) {
@@ -378,6 +378,53 @@
       },
       confirmarCarga () {
         this.$parent.handleSpinShow('Escribiendo datos en el servidor')
+        // creamos una conexion constante para hacer registros en bloques
+        const storage = require('../../libs/storage')
+        const miscelanius = require('../../libs/miscelanius')
+        const conexiones = storage.getActualConnection()
+        let consecutivo, formatoBuffer
+        // Establecemos conexion
+        conexiones.connect((err) => {
+          if (err) {
+            this.$Message.error(err)
+          }
+        })
+        // generamos un nuevo consecutivo y lo obtenemos
+        storage._database_generaConsecutivoDocumento({
+          iddocumento: 2,
+          parameters: [
+            {
+              param: '#MANAGER',
+              content: this.numGestor
+            },
+            {
+              param: '#YEAR',
+              content: new Date(Date.now()).getFullYear()
+            }
+          ]
+        }).then((rta) => {
+          consecutivo = rta.consecutivo
+          formatoBuffer = rta.formato
+          // Despues de haber obtenido el consecutivo y el formato, creamos el documento de manera local
+          miscelanius.createDocumento({
+            consecutivo: consecutivo,
+            entidadNombre: 'UNA ENTIDAD CUALQUIERA DE PRUEBA',
+            nombreGestor: this.gestor,
+            fechaDocumento: this.glosas.fechaDocumento,
+            contenido: this.glosas.facturas,
+            formato: formatoBuffer,
+            tipo: 0
+          })
+        }).catch((err) => {
+          console.log(err)
+          this.$parent.handleSpinHide()
+          this.$Message.error(err)
+          conexiones.end()
+        })
+        // this.glosas.facturas.forEach(factura => {
+        //   // procedemos a generar un nuevo consecutivo
+        //
+        // })
       }
     }
   }

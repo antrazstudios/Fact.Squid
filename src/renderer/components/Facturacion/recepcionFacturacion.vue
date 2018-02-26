@@ -222,7 +222,7 @@
                   consecutivo: this.numEnvio,
                   connection: conn
                 }).then((result) => {
-                  if (result === true) {
+                  if (result.state === true) {
                     this.numEnvioError = 'Este envio ya existe en la base de datos'
                     this.$parent.handleSpinHide()
                     conn.end()
@@ -235,8 +235,8 @@
                       }).then((result) => {
                         countFactsRegBd++
                         factura.idtercero = this.numEntidad
-                        factura.stateDB = result
-                        if (result === true) {
+                        factura.stateDB = result.state
+                        if (result.state === true) {
                           countFactsNegativa++
                         }
                         if (countFactsRegBd === this.facturacionDb.length) {

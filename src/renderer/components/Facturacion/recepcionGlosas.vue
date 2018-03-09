@@ -1,21 +1,28 @@
 <template>
   <div class="content">
     <input type="file" style="display:none" ref="fileInput" accept="application/vnd.ms-excel, .xlsx" @change="onFilePicked"/>
-    <Row v-if="visibleChargeInit === false">
-      <Form ref="FormGlosas" :label-width="180">
-        <FormItem label="Gestor de Glosa" :error="gestorError">
-          <Input disabled :value="gestor"/>
-        </FormItem>
-        <FormItem label="Entidad Planilla" :error="nitError">
-          <Input disabled :value="glosas.nit"/>
-        </FormItem>
-        <FormItem label="Entidades Conmutadas" :error="entidadesConmError">
-          <Tag v-for="entidade in entidadesConm" :key="entidade.key">{{entidade}}</Tag>
-        </FormItem>
-        <FormItem label="Fecha de Documento: " :error="fechaDocumentoError">
-          <DatePicker type="date" :value="glosas.fechaDocumento" @on-change="handleChange"></DatePicker>
-        </FormItem>
-      </Form>
+    <Row v-if="visibleChargeInit === false" :gutter="16">
+      <i-col span="23">
+        <Form ref="FormGlosas" :label-width="180">
+          <FormItem label="Gestor de Glosa" :error="gestorError">
+            <Input disabled :value="gestor"/>
+          </FormItem>
+          <FormItem label="Entidad Planilla" :error="nitError">
+            <Input disabled :value="glosas.nit"/>
+          </FormItem>
+          <FormItem label="Entidades Conmutadas" :error="entidadesConmError">
+            <Tag v-for="entidade in entidadesConm" :key="entidade.key">{{entidade}}</Tag>
+          </FormItem>
+          <FormItem label="Fecha de Documento: " :error="fechaDocumentoError">
+            <DatePicker type="date" :value="glosas.fechaDocumento" @on-change="handleChange"></DatePicker>
+          </FormItem>
+        </Form>
+      </i-col>
+      <i-col span="1">
+        <i-button v-if="pathTempDocument !== ''" type="info" @click="previewDocument">
+          <Icon type="document"/>
+        </i-button>
+      </i-col>
     </Row>
     <Row v-if="visibleChargeInit === false" style="width: 100%">
       <i-table border :style="'width: 100%; height:' + $parent.maxHeightTable - 280 + 'px'" :columns="columnsGlosas" :data="glosas.facturas" size="small" :stripe="false" :height="$parent.maxHeightTable - 280"></i-table>
@@ -72,6 +79,8 @@
         nitError: '',
         gestor: '',
         gestorError: '',
+        pathTempDocument: '',
+        firmaGestor: null,
         entidadesConm: [],
         entidadesConmError: '',
         fechaDocumentoError: '',
@@ -110,6 +119,7 @@
           var workbook = new Excel.Workbook()
           workbook.xlsx.readFile(this.files[0].path).then(() => {
             let miscelanius = require('../../libs/miscelanius')
+            miscelanius.deleteTempfiles()
             miscelanius.decodeXLSXGlosas(workbook).then((resolve) => {
               this.glosas = resolve
               this.glosas.facturas.forEach(factura => {
@@ -129,6 +139,7 @@
                 // Retornamos los datos del gestor verificados
                 this.numGestor = rta.result[0][0].tb_gestores_codigo
                 this.gestor = 'GESTOR Nº' + rta.result[0][0].tb_gestores_codigo + ' - ' + rta.result[0][0].tb_users_primernombre + ' ' + rta.result[0][0].tb_users_segundonombre + ' ' + rta.result[0][0].tb_users_primerapellido + ' ' + rta.result[0][0].tb_users_segundoapellido
+                this.firmaGestor = rta.result[0][0].tb_gestores_fd
                 // creamos una bandera para establecer el limite de la conexion
                 let countFacturas = 0
                 // creamos una conexion temporal para ejecutar esta consulta por bloques
@@ -377,12 +388,12 @@
         }
       },
       confirmarCarga () {
-        this.$parent.handleSpinShow('Escribiendo datos en el servidor')
+        // this.$parent.handleSpinShow('Escribiendo datos en el servidor')
         // creamos una conexion constante para hacer registros en bloques
         const storage = require('../../libs/storage')
         const miscelanius = require('../../libs/miscelanius')
         const conexiones = storage.getActualConnection()
-        let consecutivo, formatoBuffer
+        let consecutivo, formatoBuffer, logoEncabezadoBuffer
         // Establecemos conexion
         conexiones.connect((err) => {
           if (err) {
@@ -405,6 +416,7 @@
         }).then((rta) => {
           consecutivo = rta.consecutivo
           formatoBuffer = rta.formato
+          logoEncabezadoBuffer = rta.encabezado
           // Despues de haber obtenido el consecutivo y el formato, creamos el documento de manera local
           miscelanius.createDocumento({
             consecutivo: consecutivo,
@@ -413,7 +425,17 @@
             fechaDocumento: this.glosas.fechaDocumento,
             contenido: this.glosas.facturas,
             formato: formatoBuffer,
+            encabezadoImg: logoEncabezadoBuffer,
+            firmaImg: this.firmaGestor,
             tipo: 0
+          }).then((rta) => {
+            // almacenamos el path temporal para abrir una vista previa del documento
+            this.pathTempDocument = rta
+          }).catch((err) => {
+            console.log(err)
+            this.$parent.handleSpinHide()
+            this.$Message.error(err)
+            conexiones.end()
           })
         }).catch((err) => {
           console.log(err)
@@ -425,6 +447,15 @@
         //   // procedemos a generar un nuevo consecutivo
         //
         // })
+      },
+      previewDocument () {
+        const settings = require('../../libs/settings')
+        const fs = require('fs')
+        const {shell} = require('electron')
+        const pathDocuments = settings.getDocumentsPath() + 'temps/temp_printpreview' + Date.now() + '.xlsx'
+        console.log(pathDocuments)
+        fs.createReadStream(this.pathTempDocument).pipe(fs.createWriteStream(pathDocuments))
+        shell.openExternal(pathDocuments)
       }
     }
   }

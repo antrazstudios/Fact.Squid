@@ -1092,7 +1092,8 @@ exports._database_generaConsecutivoDocumento = (configuracion) => {
     })
     deferred.resolve({
       consecutivo: consecutivo,
-      formato: rta.result[1][0].tb_formatos_contenido
+      formato: rta.result[1][0].tb_formatos_contenido,
+      encabezado: rta.result[1][0].tb_formatos_logoencabezado
     })
   }).catch((err) => {
     deferred.reject(err)

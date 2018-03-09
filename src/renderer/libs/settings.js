@@ -23,6 +23,25 @@ exports.getDocumentsPath = () => {
   return config.path.replace('config.json', '')
 }
 
+exports.updateTempPath = () => {
+  const fs = require('fs')
+  const fsextra = require('fs-extra')
+  fs.stat(config.path.replace('config.json', '') + 'temps', (err, stats) => {
+    if (err) {
+      console.log('fs.stat', err)
+      fs.mkdirSync(config.path.replace('config.json', '') + 'temps')
+    } else {
+      fsextra.remove(config.path.replace('config.json', '') + 'temps', (err) => {
+        if (err) {
+          console.log('fs.unlink', err)
+        } else {
+          fs.mkdirSync(config.path.replace('config.json', '') + 'temps')
+        }
+      })
+    }
+  })
+}
+
 exports.getVersionApp = () => {
   return require('../../../package.json').version
 }

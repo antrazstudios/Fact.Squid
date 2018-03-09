@@ -171,14 +171,17 @@ exports.createDocumento = (configuracion) => {
   // configuracion. fechaDocumento = fecha en que se genera el documento
   // configuracion. contenido = collecion de glosas que van dentro del paquete de glosas
   // configuracion. formato = formato en modo buffer para ser trabajado
+  // configuracion. encabezadoImg = Imagen del operador que va en el encabezado
   // configuracion. tipo = tipo de documento segun nomenclatura del modelo actual de la BD
+  // configuracion. firmaImg = Imagen de la firma digital del gestor
   // return:
   // retorna un buffer listo para cargar a BD del archivo de la glosa
   let deferred = q.defer()
   // Primero se escribira el archivo temporal basandonos en el formato
   var bufferBlob = Buffer.from(configuracion.formato, 'binary')
   const pathDownload = require('./settings.js').getDocumentsPath()
-  require('fs').writeFile(pathDownload + 'temp_document.xlsx', bufferBlob, (err) => {
+  const fs = require('fs')
+  fs.writeFile(pathDownload + 'temp_document.xlsx', bufferBlob, (err) => {
     if (err) {
       console.log('No ha sido posible guardar el archivo', err)
       deferred.reject(err)
@@ -189,18 +192,29 @@ exports.createDocumento = (configuracion) => {
     workbook.xlsx.readFile(pathDownload + 'temp_document.xlsx').then(() => {
       if (configuracion.tipo === 0) {
         let sheetFormato = workbook.getWorksheet('GLOSA INICIAL')
+        // insertamos la imagen
+        let imageEncabezado = workbook.addImage({
+          buffer: Buffer.from(configuracion.encabezadoImg, 'binary'),
+          extension: 'png'
+        })
+        // le damos formato a la imagen
+        sheetFormato.addImage(imageEncabezado, {
+          tl: {col: 0, row: 0.5},
+          br: {col: 3.85, row: 1},
+          editAs: 'oneCell'
+        })
         // definicion del consecutivo de la glosa
-        sheetFormato.getCell('C2').value = configuracion.consecutivo
+        sheetFormato.getCell('C3').value = configuracion.consecutivo
         // definicion del nombre de la entidad destinataria
-        sheetFormato.getCell('C3').value = configuracion.entidadNombre
+        sheetFormato.getCell('C4').value = configuracion.entidadNombre
         // definicion del nombre del gestor remitente
-        sheetFormato.getCell('C4').value = configuracion.nombreGestor
+        sheetFormato.getCell('C5').value = configuracion.nombreGestor
         // definicion de la fecha del documento
-        sheetFormato.getCell('G4').value = configuracion.fechaDocumento
+        sheetFormato.getCell('G5').value = configuracion.fechaDocumento
         // definicion del contenido del paquete de glosas
         // primero definimos un punto de partida en las ROWs del libro
         let countItems = 0
-        let row = 8 // linea de encabezados
+        let row = 9 // linea de encabezados
         let totalvalorglosas = 0
         let totalvaloraceptado = 0
         let totalvalornoaceptado = 0
@@ -213,22 +227,164 @@ exports.createDocumento = (configuracion) => {
           row = row + 1 // nos movemos a la siguiente linea
           countItems = countItems + 1 // añadimos un nuevo item al contador
           sheetFormato.getCell('A' + row).value = countItems // definimos el numero de la lista o item
+          // definimos formato de bordes
+          sheetFormato.getCell('A' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
           sheetFormato.getCell('B' + row).value = glosa.factura // definimos el numero de factura de la glosa
+          // definimos formato de bordes
+          sheetFormato.getCell('B' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
           sheetFormato.getCell('C' + row).value = glosa.fecha // definimos la fecha del tramite
+          // definimos formato de bordes
+          sheetFormato.getCell('C' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
           sheetFormato.getCell('D' + row).value = glosa.valor // definimos el valor del tramite
+          // definimos formato de bordes
+          sheetFormato.getCell('D' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
           sheetFormato.getCell('E' + row).value = glosa.valoraceptado // definimos el valor aceptado del tramite por el gestor
+          // definimos formato de bordes
+          sheetFormato.getCell('E' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
           sheetFormato.getCell('F' + row).value = glosa.valornoaceptado // definimos el valor no aceptado del tramite por el gestor
+          // definimos formato de bordes
+          sheetFormato.getCell('F' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
           sheetFormato.getCell('G' + row).value = glosa.numerotramiteinterno // definimos el numero de tramite interno
+          // definimos formato de bordes
+          sheetFormato.getCell('G' + row).border = {
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'}
+          }
         })
         // definimos los estilos para el contenido
         sheetFormato.getColumn(4).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00' // Formato de moneda
         sheetFormato.getColumn(5).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00' // Formato de moneda
         sheetFormato.getColumn(6).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00' // Formato de moneda
-        workbook.xlsx.writeFile(pathDownload + 'temp_document.xlsx')
+        // definimos los totales
+        sheetFormato.getCell('C' + (row + 1)).alignment = {vertical: 'middle', horizontal: 'center'}
+        sheetFormato.getCell('C' + (row + 1)).border = {
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'}
+        }
+        sheetFormato.getCell('C' + (row + 1)).value = 'TOTAL:' // definimos el titulo total a una celda
+        // definimos el estilo del texto y de los bordes
+        sheetFormato.getCell('C' + (row + 1)).font = {
+          bold: true
+        }
+        // definimos el total del valor de lo glosado
+        sheetFormato.getCell('D' + (row + 1)).value = totalvalorglosas
+        sheetFormato.getCell('D' + (row + 1)).border = {
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'}
+        }
+        // definimos el total del valor de lo aceptado
+        sheetFormato.getCell('E' + (row + 1)).value = totalvaloraceptado
+        sheetFormato.getCell('E' + (row + 1)).border = {
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'}
+        }
+        // definimos el total del valor de lo aceptado
+        sheetFormato.getCell('F' + (row + 1)).value = totalvalornoaceptado
+        sheetFormato.getCell('F' + (row + 1)).border = {
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'}
+        }
+        // definir firma del gestor
+        // insertamos la firma digital desde el buffer
+        let firmaGestor = workbook.addImage({
+          buffer: Buffer.from(configuracion.firmaImg, 'binary'),
+          extension: 'png'
+        })
+        sheetFormato.addImage(firmaGestor, {
+          tl: {col: 2, row: row + 4},
+          br: {col: 4.75, row: row + 11},
+          editAs: 'oneCell'
+        })
+        // insertamos titulo de la firma
+        sheetFormato.getCell('C' + (row + 12)).value = configuracion.nombreGestor
+        // definimos los bordes de la firma
+        sheetFormato.getCell('C' + (row + 12)).border = {
+          top: {style: 'thin'}
+        }
+        sheetFormato.getCell('D' + (row + 12)).border = {
+          top: {style: 'thin'}
+        }
+        sheetFormato.getCell('E' + (row + 12)).border = {
+          top: {style: 'thin'}
+        }
+        sheetFormato.getCell('F' + (row + 12)).border = {
+          top: {style: 'thin'}
+        }
+        workbook.xlsx.writeFile(pathDownload + 'temp_document.xlsx').then(() => {
+          deferred.resolve(pathDownload + 'temp_document.xlsx')
+        })
       }
     }).catch((err) => {
       deferred.reject(err)
     })
   })
   return deferred.promise
+}
+
+exports.deleteTempfiles = () => {
+  // matriz que contiene los archivos temporales que deben ser eliminados
+  let documentsMatriz = [
+    {
+      nombre: 'temp_compressRIPSZip.zip',
+      origen: 'RIPS CONTENIDOS PARA CARGA'
+    },
+    {
+      nombre: 'temp_document.xlsx',
+      origen: 'DOCUMENTO TEMPORAL DE CARGA'
+    }
+  ]
+  const settings = require('./settings')
+  const fs = require('fs')
+  documentsMatriz.forEach(documento => {
+    try {
+      fs.unlink(settings.getDocumentsPath() + documento.nombre, (err) => {
+        if (err) {
+          console.log(err)
+        }
+        console.log('DELETE TEMP FILE', documento.origen + ': ' + documento.nombre)
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  })
 }

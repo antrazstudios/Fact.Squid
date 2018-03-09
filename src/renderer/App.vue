@@ -1,6 +1,6 @@
 <template>
   <div id="app" style="user-select: none">
-    
+
     <!-- Cotenido -->
     <!-- Menu superior fixed-->
     <Menu ref="MenuFix" :width="widthMenu" v-if="showMenuBar === true" mode="horizontal" :active-name="activeName" :on-select="getPathButtonVisibility()" >
@@ -369,6 +369,7 @@
       }
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
+      settings.updateTempPath()
       // Define el color dependiendo del tipo de Deploy
       switch (settings.getDeployVersionApp()) {
         case 'ALPHA':

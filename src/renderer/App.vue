@@ -152,7 +152,6 @@
         </i-col>
       </Row>    
     </div>
-    <!--  -->
 
     <!-- Modals -->
     <!-- Informacion del sistema -->
@@ -364,6 +363,7 @@
       }
       // Se oculta el Spin de espera
       this.handleSpinHide()
+      console.log(this.electronRemote.getCurrentWindow().getURL())
     },
     created: function () {
       // Mostrar la espera en pantalla
@@ -387,6 +387,13 @@
       // Cambiar el estado de la ventana para visualizar el cambio de controles de ventana
       this.electronRemote.getCurrentWindow().on('unmaximize', () => {
         this.windowState = 'restored'
+      })
+      // Abrir los enlaces de la aplicacion en el navegador por defecto
+      var shell = require('electron').shell
+      var $ = require('jquery')
+      $(document).on('click', 'a[href^="http"]', function (event) {
+        event.preventDefault()
+        shell.openExternal(this.href)
       })
       // Creacion del menu en modo desarrollador
       this.createMenu()

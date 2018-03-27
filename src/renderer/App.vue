@@ -103,7 +103,7 @@
       <Row type="flex" justify="space-between">
         <!-- Contenedor Izquierdo -->
         <div class="footer-container">
-          <Tag class="footer-item-tag clicker" v-bind:style="{ backgroundColor: colorVersion}" @click="gotoAbout()">
+          <Tag class="footer-item-tag noclicker" v-bind:style="{ backgroundColor: colorVersion}">
             {{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}
           </Tag>
           <Tag class="footer-item-tag noclicker" v-if="developerMode === true">
@@ -119,8 +119,9 @@
             <Icon type="link"/>
             Conectado a: {{ require('./libs/settings.js').getConnectionName() }}
           </Tag>
-          <Poptip trigger="hover" title="Conexiones a BD" placement="left-end">
-            <Tag class="footer-item-tag clicker" style="background-color: #1abc9c">Conexiones</Tag>
+          
+          <Poptip trigger="hover" title="Conexiones a BD" placement="top-end">
+            <Tag class="footer-item-tag clicker" style="background-color: #1abc9c" @click="connectionsAssitantShow()">Conexiones</Tag>
             <div slot="content">
               <Row>
                 <Button @click="connectionsModal = !connectionsModal" style="width: 100%; margin-bottom: 5px">Cambiar conexion actual</Button>
@@ -190,6 +191,7 @@
         </i-select>
       </div>
     </Modal>
+    <!-- Notificaciones -->
     <Modal v-model="visibleNotifications" title="Notificaciones">
       <notifications-view v-if="showMenuBar === true" :notified="true" refresh="mounted" visualization="complete"></notifications-view>
       <div slot="footer"></div>

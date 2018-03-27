@@ -5,7 +5,7 @@
         <Row type="flex" align="middle" justify="center" style="text-align: left; padding: 60px 60px; height: 100%">
           <i-col span="22">
             <img class="img-logo2" src="../../assets/images/factsquid_iconWhite.png" alt="">
-            <h1 style="margin-top: 5%">Fact.Squid hecho para ti</h1>
+            <h1 style="margin-top:3%">Fact.Squid hecho para ti</h1>
             <h1>hecho con cariño.</h1>
             <h3>Bienvenido(a) nuevamente, Porfavor inicia sesion para continuar</h3>
             <i-form ref="formInline" :model="formInline" :rules="ruleInline" style="margin-top: 10%;">
@@ -27,10 +27,19 @@
       </i-col>
       <i-col class="col-height2" span="12">
         <Row type="flex" align="middle" justify="center" style="padding: 60px 60px; height: 100%">
-        <i-col span="24">
-          <img class="img-logo" src="../../assets/images/factsquid_iconColor.png" alt="">
-          <i-button>Visitar sitio web de Fact.squid</i-button>
-        </i-col>
+          <i-col span="24">
+            <!-- <img class="img-logo" src="../../assets/images/factsquid_iconColor.png" alt="">
+            <i-button>Visitar sitio web de Fact.squid</i-button> -->
+            <Carousel autoplay :autoplay-speed="10000" dots="none">
+              <CarouselItem v-for="item in carouselItems" :key="item.id">
+                <div class="carousel-item-theme">
+                  <img style="width: 280px" :src="item.imgPATH">
+                  <h2>{{ item.title }}</h2>
+                  <span style="text-align: justify!important;">{{ item.message }}</span>
+                </div>
+              </CarouselItem>
+            </Carousel>
+          </i-col>
         </Row>
       </i-col>
     </Row>
@@ -61,6 +70,32 @@
             { type: 'string', min: 8, message: 'La contraseña no puede ser menos de 8 caracteres', trigger: 'blur' }
           ]
         },
+        carouselItems: [
+          {
+            id: 0,
+            title: '¿Mi informacion esta a salvo?',
+            message: 'Por supuesto, puedes consultar nuestras politicas de seguridad en cualquier momento en: http://www.antrazstudios.com/privacy y saber claramente como manipulamos la informacion que te pertenece.',
+            imgPATH: '/static/images/safebox.png'
+          },
+          {
+            id: 1,
+            title: '¡Somos pioneros en tracking medico!',
+            message: 'Somos el primer software colombiano que realmente hace tracking de una cuenta medica como debe ser. Tenemos muchisisisisimas ideas para seguir implementando funciones a Fact.Squid.',
+            imgPATH: '/static/images/goal.png'
+          },
+          {
+            id: 2,
+            title: 'Notificaciones en Tiempo real',
+            message: 'Ahora las notificaciones del sistema, funcionan en tiempo real, cada suceso que ocurra con tus documentos te sera notificado directamente a ti de inmediato, tanto aqui como en nuestra aplicacion movil',
+            imgPATH: '/static/images/megaphone.png'
+          },
+          {
+            id: 3,
+            title: '¿Aplicacion movil de Fact.Squid?',
+            message: 'Si, estamos ya en pruebas de una aplicacion movil de Fact.Squid para que tengas acceso a tus documentos y prueba de entrega en cualquier parte, tan solo con un click.',
+            imgPATH: '/static/images/android.png'
+          }
+        ],
         heightMax: 877
       }
     },
@@ -153,5 +188,14 @@
     display: inline;
     margin-right: 3px;
     margin-top: 8px;
+  }
+  .carousel-item-theme {
+    background-color: white;
+    opacity: 0.9;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #c1f1e9;
+    box-shadow: 0.5px 0.5px 1px #c1f1e9;
+    height: 490px;
   }
 </style>

@@ -96,9 +96,16 @@
     <!-- Area de notificacion -->
     <i-col span="6" >
       <Card class="slides">
-        <h3>Notificaciones</h3>
+        <Row type="flex">
+          <i-col span="21">
+            <h3>Notificaciones</h3>
+          </i-col>
+          <i-col span="3">
+            <i-button style="text-align: center" type="ghost" icon="android-notifications" @click="$parent.visibleNotifications = true"></i-button>
+          </i-col>
+        </Row>
         <hr/>
-        <notifications-view :notified="false" refresh="created"></notifications-view>
+        <notifications-view :notified="false" refresh="created" visualization="compress"></notifications-view>
       </Card>
     </i-col>
     <!-- Boton de regresar al top -->

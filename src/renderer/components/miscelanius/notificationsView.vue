@@ -20,7 +20,7 @@
           <span style="font-size: 12px; font-weight: bold;">{{item.from}}</span>
         </div>
         <Icon slot="icon" :type="item.kind"></Icon>
-        <div slot="desc" style="line-height: normal !important; opacity: 0.8; margin-top: 10px;">
+        <div v-if="visualization === 'complete'" slot="desc" style="line-height: normal !important; opacity: 0.8; margin-top: 10px;">
           <span v-if="item.state === 0" style="font-size: 11px;">{{item.content}}</span>
           <br v-if="item.state === 0">
           <div v-if="item.state === 0" style="text-align: right;">
@@ -49,15 +49,15 @@
     <hr class="hrTitle" v-if="firebaseDbRenderOthers.length !== 0">
     <!-- Contenido de las notificaciones anteriores -->
     <transition-group enter-active-class="animated fadeInRight">
-      <Alert v-for="item in firebaseDbRenderOthers" :key="item.key" :type="item.type" :show-icon="item.state === 0 ? true : false" closable style="opacity: 0.8" @on-close="deleteNotification(item)">
-        <div v-if="item.state === 0" style="line-height: normal !important; opacity: 0.8s; margin-top: 8px">
+      <Alert v-for="item in firebaseDbRenderOthers" :key="item.key" :type="item.type" :show-icon="item.state === 0 ? true : false" :closable="visualization === 'complete' ? true : false" style="opacity: 0.8" @on-close="deleteNotification(item)">
+        <div v-if="item.state === 0" v-bind:style="{ lineHeight: 1, opacity: 0.8, marginTop: visualization === 'complete' ? '8px' : '0px' }">
           <span style="font-size: 12px; font-weight: bold;">{{item.from}}</span>
         </div>
-        <div v-if="item.state === 1" style="line-height: normal !important; opacity: 0.6; text-align: center">
+        <div v-if="item.state === 1" v-bind:style="{ lineHeight: 1, opacity: 0.6, textAlign: 'center' }">
           <span style="font-size: 12px; font-weight: bold;">{{item.from}}</span>
         </div>
         <Icon slot="icon" :type="item.kind"></Icon>
-        <div slot="desc" style="line-height: normal !important; opacity: 0.8; margin-top: 10px;">
+        <div v-if="visualization === 'complete'" slot="desc" style="line-height: 1 !important; opacity: 0.8; margin-top: 10px; width: 100%">
           <span v-if="item.state === 0" style="font-size: 11px; word-wrap: break-word!important;">{{item.content}}</span>
           <br v-if="item.state === 0">
           <div v-if="item.state === 0" style="text-align: right;">
@@ -80,7 +80,7 @@
 <script>
   export default {
     name: 'notifications',
-    props: [ 'notified', 'refresh' ],
+    props: [ 'notified', 'refresh', 'visualization' ],
     data () {
       return {
         firebase: '',

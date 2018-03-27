@@ -213,6 +213,7 @@
           return 0
         })
         this.firebaseCharge = false
+        this.$parent.handleSpinHide()
       })
     },
     methods: {

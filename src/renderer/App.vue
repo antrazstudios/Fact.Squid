@@ -126,7 +126,7 @@
                 <Button @click="connectionsModal = !connectionsModal" style="width: 100%; margin-bottom: 5px">Cambiar conexion actual</Button>
               </Row>
               <Row>
-                <Button @click="ConnectionsAssitantShow()" style="width: 100%">Asistente de conexiones</Button>
+                <Button @click="connectionsAssitantShow()" style="width: 100%">Asistente de conexiones</Button>
               </Row>
             </div>
           </Poptip>
@@ -356,13 +356,21 @@
       }
     },
     mounted () {
+      // Verficacion del tamaño maximo que puede tomar una tabla, si es 0 lo obtiene por calculo desde el tamaño de la visualizacion.
       if (this.maxHeightTable === 0) {
         this.maxHeightTable = this.electronRemote.getCurrentWindow().getSize()[1] - 240
       }
+      // Se oculta el Spin de espera
       this.handleSpinHide()
     },
     created: function () {
+      // Mostrar la espera en pantalla
+      this.handleSpinShow()
+      // Precarga el inicio por debajo
+      this.changePath('/')
+      // Desactiva los botones de la ventana
       this.windowButtonCloseState = false
+      // Obtiene el Remote de la instancia de Electron
       this.electronRemote = require('electron').remote
       // Obtencion del maximo de una tabla dependiendo del tamaño de la app
       this.electronRemote.getCurrentWindow().on('resize', () => {
@@ -370,23 +378,23 @@
         this.actualWidthWindow = this.electronRemote.getCurrentWindow().getSize()[0]
         this.actualHeightWindow = this.electronRemote.getCurrentWindow().getSize()[1]
       })
+      // Cambiar el estado de la ventana para visualizar el cambio de controles de ventana
       this.electronRemote.getCurrentWindow().on('maximize', () => {
         this.windowState = 'maximized'
       })
+      // Cambiar el estado de la ventana para visualizar el cambio de controles de ventana
       this.electronRemote.getCurrentWindow().on('unmaximize', () => {
         this.windowState = 'restored'
       })
-      // Creacion del menu
+      // Creacion del menu en modo desarrollador
       this.createMenu()
       // Carga la plataforma
       this.platform = process.platform
-      if (this.platform === 'win32') {
-        this.margintop = 20
-      } else {
-        this.margintop = 20
-      }
+      // Definir el tamaño de espacio hacia el titlebar
+      this.margintop = 20
       // Se crea una nueva instancia de la libreria de configuracion
       let settings = require('./libs/settings.js')
+      // Se actauliza el Path de temporales desde la configuracion
       settings.updateTempPath()
       // Define el color dependiendo del tipo de Deploy
       switch (settings.getDeployVersionApp()) {
@@ -404,28 +412,21 @@
           break
       }
       // Se crea el archivo de configuracion general
-      console.log(settings.createConfigContent())
+      settings.createConfigContent()
       // Se elimina cualquier sesion que pueda existir
-      console.log(settings.endSesion())
+      settings.endSesion()
       // Se notifica al usuario que se reiniciaron las credenciales y que debe suministrarlas de nuevo
       this.$Message.warning({
-        content: 'Se han reiniciado todas las sesiones, es necesario que proporcione sus credenciales',
+        content: 'Se han reiniciado todas las sesiones existentes, es necesario que proporcione sus credenciales para iniciar',
         duration: 6
       })
-      // Se modifica la vista actual y el app
-      // document.getElementById('menufix').style.visibility = 'hidden'
+      // Se cargan las conexiones
+      this.chargeConnections()
+      // Se redirige a la vista de inicio de sesion
       this.changePath('/login')
-      let defaultConnName = settings.getContentFromLocalKey('defaultConn')
-      let i = 0
-      this.connectionsList = settings.getContentFromLocalKey('connections')
-      for (i; i <= this.connectionsList.length - 1; i++) {
-        if (this.connectionsList[i].id === defaultConnName) {
-          this.connectionSelected = this.connectionsList[i].name
-        }
-      }
     },
     methods: {
-      ConnectionsAssitantShow () {
+      connectionsAssitantShow () {
         this.changePath('/sql/connectionsassistant')
       },
       changeDefaultConnection () {
@@ -441,6 +442,17 @@
           duration: 10
         })
         this.changePath('/login')
+      },
+      chargeConnections () {
+        let settings = require('./libs/settings.js')
+        let defaultConnName = settings.getContentFromLocalKey('defaultConn')
+        let i = 0
+        this.connectionsList = settings.getContentFromLocalKey('connections')
+        for (i; i <= this.connectionsList.length - 1; i++) {
+          if (this.connectionsList[i].id === defaultConnName) {
+            this.connectionSelected = this.connectionsList[i].name
+          }
+        }
       },
       showTitleBar (show) {
         this.showMenuBar = show
@@ -592,6 +604,10 @@
     font-family: 'Poppins';
     src: url('./assets/fonts/Poppins-Regular.ttf');
   }
+  @font-face {
+    font-family: 'Gill Sans';
+    src: url('./assets/fonts/GillSansStd.otf');
+  }
   #app {
     font-family: 'Poppins', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -626,9 +642,9 @@
   .titlebar-title{
     font-weight: bold;
     opacity: 0.8;
-    font-size: 14px;
+    font-size: 15px;
     vertical-align: middle;
-    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif;
+    font-family: 'Gill Sans', sans-serif;
   }
   .titlebar-icon{
     display: inline;
@@ -642,7 +658,7 @@
     border-radius: 4px;
   }
   .titlebar{
-    /* -webkit-app-region: drag; */
+    font-family: 'Gill Sans', sans-serif;
     position: fixed;
     padding-top: 4px;
     padding-bottom: 4px;

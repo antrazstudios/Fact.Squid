@@ -70,8 +70,10 @@
         let message = 'Esperando respuesta del servidor'
         // verificar si esta en modo desarrollador y asignar credenciales como tal
         if (this.$parent.developerMode === true) {
-          this.formInline.user = 'ROOT'
-          this.formInline.password = '1234567890'
+          if (this.formInline.user === '' & this.formInline.password === '') {
+            this.formInline.user = 'ROOT'
+            this.formInline.password = '1234567890'
+          }
           message = message + ', en modo desarrollador'
         }
         // Verificacion si esta validado el formulario de inicio de sesion
@@ -84,26 +86,28 @@
               pass: this.formInline.password
             }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
               if (rta.userConsult !== undefined) {
+                this.$parent.handleSpinShow()
                 // crear una sesion nueva
                 require('../../libs/settings.js').createSesion(rta.userConsult, this.$parent.connectionSelected)
+                // Redirigir al inicio
+                this.$parent.changePath('/')
                 // Habilitar boton de cerrado
                 this.$parent.windowButtonCloseState = true
                 // Mostrar el TitleBar
                 this.$parent.showTitleBar(true)
-                // Redirigir al inicio
-                this.$parent.changePath('/')
-                // Verificar la sesion
-                this.$parent.verifySesion()
                 // Ajustar la ventana
                 this.$parent.electronRemote.getCurrentWindow().setMaximizable(true)
                 this.$parent.electronRemote.getCurrentWindow().setResizable(true)
                 this.$parent.electronRemote.getCurrentWindow().maximize()
+                // Verificar la sesion
+                this.$parent.verifySesion()
+              } else {
+                this.$parent.handleSpinHide()
               }
               this.$Message.success({
                 content: 'Inicio de sesion exitoso',
                 duration: 6
               })
-              this.$parent.handleSpinHide()
             }).catch((rta) => { // En caso de que ocurra un error, enseña la informacion al usuario
               this.$Message.error({
                 content: rta,

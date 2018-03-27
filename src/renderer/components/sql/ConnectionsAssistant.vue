@@ -325,6 +325,7 @@
         // Reestablece los controles
         this.$refs.connectionEdit.resetFields()
         this.loadConnections()
+        this.$parent.chargeConnections()
       },
       removeClick (name) {
         this.$Modal.confirm({
@@ -334,6 +335,7 @@
           onOk: () => {
             require('../../libs/settings.js').removeConnectionWithName(name)
             this.loadConnections()
+            this.$parent.chargeConnections()
           }
         })
       },

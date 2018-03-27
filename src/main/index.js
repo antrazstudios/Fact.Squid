@@ -44,7 +44,8 @@ function createWindow () {
     show: false,
     hasShadow: true,
     backgroundColor: '#ecf0f1',
-    maximizable: false
+    maximizable: false,
+    frame: false
   })
 
   splashWindow = new BrowserWindow({

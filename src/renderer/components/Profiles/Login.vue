@@ -21,7 +21,7 @@
                 <Button class="form-object" type="text" @click="handleSubmit('formInline')">Recuperar contraseña</Button>
               </FormItem>
             </i-form>
-            <p style="margin-top: 10%; font-size: 11px">Cuando usas Fact.Squid, tu aceptas los terminos y condiciones & las politicas de privacidad de AntrazStudios</p>
+            <p style="margin-top: 10%; font-size: 11px">Cuando usas <a href="http://antrazstudios.com/factsquid" >Fact.Squid</a>, tu aceptas los <a href="http://www.antrazstudios.com/termsconditions">terminos y condiciones</a> & las <a href="http://www.antrazstudios.com/privacity">politicas de privacidad</a> de <a href="http://www.antrazstudios.com">AntrazStudios</a> </p>
           </i-col>
         </Row>
       </i-col>
@@ -86,6 +86,8 @@
               if (rta.userConsult !== undefined) {
                 // crear una sesion nueva
                 require('../../libs/settings.js').createSesion(rta.userConsult, this.$parent.connectionSelected)
+                // Habilitar boton de cerrado
+                this.$parent.windowButtonCloseState = true
                 // Mostrar el TitleBar
                 this.$parent.showTitleBar(true)
                 // Redirigir al inicio
@@ -148,36 +150,4 @@
     margin-right: 3px;
     margin-top: 8px;
   }
-  /* .content{
-    width: 100%;
-    min-height: 100%;
-    padding: 20px;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: right;
-  }
-  .cardcontent{
-    top: 0px;
-    bottom: 80px;
-    padding: 0;
-    width: 45%;
-  }
-  .background-row{
-    background-image: url('~@/assets/images/bga.jpg');
-    position: fixed;
-  }
-  .layout-text-item{
-    margin: 8px 0px;
-  }
-  .form-text{
-    text-align: center;
-  }
-  .layout-image{
-    background-image: url('~@/assets/images/login_form.gif');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    min-width: 150px;
-    min-height: 150px;
-  } */
 </style>

@@ -120,7 +120,7 @@
             Conectado a: {{ require('./libs/settings.js').getConnectionName() }}
           </Tag>
           <Poptip trigger="hover" title="Conexiones a BD" placement="left-end">
-            <Tag class="footer-item-tag clicker" style="background-color: #81ecec">Conexiones</Tag>
+            <Tag class="footer-item-tag clicker" style="background-color: #1abc9c">Conexiones</Tag>
             <div slot="content">
               <Row>
                 <Button @click="connectionsModal = !connectionsModal" style="width: 100%; margin-bottom: 5px">Cambiar conexion actual</Button>
@@ -134,16 +134,24 @@
       </Row>
     </div>
     <!-- Titlebar - Barra de titulo -->
-    <Row v-if="platform === 'darwin'">
-      <div :class="this.showTitlebar === false ? 'titlebar titlebar-darwin-close' : 'titlebar'">
-      <!-- <div class="titlebar"> -->
-        <label class="titlebar-title">Fact
-          <div class="titlebar-icon">
-            .Squid
-          </div>
-        </label>
-      </div>
-    </Row>
+    <div class="titlebar">
+      <Row type="flex" justify="center">
+        <i-col span="3"></i-col>
+        <i-col span="18" style="-webkit-app-region: drag;">
+          <label class="titlebar-title">Fact
+            <div class="titlebar-icon">
+              .Squid
+            </div>
+          </label>
+        </i-col>
+        <i-col style="text-align: right; z-index: 999" span="3">
+          <i-button v-if="platform !== 'darwin'" style="z-index: 99" :disabled="!windowButtonCloseState" title="Minizar" type="text" icon="minus" size="small" @click="windowMinimize()"></i-button>
+          <i-button v-if="platform !== 'darwin'" style="z-index: 99" :disabled="!windowButtonCloseState" :title="windowState === 'maximized' ? 'Restaurar' : 'Maximizar'" type="text" :icon="windowState === 'maximized' ? 'arrow-shrink' : 'arrow-expand'" size="small" @click="windowState === 'maximized' ? windowRestore() : windowMaximize()"></i-button>
+          <i-button v-if="platform !== 'darwin'" style="z-index: 99" title="Cerrar" :disabled="!windowButtonCloseState" type="text" icon="close" size="small" @click="windowClose()"></i-button>
+        </i-col>
+      </Row>    
+    </div>
+    <!--  -->
 
     <!-- Modals -->
     <!-- Informacion del sistema -->
@@ -298,6 +306,8 @@
             button_style: 'text'
           }
         ],
+        windowState: 'normal',
+        windowButtonCloseState: true,
         electronRemote: null,
         widthMenu: '',
         showMenuBar: false,
@@ -352,6 +362,7 @@
       this.handleSpinHide()
     },
     created: function () {
+      this.windowButtonCloseState = false
       this.electronRemote = require('electron').remote
       // Obtencion del maximo de una tabla dependiendo del tamaño de la app
       this.electronRemote.getCurrentWindow().on('resize', () => {
@@ -359,12 +370,18 @@
         this.actualWidthWindow = this.electronRemote.getCurrentWindow().getSize()[0]
         this.actualHeightWindow = this.electronRemote.getCurrentWindow().getSize()[1]
       })
+      this.electronRemote.getCurrentWindow().on('maximize', () => {
+        this.windowState = 'maximized'
+      })
+      this.electronRemote.getCurrentWindow().on('unmaximize', () => {
+        this.windowState = 'restored'
+      })
       // Creacion del menu
       this.createMenu()
       // Carga la plataforma
       this.platform = process.platform
       if (this.platform === 'win32') {
-        this.margintop = 0
+        this.margintop = 20
       } else {
         this.margintop = 20
       }
@@ -481,6 +498,7 @@
         this.actualProfile = require('./libs/settings.js').getSesionProfile()
       },
       closeSesion () {
+        this.windowButtonCloseState = false
         this.actualProfile = ''
         require('./libs/settings.js').endSesion()
         this.$Message.info({
@@ -552,6 +570,18 @@
       },
       gotoDocumentation () {
         this.changePath('/Settings/about/1')
+      },
+      windowMaximize () {
+        this.electronRemote.getCurrentWindow().maximize()
+      },
+      windowRestore () {
+        this.electronRemote.getCurrentWindow().unmaximize()
+      },
+      windowMinimize () {
+        this.electronRemote.getCurrentWindow().minimize()
+      },
+      windowClose () {
+        this.electronRemote.getCurrentWindow().close()
       }
     }
   }
@@ -590,6 +620,8 @@
     height:100%;
     background-color: white;
     overflow-x: hidden;
+    border-color: black;
+    border-width: 1px;
   }
   .titlebar-title{
     font-weight: bold;
@@ -610,22 +642,15 @@
     border-radius: 4px;
   }
   .titlebar{
-    user-select: none;
-    -webkit-app-region: drag;
+    /* -webkit-app-region: drag; */
     position: fixed;
     padding-top: 4px;
     padding-bottom: 4px;
     text-align: center;
     width: 100%;
     top: 0px;
-    z-index: 1000;
+    z-index: 100;
     background-color: white;
-  }
-  .titlebar-darwin-close{
-    -webkit-box-shadow: 0 4px 6px -6px #222;
-    -moz-box-shadow: 0 4px 6px -6px #222;
-    box-shadow: 0 4px 6px -6px #222;
-    z-index: 999;
   }
   .footer{
     position: fixed;
@@ -636,7 +661,9 @@
     -webkit-box-shadow: 0px -6px 4px -6px #949494;
     -moz-box-shadow: 0px -6px 4px -6px #949494;
     box-shadow: 0px -6px 4px -6px #949494;
-    z-index: 999;
+    /* z-index: 999; */
+    padding-bottom: 3px;
+    padding-left: 3px;
   }
   .footer-container{
     display: inline-block;
@@ -656,7 +683,7 @@
   }
   .footer-item-tag.noclicker{
     cursor: not-allowed;
-    background-color: #dfe6e9;
+    background-color: #87898a;
     color: white;
   }
   .footer-item-tag.text{
@@ -686,7 +713,7 @@
     -webkit-box-shadow: 0 4px 6px -6px #222;
     -moz-box-shadow: 0 4px 6px -6px #222;
     box-shadow: 0 4px 6px -6px #222;
-    z-index: 999;
+    z-index: 98;
   }
   .layout-buttons{
     float: right;

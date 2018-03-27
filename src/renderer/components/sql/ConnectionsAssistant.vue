@@ -19,14 +19,6 @@
     margin-right: auto;
     display: block;
   }
-  .layout-image{
-    background-image: url('~@/assets/images/login_form.gif');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    min-width: 150px;
-    min-height: 150px;
-  }
 </style>
 <template>
   <div class="content">

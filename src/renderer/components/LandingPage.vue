@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <!-- Area de accesos directos -->
-    <i-col span="4">
+    <i-col span="5">
       <Card class="slides">
         <h3>Accesos Directos</h3>
         <hr/>
@@ -11,10 +11,9 @@
               <div class="slides-shortcut--icon" v-bind:style="{ backgroundColor : shortcut.icon_color}">
                 <Icon v-bind:style="{ color : shortcut.icon_fontColor }" v-if="shortcut.icon_type !== 'profileimage'" :type="shortcut.icon_type"/>
               </div>
-              <Avatar v-if="shortcut.icon_type === 'profileimage'" :src="$parent.actualProfile.imagenperfil" style="width: 19px; height: 20px; cursor: pointer;"></Avatar>
+              <img v-if="shortcut.icon_type === 'profileimage'" :src="$parent.actualProfile.imagenperfil" style="width: 19px!important; height: 20px; cursor: pointer;">
               <!-- <img class="slides-shortcut-img" v-if="shortcut.icon_type === 'profileimage'" :src="$parent.actualProfile.imagenperfil"/> -->
               <label style="cursor: pointer; font-weight: bold;">{{shortcut.title}}</label>
-
             </i-button>
           </ButtonGroup>
         </Row>
@@ -32,7 +31,7 @@
       </Card>
     </i-col>
     <!-- Area del Feed -->
-    <i-col span="14">
+    <i-col span="13">
       <transition enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-if="firebaseCharge === false">
           <!-- En caso que existan noticias en el feed -->
@@ -41,7 +40,7 @@
               <Card class="slides">
                 <Row>
                   <i-col span="2">
-                    <Avatar :src="notice.imgsrc"/>
+                    <img :src="notice.imgsrc" alt="" style="width: 40px">
                   </i-col>
                   <i-col span="8">
                     <h4>{{notice.author}}</h4>

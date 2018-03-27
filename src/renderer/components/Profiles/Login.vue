@@ -1,39 +1,50 @@
 <template>
-  <Row class="background-row" type="flex" justify="center" align="middle">
-    <Card class="cardcontent">
-      <div style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
-          <img src="../../assets/images/factsquid_logoColor.png" style="width: 20%;"/>
-        </div>
-        <div style="margin-top: 100px">
-          <!-- <div class="layout-image form-object"></div> -->
-          <h1 class="layout-text-item form-text">Bienvenido!</h1>
-          <h3 class="layout-text-item form-text" style="opacity: 0.4; font-weight: normal; margin-bottom: 50px">Inicie sesion para acceder al sistema</h3>
-          <Form ref="formInline" :model="formInline" :rules="ruleInline" style="width: 75%" class="layout-text-item form-object">
-            <FormItem prop="user">
+  <div class="content" >
+    <Row type="flex" style="height: 100%" justify="center" align="middle">
+      <i-col class="col-height1" span="12">
+        <Row type="flex" align="middle" justify="center" style="text-align: left; padding: 60px 60px; height: 100%">
+          <i-col span="22">
+            <img class="img-logo2" src="../../assets/images/factsquid_iconWhite.png" alt="">
+            <h1 style="margin-top: 5%">Fact.Squid hecho para ti</h1>
+            <h1>hecho con cariño.</h1>
+            <h3>Bienvenido(a) nuevamente, Porfavor inicia sesion para continuar</h3>
+            <i-form ref="formInline" :model="formInline" :rules="ruleInline" style="margin-top: 10%;">
+              <FormItem prop="user">
                 <Input type="text" v-model="formInline.user" placeholder="Usuario o Identificacion"/>
-            </FormItem>
-            <FormItem prop="password" style="margin: 20px 0px 5px 0px">
-                <Input type="password" v-model="formInline.password" placeholder="Contraseña"/>
-            </FormItem>
-            <FormItem style="margin: 25px 0px 5px 0px">
-              <Button class="form-object" style="margin: 0px auto 10px auto; width: 100%" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
-              <Button class="form-object" style=" width: 100%" @click="CancelLogin()">Cancelar</Button>
-            </FormItem>
-            <FormItem>
-                <Button class="form-object" type="text">He olvidado mi contraseña</Button>
-            </FormItem>
-          </Form>
-        </div>
-    </Card>
-  </Row>
+              </FormItem>
+              <FormItem prop="password" style="margin: 20px 0px 5px 0px">
+                  <Input type="password" v-model="formInline.password" placeholder="Contraseña"/>
+              </FormItem>
+              <FormItem style="margin: 25px 0px 5px 0px">
+                <Button class="form-object" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
+                <Button class="form-object" @click="CancelLogin()">Cancelar</Button>
+                <Button class="form-object" type="text" @click="handleSubmit('formInline')">Recuperar contraseña</Button>
+              </FormItem>
+            </i-form>
+            <p style="margin-top: 10%; font-size: 11px">Cuando usas Fact.Squid, tu aceptas los terminos y condiciones & las politicas de privacidad de AntrazStudios</p>
+          </i-col>
+        </Row>
+      </i-col>
+      <i-col class="col-height2" span="12">
+        <Row type="flex" align="middle" justify="center" style="padding: 60px 60px; height: 100%">
+        <i-col span="24">
+          <img class="img-logo" src="../../assets/images/factsquid_iconColor.png" alt="">
+          <i-button>Visitar sitio web de Fact.squid</i-button>
+        </i-col>
+        </Row>
+      </i-col>
+    </Row>
+  </div>
 </template>
 
 <script>
   export default {
     name: 'login',
     created: function () {
-      // let Base = require('../../App.vue')
       this.$parent.showTitleBar(false)
+    },
+    mounted () {
+      this.heightMax = this.$parent.electronRemote.getCurrentWindow().getSize()[1]
     },
     data () {
       return {
@@ -49,28 +60,42 @@
             { required: true, message: 'Este campo no puede ser nulo', trigger: 'blur' },
             { type: 'string', min: 8, message: 'La contraseña no puede ser menos de 8 caracteres', trigger: 'blur' }
           ]
-        }
+        },
+        heightMax: 877
       }
     },
     methods: {
       handleSubmit (name) { // Metodo de verificacion de usuario
+        // Mensaje para mostrarle al usuario
+        let message = 'Esperando respuesta del servidor'
+        // verificar si esta en modo desarrollador y asignar credenciales como tal
+        if (this.$parent.developerMode === true) {
+          this.formInline.user = 'ROOT'
+          this.formInline.password = '1234567890'
+          message = message + ', en modo desarrollador'
+        }
         // Verificacion si esta validado el formulario de inicio de sesion
         this.$refs[name].validate((valid) => {
-          // en caso de estar activado el modo de desarollo omitira los datos del formulario, inicia sesion de manera directa.
-          if (this.$parent.developerMode === true) {
-            this.$parent.handleSpinShow('Esperando respuesta del servidor, en modo desarrollador')
-            // ejecuta el procedimiento de inicio de sesion con los datos del usuario ROOT
+          // Si es valido el formulario
+          if (valid) {
+            this.$parent.handleSpinShow(message)
             require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass({
-              username: 'ROOT',
-              pass: '1234567890'
-              // username: 'LCV',
-              // pass: 'gata1125'
+              username: this.formInline.user,
+              pass: this.formInline.password
             }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
               if (rta.userConsult !== undefined) {
+                // crear una sesion nueva
                 require('../../libs/settings.js').createSesion(rta.userConsult, this.$parent.connectionSelected)
+                // Mostrar el TitleBar
                 this.$parent.showTitleBar(true)
+                // Redirigir al inicio
                 this.$parent.changePath('/')
+                // Verificar la sesion
                 this.$parent.verifySesion()
+                // Ajustar la ventana
+                this.$parent.electronRemote.getCurrentWindow().setMaximizable(true)
+                this.$parent.electronRemote.getCurrentWindow().setResizable(true)
+                this.$parent.electronRemote.getCurrentWindow().maximize()
               }
               this.$Message.success({
                 content: 'Inicio de sesion exitoso',
@@ -84,34 +109,8 @@
               })
               this.$parent.handleSpinHide()
             })
-          } else { // Metodo de inicio de sesion corriente con el modo de desarrollo desactivado
-            if (valid) {
-              this.$parent.handleSpinShow('Esperando respuesta del servidor')
-              require('../../libs/storage.js')._database_usersLoginWithNicknameAndPass({
-                username: this.formInline.user,
-                pass: this.formInline.password
-              }).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
-                if (rta.userConsult !== undefined) {
-                  require('../../libs/settings.js').createSesion(rta.userConsult, this.$parent.connectionSelected)
-                  this.$parent.$refs.menufix.$el.style.display = ''
-                  this.$parent.changePath('/')
-                  this.$parent.verifySesion()
-                }
-                this.$Message.success({
-                  content: 'Inicio de sesion exitoso',
-                  duration: 6
-                })
-                this.$parent.handleSpinHide()
-              }).catch((rta) => { // En caso de que ocurra un error, enseña la informacion al usuario
-                this.$Message.error({
-                  content: rta,
-                  duration: 8
-                })
-                this.$parent.handleSpinHide()
-              })
-            } else {
-              this.$Message.error('Verifique el formulario!')
-            }
+          } else {
+            this.$Message.error('Verifique el formulario! existen campos sin digitar adecuadamente')
           }
         })
       },
@@ -122,8 +121,34 @@
   }
 </script>
 
-<style lang="css" scoped>
-  .content{
+<style scoped>
+  .content {
+    text-align: center;
+    height: max-content;
+    width: 100%;
+    background-image: url('../../assets/images/background-image-login.png');
+    background-repeat: repeat;
+  }
+  .img-logo {
+    width: 80%;
+  }
+  .img-logo2 {
+    width: 50px;
+    opacity: 0.3;
+  }
+  .col-height1 {
+    height: 100%!important;
+    background-color: whitesmoke!important;
+  }
+  .col-height2 {
+    height: 100%!important;
+  }
+  .form-object{
+    display: inline;
+    margin-right: 3px;
+    margin-top: 8px;
+  }
+  /* .content{
     width: 100%;
     min-height: 100%;
     padding: 20px;
@@ -132,7 +157,6 @@
     background-position: right;
   }
   .cardcontent{
-    /* position: fixed; */
     top: 0px;
     bottom: 80px;
     padding: 0;
@@ -148,11 +172,6 @@
   .form-text{
     text-align: center;
   }
-  .form-object{
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
   .layout-image{
     background-image: url('~@/assets/images/login_form.gif');
     background-size: contain;
@@ -160,5 +179,5 @@
     background-position: center;
     min-width: 150px;
     min-height: 150px;
-  }
+  } */
 </style>

@@ -5,7 +5,7 @@ import App from './App'
 import router from './router'
 import store from './store'
 import iView from 'iview'
-import 'iview/dist/styles/iview.css'
+import './assets/css/theme-factsquid/iview.css'
 import 'animate.css/animate.css'
 import locale from 'iview/dist/locale/es-ES'
 

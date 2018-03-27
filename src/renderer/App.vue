@@ -304,6 +304,7 @@
         connectionsList: [],
         connectionSelected: '',
         actualWidthWindow: 0,
+        actualHeightWindow: 0,
         maxHeightTable: 0,
         connectionsModal: false,
         aboutModal: false,
@@ -347,7 +348,6 @@
     mounted () {
       if (this.maxHeightTable === 0) {
         this.maxHeightTable = this.electronRemote.getCurrentWindow().getSize()[1] - 240
-        console.log(this.maxHeightTable)
       }
       this.handleSpinHide()
     },
@@ -357,6 +357,7 @@
       this.electronRemote.getCurrentWindow().on('resize', () => {
         this.maxHeightTable = this.electronRemote.getCurrentWindow().getSize()[1] - 240
         this.actualWidthWindow = this.electronRemote.getCurrentWindow().getSize()[0]
+        this.actualHeightWindow = this.electronRemote.getCurrentWindow().getSize()[1]
       })
       // Creacion del menu
       this.createMenu()
@@ -487,6 +488,10 @@
           duration: 6
         })
         this.$router.push('/login')
+        this.electronRemote.getCurrentWindow().setSize(1000, 650, true)
+        this.electronRemote.getCurrentWindow().center()
+        this.electronRemote.getCurrentWindow().setMaximizable(false)
+        this.electronRemote.getCurrentWindow().setResizable(false)
       },
       handleSpinShow (message = 'Espere un momento por favor') {
         this.$Spin.show({
@@ -553,6 +558,15 @@
 </script>
 
 <style lang="css">
+  @font-face {
+    font-family: 'Poppins';
+    src: url('./assets/fonts/Poppins-Regular.ttf');
+  }
+  #app {
+    font-family: 'Poppins', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 /* Scrollbars */
   ::-webkit-scrollbar {
     background-color: rgba(255, 255, 255, 0);
@@ -571,7 +585,7 @@
   }
   /* Body */
   body {
-    font-family: "Helvetica Neue",Arial;
+    font-family: 'Poppins', sans-serif;
     width: 100%;
     height:100%;
     background-color: white;

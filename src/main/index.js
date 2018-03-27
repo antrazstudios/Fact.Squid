@@ -43,7 +43,8 @@ function createWindow () {
     enableLargerThanScreen: true,
     show: false,
     hasShadow: true,
-    backgroundColor: '#ecf0f1'
+    backgroundColor: '#ecf0f1',
+    maximizable: false
   })
 
   splashWindow = new BrowserWindow({
@@ -72,7 +73,7 @@ function createWindow () {
   // Cuando la ventana principal este lista
   mainWindow.on('ready-to-show', () => {
     splashWindow.destroy()
-    mainWindow.maximize()
+    mainWindow.setResizable(false)
     mainWindow.show()
   })
   mainWindow.on('closed', () => {

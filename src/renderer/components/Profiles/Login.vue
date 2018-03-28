@@ -16,9 +16,9 @@
                   <Input type="password" v-model="formInline.password" placeholder="Contraseña"/>
               </FormItem>
               <FormItem style="margin: 25px 0px 5px 0px">
-                <Button class="form-object" type="primary" @click="handleSubmit('formInline')">Iniciar sesion</Button>
+                <Button class="form-object" type="primary" @click="SubmitLogin('formInline')">Iniciar sesion</Button>
                 <Button class="form-object" @click="CancelLogin()">Cancelar</Button>
-                <Button class="form-object" type="text" @click="handleSubmit('formInline')">Recuperar contraseña</Button>
+                <Button class="form-object" type="text" @click="RecoveryPassword('formInline')">Recuperar contraseña</Button>
               </FormItem>
             </i-form>
             <p style="margin-top: 10%; font-size: 11px">Cuando usas <a href="http://antrazstudios.com/factsquid" >Fact.Squid</a>, tu aceptas los <a href="http://www.antrazstudios.com/termsconditions">terminos y condiciones</a> & las <a href="http://www.antrazstudios.com/privacity">politicas de privacidad</a> de <a href="http://www.antrazstudios.com">AntrazStudios</a> </p>
@@ -28,8 +28,6 @@
       <i-col class="col-height2" span="12">
         <Row type="flex" align="middle" justify="center" style="padding: 60px 60px; height: 100%">
           <i-col span="24">
-            <!-- <img class="img-logo" src="../../assets/images/factsquid_iconColor.png" alt="">
-            <i-button>Visitar sitio web de Fact.squid</i-button> -->
             <Carousel autoplay :autoplay-speed="10000" dots="none">
               <CarouselItem v-for="item in carouselItems" :key="item.id">
                 <div class="carousel-item-theme">
@@ -61,15 +59,7 @@
           user: '',
           password: ''
         },
-        ruleInline: {
-          user: [
-            { required: true, message: 'Este campo no puede ser nulo', trigger: 'blur' }
-          ],
-          password: [
-            { required: true, message: 'Este campo no puede ser nulo', trigger: 'blur' },
-            { type: 'string', min: 8, message: 'La contraseña no puede ser menos de 8 caracteres', trigger: 'blur' }
-          ]
-        },
+        ruleInline: {},
         carouselItems: [
           {
             id: 0,
@@ -100,7 +90,9 @@
       }
     },
     methods: {
-      handleSubmit (name) { // Metodo de verificacion de usuario
+      SubmitLogin (name) { // Metodo de verificacion de usuario
+        // Creacion de las normas de validacion
+        this.createdRules()
         // Mensaje para mostrarle al usuario
         let message = 'Esperando respuesta del servidor'
         // verificar si esta en modo desarrollador y asignar credenciales como tal
@@ -157,6 +149,37 @@
       },
       CancelLogin () {
         require('electron').remote.getCurrentWindow().close()
+      },
+      RecoveryPassword (name) {
+        // Se generan las reglas
+        this.createdRules('passwordchange')
+        // Verficiacion si esta validado el formulario de inicio de sesion
+        this.$refs[name].validate((valid) => {
+          if (valid) {
+            
+          } else {
+            this.$Message.error('Verifique el formulario! existen campos sin digitar adecuadamente')
+          }
+        })
+      },
+      createdRules (type = 'login') { // Tambien recibe 'passwordchange'
+        if (type === 'passwordchange') {
+          this.ruleInline = {
+            user: [
+              { required: true, message: 'No ha especificado un usuario.', trigger: 'blur' }
+            ]
+          }
+        } else {
+          this.ruleInline = {
+            user: [
+              { required: true, message: 'No ha especificado un usuario.', trigger: 'blur' }
+            ],
+            password: [
+              { required: true, message: 'Es necesaria una contraseña para continuar', trigger: 'blur' },
+              { type: 'string', min: 8, message: 'La contraseña no puede ser menos de 8 caracteres', trigger: 'blur' }
+            ]
+          }
+        }
       }
     }
   }

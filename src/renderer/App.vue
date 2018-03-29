@@ -135,7 +135,7 @@
       </Row>
     </div>
     <!-- Titlebar - Barra de titulo -->
-    <div class="titlebar">
+    <div v-bind:class="showMenuBar === true ? 'titlebar' : 'titlebar-shadow'">
       <Row type="flex" justify="center">
         <i-col span="3"></i-col>
         <i-col span="18" style="-webkit-app-region: drag;">
@@ -667,6 +667,20 @@
     border-radius: 4px;
   }
   .titlebar{
+    font-family: 'Gill Sans', sans-serif;
+    position: fixed;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    text-align: center;
+    width: 100%;
+    top: 0px;
+    z-index: 100;
+    background-color: white;
+  }
+  .titlebar-shadow {
+    -webkit-box-shadow: 0 4px 6px -6px #222;
+    -moz-box-shadow: 0 4px 6px -6px #222;
+    box-shadow: 0 4px 6px -6px #222;
     font-family: 'Gill Sans', sans-serif;
     position: fixed;
     padding-top: 4px;

@@ -141,6 +141,63 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
 }
 
 // -----------------------------------------------------------------------------------------------------------
+exports._database_getSecurityQuestions = (username) => {
+  // --------------------------| Description |--------------------------
+  // Description: Proceso que obtiene los datos de preguntas de seguridad con el username
+  // Parameters:
+  // * configuracion. username = nombre de usuarioa iniciar sesion
+  // ------------------------| End Description |------------------------
+  // Definicion de los datos a retornar en caso de ser positiva la respuesta
+  // del servidor
+  let data = []
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  this._database_runQuery({ query: 'call getSecurityQuestions(?);', parameters: [username] }).then((rta) => {
+    // instanciamos la libreria de objetos
+    let objects = require('./objects')
+    // Verificacion de la cantidad de resultados obtenidos desde la base de datos
+    // Recorremos con un for todos los resultados arrojados por el servidor
+    for (let i = 0; i < rta.result[0].length; i++) {
+      const row = rta.result[0][i]
+      data.push(objects.createSecurityQuestion(row.idtb_users_has_tb_users_pseguridadcol, row.tb_users_pseguridad_pregunta, row.tb_users_has_tb_users_pseguridad_respuesta))
+    }
+    // Retornamos la informacion allada
+    deferred.resolve(data)
+  }).catch((err) => {
+    console.log(err)
+    deferred.reject(err)
+  })
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_changePassword = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Proceso que valida la contraseña del lado del servidor y si es positivo realiza el cambio
+  // Parameters:
+  // * configuracion. comparation = Se envia n/a si no se desea realizar una comparacion o la contraseña vieja para comparar
+  // * configuracion. nickname = Se envia el usuario al que se le va a aplicar el cambio en caso de ser efectivo
+  // * configuracion. newpassword = Se envia el password que se va a definir como nuevo
+  // ------------------------| End Description |------------------------
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  this._database_runQuery(
+    {
+      query: 'call changePassword(?, ?, ?);',
+      parameters: [configuracion.comparation, configuracion.nickname, configuracion.newpassword]
+    }).then((rta) => {
+    deferred.resolve({
+      type: rta.result[0][0].typemessage,
+      message: rta.result[0][0].message
+    })
+  }).catch((err) => {
+    console.log(err)
+    deferred.reject(err)
+  })
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
 exports._database_consultTerceros = (configuracion) => {
   // --------------------------| Description |--------------------------
   // Description: Proceso desde la base de datos que obtiene un listado de usuarios

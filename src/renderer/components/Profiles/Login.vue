@@ -41,6 +41,16 @@
         </Row>
       </i-col>
     </Row>
+    <Modal v-model="showSecurityQuestions" :ok-text="'Enviar respuesta'" :cancel-text="'CANCELAR'" :title="'RESPONDE UNA DE LAS PREGUNTAS DE SEGURIDAD'" @on-ok="GoToRecoveryPassword()" :mask-closable="false">
+      <div>
+        <h4 style="display: inline">Pregunta: </h4>
+        <i-select v-model="securitySelected" clereable>
+          <i-option v-for="item in securityQuestions" :value="item.answer" :key="item.id">{{ item.question }}</i-option>
+        </i-select>
+        <h4 style="display: inline; margin-top: 10px">Respuesta: </h4>
+        <i-input v-model="securityResponse"></i-input>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -86,7 +96,11 @@
             imgPATH: '/static/images/android.png'
           }
         ],
-        heightMax: 877
+        heightMax: 877,
+        securityQuestions: [],
+        securitySelected: '',
+        securityResponse: '',
+        showSecurityQuestions: false
       }
     },
     methods: {
@@ -156,11 +170,41 @@
         // Verficiacion si esta validado el formulario de inicio de sesion
         this.$refs[name].validate((valid) => {
           if (valid) {
-            
+            this.$parent.handleSpinShow('Estableciendo su informacion segura')
+            require('../../libs/storage.js')._database_getSecurityQuestions(this.formInline.user).then((rta) => { // En caso de tener una respuesta positiva ejecuta el inicio de sesion
+              // enviamos las preguntas y respuestas a la propiedad indicada
+              this.securityQuestions = rta
+              console.log(this.securityQuestions)
+              this.$parent.handleSpinHide()
+              // evualuamos la cantidad de preguntas existentes.
+              if (this.securityQuestions.length === 0) {
+                this.$Message.error('No es posible realizar una recuperacion de cuenta, si no ha creado preguntas de seguridad')
+              } else {
+                this.showSecurityQuestions = true
+              }
+            }).catch((rta) => { // En caso de que ocurra un error, enseña la informacion al usuario
+              this.$Message.error({
+                content: rta,
+                duration: 8
+              })
+              this.$parent.handleSpinHide()
+            })
           } else {
             this.$Message.error('Verifique el formulario! existen campos sin digitar adecuadamente')
           }
         })
+      },
+      GoToRecoveryPassword () {
+        this.securityResponse = this.securityResponse.toUpperCase()
+        if (this.securityResponse === this.securitySelected) {
+          this.$Message.warning('Por favor especifique una nueva contraseña')
+          this.$parent.changePath('changepassword', {
+            username: this.formInline.user,
+            type: 'direct'
+          })
+        } else {
+          this.$Message.error('La respuesta no coincide con la almacenada en el servidor')
+        }
       },
       createdRules (type = 'login') { // Tambien recibe 'passwordchange'
         if (type === 'passwordchange') {

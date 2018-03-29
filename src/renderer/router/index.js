@@ -30,7 +30,15 @@ export default new Router({
     {
       path: '/login',
       name: 'login',
-      component: require('@/components/Profiles/login').default
+      component: require('@/components/Profiles/Login').default
+    },
+    {
+      path: '/changepassword',
+      name: 'changepassword',
+      component: require('@/components/Profiles/ChangePassword').default,
+      props (route) {
+        return route.query || {}
+      }
     },
     {
       path: '/sql/connectionsassistant',

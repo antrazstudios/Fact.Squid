@@ -63,6 +63,16 @@ exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernom
   }
 }
 
+// Preguntas de seguridad
+exports.createSecurityQuestion = (vid, vquestion, vanswer) => {
+  vanswer = vanswer.toUpperCase()
+  return {
+    id: vid,
+    question: vquestion,
+    answer: vanswer
+  }
+}
+
 // Permisos otorgados a los usuarios
 exports.createPermissionsToken = (vnombre, vdescription) => {
   return {

@@ -232,7 +232,7 @@
   }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
   .content{
     width: 100%;
     height: 100% !important;

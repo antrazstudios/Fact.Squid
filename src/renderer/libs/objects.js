@@ -28,7 +28,7 @@ exports.createUser = (vid, videntificacion, vtipoidentificacion, vprimernombre, 
 }
 
 // Usuario del tipo TOKEN
-exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions) => {
+exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions, ventidad, voperador, vconfig, vgestor = null) => {
   return {
     // Propiedades
     id: vid,
@@ -45,6 +45,10 @@ exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernom
     oficina: voficina,
     isactive: visactive,
     permissions: vpermissions,
+    entidad: ventidad,
+    operador: voperador,
+    config: vconfig,
+    gestor: vgestor,
     // Procedimientos
     getFullName () {
       return this.primernombre + ' ' + this.segundonombre + ' ' + this.primerapellido + ' ' + this.segundoapellido
@@ -70,6 +74,61 @@ exports.createSecurityQuestion = (vid, vquestion, vanswer) => {
     id: vid,
     question: vquestion,
     answer: vanswer
+  }
+}
+
+// Informacion de Gestor
+exports.createGestorInfo = (vid, vcodigo, vfirma) => {
+  return {
+    id: vid,
+    codigo: vcodigo,
+    firma: 'data:image/png;base64, ' + vfirma.toString('base64').replace('data:image/png;base64, ', '')
+  }
+}
+
+// Informacion de Operador
+exports.createOperador = (vid, vnombre, vrepresentantecc, vrepresentantenombre, vdireccion, vtelefono, vlogo, vciudad) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    representantecc: vrepresentantecc,
+    representantenombre: vrepresentantenombre,
+    direccion: vdireccion,
+    telefono: vtelefono,
+    logo: 'data:image/png;base64, ' + vlogo.toString('base64').replace('data:image/png;base64, ', ''),
+    ciudad: vciudad
+  }
+}
+
+// Informacion de Entidad
+exports.createEntidad = (vid, videntificacion, vnombre, vrepresentantecc, vrepresentantenombre, vdireccion, vtelefono, vlogo, vciudad) => {
+  return {
+    id: vid,
+    nombre: vnombre,
+    representantecc: vrepresentantecc,
+    representantenombre: vrepresentantenombre,
+    direccion: vdireccion,
+    telefono: vtelefono,
+    logo: 'data:image/png;base64, ' + vlogo.toString('base64').replace('data:image/png;base64, ', ''),
+    ciudad: vciudad
+  }
+}
+
+// Configuracion de usuario
+exports.createConfig = (vid, vusedpath, vpath, vversion, vrequirehorarios, venablemaps, vnotifications, vmailintervalhour, vmailintervalmin, vmailintervalsec, vkey16, vkey8) => {
+  return {
+    id: vid,
+    usedpath: vusedpath,
+    path: vpath,
+    version: vversion,
+    requirehorarios: vrequirehorarios,
+    enabledmaps: venablemaps,
+    notifications: vnotifications,
+    mailintervalhour: vmailintervalhour,
+    mailintervalmin: vmailintervalmin,
+    mailintervalsec: vmailintervalsec,
+    key16: vkey16,
+    key8: vkey8
   }
 }
 

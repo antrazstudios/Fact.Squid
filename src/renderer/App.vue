@@ -85,7 +85,7 @@
                   <h2 class="text-highlight">{{actualProfile.primernombre + ' ' + actualProfile.segundonombre + ' ' + actualProfile.primerapellido + ' ' + actualProfile.segundoapellido}}</h2>
                   <h4 class="text-highlight">{{actualProfile.cargo}}</h4>
                   <h4 class="text-highlight">{{actualProfile.oficina}}</h4>
-                  <i-button class="button-center">Editar perfil</i-button>
+                  <i-button class="button-center" @click="gotoProfile()">Editar perfil</i-button>
                   <i-button class="button-center" @click="closeSesion()">Cerrar sesion</i-button>
                 </div>
               </Poptip>
@@ -110,7 +110,7 @@
             Modo Desarrollador
           </Tag>
           <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
-            <h4 style="display: inline-block;">Usuario actaul: {{actualProfile.username}}</h4>
+            <h4 style="display: inline-block;">Usuario actual: {{actualProfile.username}}</h4>
           </Tag>
         </div>
         <!-- Contenedor Derecho -->
@@ -194,6 +194,10 @@
     <Modal v-model="visibleNotifications" title="Notificaciones">
       <notifications-view v-if="showMenuBar === true" :notified="true" refresh="mounted" visualization="complete"></notifications-view>
       <div slot="footer"></div>
+    </Modal>
+    <!-- Modo de autenticacion de Desarrollador -->
+    <Modal v-model="vDeveloperAuth" :ok-text="'Autenticarse'" :cancel-text="'Cancelar'" :title="'Autenticacion de Servicio de Desarrolladores'" :mask-closable="false" @on-ok="developerAuth()">
+      <i-input type="password" v-model="vDeveloperPass" placeholder="Ingrese su contraseña de desarrollador"></i-input>
     </Modal>
   </div>
 </template>
@@ -307,6 +311,8 @@
             button_style: 'text'
           }
         ],
+        vDeveloperAuth: false,
+        vDeveloperPass: '',
         windowState: 'normal',
         windowButtonCloseState: true,
         electronRemote: null,
@@ -322,7 +328,7 @@
         colorVersion: '',
         loaderMessage: '...',
         actualProfile: '',
-        developerMode: true,
+        developerMode: false,
         visibleProfile: false,
         visibleSearch: false,
         visibleNotifications: false,
@@ -363,7 +369,6 @@
       }
       // Se oculta el Spin de espera
       this.handleSpinHide()
-      console.log(this.electronRemote.getCurrentWindow().getURL())
     },
     created: function () {
       // Mostrar la espera en pantalla
@@ -388,6 +393,12 @@
       this.electronRemote.getCurrentWindow().on('unmaximize', () => {
         this.windowState = 'restored'
       })
+      // Evento de cambio del modo desarrollador
+      window.addEventListener('keyup', (e) => {
+        if (e.altKey === true && e.code === 'KeyD') {
+          this.vDeveloperAuth = true
+        }
+      }, true)
       // Abrir los enlaces de la aplicacion en el navegador por defecto
       var shell = require('electron').shell
       var $ = require('jquery')
@@ -435,6 +446,20 @@
       this.changePath('/login')
     },
     methods: {
+      developerAuth () {
+        if (this.vDeveloperPass === 'Gata1125*') {
+          this.developerMode = true
+          this.$Message.warning('MODO DESARROLLADOR ACTIVADO')
+          this.vDeveloperPass = ''
+        } else {
+          if (this.developerMode === true) {
+            this.$Message.warning('MODO DESARROLLADOR DESACTIVADO')
+          } else {
+            this.$Message.error('ERROR DE AUTENTICACION')
+          }
+          this.developerMode = false
+        }
+      },
       connectionsAssitantShow () {
         this.changePath('/sql/connectionsassistant')
       },
@@ -469,9 +494,8 @@
       },
       createMenu () {
         // Creacion del menu de la aplicacion
-        const {remote} = require('electron')
-        const {Menu} = remote
-        console.log(Menu.getApplicationMenu())
+        // const {remote} = require('electron')
+        // const {Menu} = remote
         // // Creacion del template del menu
         // const templateMenu = [
         //   {
@@ -548,6 +572,9 @@
       },
       handleSpinHide () {
         this.$Spin.hide()
+      },
+      gotoProfile () {
+        this.changePath('/Profile')
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile

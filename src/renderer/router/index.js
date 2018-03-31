@@ -41,6 +41,11 @@ export default new Router({
       }
     },
     {
+      path: '/Profile',
+      name: 'view-profile',
+      component: require('@/components/Profiles/ViewProfile').default
+    },
+    {
       path: '/sql/connectionsassistant',
       name: 'connections-assistant',
       component: require('@/components/sql/ConnectionsAssistant').default

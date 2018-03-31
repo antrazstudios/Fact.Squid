@@ -126,9 +126,32 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
       for (let i = 0; i < resultData3.length; i++) {
         data.permissionsConsult.push(require('./objects.js').createPermissionsToken(resultData3[i].tb_permission_content, resultData3[i].tb_permission_description))
       }
-      // Se obtienen los datos del usuario, y se agregan los permisos obtenidos
-      data.userConsult = require('./objects.js').createUserToken(resultData2[0].idtb_users, resultData2[0].tb_users_identificacion, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil, resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, data.permissionsConsult)
-      deferred.resolve(data)
+      this._database_runQuery({
+        query: 'call getAdittionalInfoUser(?);',
+        parameters: [ resultData2[0].tb_users_username ]
+      }).then((response) => {
+        let gestorInfo, operadorInfo, entidadInfo, confiInfo
+        // obtener informacion de gestores asociados al usuario
+        gestorInfo = []
+        for (let i = 0; i < response.result[0].length; i++) {
+          const gestores = response.result[0][i]
+          gestorInfo.push(require('./objects.js').createGestorInfo(gestores.idtb_gestores, gestores.tb_gestores_codigo, gestores.tb_gestores_fd))
+        }
+        // obtener informacion del operador al que se encuentra asociado el usuario
+        let operadorData = response.result[1][0]
+        operadorInfo = require('./objects.js').createOperador(operadorData.idtb_operadores, operadorData.tb_operadores_nombre, operadorData.tb_operadores_representantecc, operadorData.tb_operadores_representantenombre, operadorData.tb_operadores_direccion, operadorData.tb_operadores_telefono, operadorData.tb_operadores_logo, require('./objects.js').createCiudad(operadorData.idtb_ciudad, operadorData.tb_ciudad_nombre, require('./objects.js').createDepartamento(operadorData.idtb_departamento, operadorData.tb_departamento_nombre, require('./objects.js').createPais(operadorData.idtb_pais, operadorData.tb_pais_nombre))))
+        // obtener informacion de la entidad al que se encuentra asociado el operador y asu vez el usuario
+        let entidadData = response.result[2][0]
+        entidadInfo = require('./objects.js').createEntidad(entidadData.idtb_entidad, entidadData.tb_entidad_identificacion, entidadData.tb_entidad_nombre, entidadData.tb_entidad_representatecc, entidadData.tb_entidad_representantenombre, entidadData.tb_entidad_direccion, entidadData.tb_entidad_telefono, entidadData.tb_entidad_logo, require('./objects.js').createCiudad(entidadData.idtb_ciudad, entidadData.tb_ciudad_nombre, require('./objects.js').createDepartamento(entidadData.idtb_departamento, entidadData.tb_departamento_nombre, require('./objects.js').createPais(entidadData.idtb_pais, entidadData.tb_pais_nombre))))
+        // obtener informacion de la configuracion de la plataforma
+        let configData = response.result[3][0]
+        confiInfo = require('./objects.js').createConfig(configData.idtb_cnf_so, configData.tb_cnf_so_usepath, configData.tb_cnf_so_path, configData.tb_cnf_so_version, configData.tb_cnf_so_requirehorarios, configData.tb_cnf_so_enabledmaps, configData.tb_cnf_so_notifications, configData.tb_cnf_so_mail_interval_hour, configData.tb_cnf_so_mail_interval_min, configData.tb_cnf_so_mail_interval_sec, configData.tb_cnf_so_security_key16, configData.tb_cnf_so_security_key8)
+        // Se obtienen los datos del usuario, y se agregan los permisos obtenidos
+        data.userConsult = require('./objects.js').createUserToken(resultData2[0].idtb_users, resultData2[0].tb_users_identification, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil, resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, data.permissionsConsult, entidadInfo, operadorInfo, confiInfo, gestorInfo)
+        deferred.resolve(data)
+      }).catch((err) => {
+        deferred.reject('Respuesta del servidor => ' + err)
+      })
     } else if (rta.result.length === 3) {
       deferred.reject('Su usuario aun no esta preparado para ser utilizado, pongase en contacto con el administrador del sistema.')
     } else {

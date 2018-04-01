@@ -139,7 +139,7 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
         }
         // obtener informacion del operador al que se encuentra asociado el usuario
         let operadorData = response.result[1][0]
-        operadorInfo = require('./objects.js').createOperador(operadorData.idtb_operadores, operadorData.tb_operadores_nombre, operadorData.tb_operadores_representantecc, operadorData.tb_operadores_representantenombre, operadorData.tb_operadores_direccion, operadorData.tb_operadores_telefono, operadorData.tb_operadores_logo, require('./objects.js').createCiudad(operadorData.idtb_ciudad, operadorData.tb_ciudad_nombre, require('./objects.js').createDepartamento(operadorData.idtb_departamento, operadorData.tb_departamento_nombre, require('./objects.js').createPais(operadorData.idtb_pais, operadorData.tb_pais_nombre))))
+        operadorInfo = require('./objects.js').createOperador(operadorData.idtb_operadores, operadorData.tb_operadores_identificacion, operadorData.tb_operadores_nombre, operadorData.tb_operadores_representantecc, operadorData.tb_operadores_representantenombre, operadorData.tb_operadores_direccion, operadorData.tb_operadores_telefono, operadorData.tb_operadores_logo, require('./objects.js').createCiudad(operadorData.idtb_ciudad, operadorData.tb_ciudad_nombre, require('./objects.js').createDepartamento(operadorData.idtb_departamento, operadorData.tb_departamento_nombre, require('./objects.js').createPais(operadorData.idtb_pais, operadorData.tb_pais_nombre))))
         // obtener informacion de la entidad al que se encuentra asociado el operador y asu vez el usuario
         let entidadData = response.result[2][0]
         entidadInfo = require('./objects.js').createEntidad(entidadData.idtb_entidad, entidadData.tb_entidad_identificacion, entidadData.tb_entidad_nombre, entidadData.tb_entidad_representatecc, entidadData.tb_entidad_representantenombre, entidadData.tb_entidad_direccion, entidadData.tb_entidad_telefono, entidadData.tb_entidad_logo, require('./objects.js').createCiudad(entidadData.idtb_ciudad, entidadData.tb_ciudad_nombre, require('./objects.js').createDepartamento(entidadData.idtb_departamento, entidadData.tb_departamento_nombre, require('./objects.js').createPais(entidadData.idtb_pais, entidadData.tb_pais_nombre))))
@@ -188,6 +188,72 @@ exports._database_getSecurityQuestions = (username) => {
     deferred.resolve(data)
   }).catch((err) => {
     console.log(err)
+    deferred.reject(err)
+  })
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_getAllSecurityQuestions = () => {
+  // --------------------------| Description |--------------------------
+  // Description: Proceso que obtiene los datos de preguntas de seguridad en el sistema
+  // ------------------------| End Description |------------------------
+  // Definicion de los datos a retornar en caso de ser positiva la respuesta
+  // del servidor
+  let data = []
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  this._database_runQuery({ query: 'SELECT * FROM consultSecurityQuestions' }).then((rta) => {
+    // instanciamos la libreria de objetos
+    let objects = require('./objects')
+    // Verificacion de la cantidad de resultados obtenidos desde la base de datos
+    // Recorremos con un for todos los resultados arrojados por el servidor
+    for (let i = 0; i < rta.result.length; i++) {
+      const row = rta.result[i]
+      data.push(objects.createSecurityQuestionObject(row.idtb_users_pseguridad, row.tb_users_pseguridad_pregunta))
+    }
+    // Retornamos la informacion allada
+    deferred.resolve(data)
+  }).catch((err) => {
+    console.log(err)
+    deferred.reject(err)
+  })
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createSecurityQuestionsInUser = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crear una nueva asociacion de pregunta y respuesta
+  // Parameters:
+  // * configuracion. iduser = numero id del usuario
+  // * configuracion. idquestion = numero id de la pregunta
+  // * configuracion. answer = respuesta de la pregunta
+  // ------------------------| End Description |------------------------
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  this._database_runQuery({ query: 'call createSecurityQuestionInUser(?, ?, ?);', parameters: [ configuracion.iduser, configuracion.idquestion, configuracion.answer ] }).then((rta) => {
+    deferred.resolve('Informacion almacenada')
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_deleteSecurityQuestionsInUser = (idquestion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crear una nueva asociacion de pregunta y respuesta
+  // Parameters:
+  // * configuracion. iduser = numero id del usuario
+  // * configuracion. idquestion = numero id de la pregunta
+  // * configuracion. answer = respuesta de la pregunta
+  // ------------------------| End Description |------------------------
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  this._database_runQuery({ query: 'call deleteSecurityQuestionInUser(?);', parameters: [ idquestion ] }).then((rta) => {
+    deferred.resolve('Informacion eliminada')
+  }).catch((err) => {
     deferred.reject(err)
   })
   return deferred.promise

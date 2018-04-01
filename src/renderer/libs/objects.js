@@ -28,7 +28,7 @@ exports.createUser = (vid, videntificacion, vtipoidentificacion, vprimernombre, 
 }
 
 // Usuario del tipo TOKEN
-exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions, ventidad, voperador, vconfig, vgestor = null) => {
+exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions, ventidad, voperador, vconfig, vgestor) => {
   return {
     // Propiedades
     id: vid,
@@ -77,6 +77,14 @@ exports.createSecurityQuestion = (vid, vquestion, vanswer) => {
   }
 }
 
+// Preguntas de seguridad coo objeto
+exports.createSecurityQuestionObject = (vid, vquestion) => {
+  return {
+    id: vid,
+    question: vquestion
+  }
+}
+
 // Informacion de Gestor
 exports.createGestorInfo = (vid, vcodigo, vfirma) => {
   return {
@@ -87,9 +95,10 @@ exports.createGestorInfo = (vid, vcodigo, vfirma) => {
 }
 
 // Informacion de Operador
-exports.createOperador = (vid, vnombre, vrepresentantecc, vrepresentantenombre, vdireccion, vtelefono, vlogo, vciudad) => {
+exports.createOperador = (vid, videntificacion, vnombre, vrepresentantecc, vrepresentantenombre, vdireccion, vtelefono, vlogo, vciudad) => {
   return {
     id: vid,
+    identificacion: videntificacion,
     nombre: vnombre,
     representantecc: vrepresentantecc,
     representantenombre: vrepresentantenombre,
@@ -104,6 +113,7 @@ exports.createOperador = (vid, vnombre, vrepresentantecc, vrepresentantenombre, 
 exports.createEntidad = (vid, videntificacion, vnombre, vrepresentantecc, vrepresentantenombre, vdireccion, vtelefono, vlogo, vciudad) => {
   return {
     id: vid,
+    identificacion: videntificacion,
     nombre: vnombre,
     representantecc: vrepresentantecc,
     representantenombre: vrepresentantenombre,

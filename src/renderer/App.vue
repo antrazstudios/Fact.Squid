@@ -578,8 +578,6 @@
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
-        console.log(this.$refs.MenuFix.width)
-        console.log(this.widthMenu)
       },
       searchClick () {
         this.visibleSearch = !this.visibleSearch

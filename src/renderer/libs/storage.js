@@ -1,4 +1,3 @@
-
 const q = require('q')
 
 // -----------------------------------------------------------------------------------------------------------
@@ -254,6 +253,33 @@ exports._database_deleteSecurityQuestionsInUser = (idquestion) => {
   this._database_runQuery({ query: 'call deleteSecurityQuestionInUser(?);', parameters: [ idquestion ] }).then((rta) => {
     deferred.resolve('Informacion eliminada')
   }).catch((err) => {
+    deferred.reject(err)
+  })
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_updateProfileBasicInformation = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crear una nueva asociacion de pregunta y respuesta
+  // Parameters:
+  // * configuracion. iduser = numero id del usuario
+  // * configuracion. primernombre = Primer nombre del usuario
+  // * configuracion. segundonombre = Segundo nombre del usuario
+  // * configuracion. primerapellido = Primer apellido del usuario
+  // * configuracion. segundoapellido = Segundo apellido del usuario
+  // * configuracion. fechanacimiento = Fecha de nacimiento del usuario
+  // ------------------------| End Description |------------------------
+  // Definicion de variables de Q para generar promesas dentro de un modulo
+  let deferred = q.defer()
+  this._database_runQuery(
+    {
+      query: 'call updateProfileBasicInformation(?, ?, ?, ?, ?, ?);',
+      parameters: [ configuracion.iduser, configuracion.primernombre, configuracion.segundonombre, configuracion.primerapellido, configuracion.segundoapellido, configuracion.fechanacimiento ]
+    }).then((rta) => {
+    deferred.resolve('Informacion actualizada')
+  }).catch((err) => {
+    console.log(err)
     deferred.reject(err)
   })
   return deferred.promise

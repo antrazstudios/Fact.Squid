@@ -13,7 +13,7 @@
             <h3>Cargo: {{ actualProfile.cargo }}</h3>
             <h4>Oficina: {{ actualProfile.oficina }}</h4>
             <!-- Informacion Inicial -->
-            <i-form ref="formInline" :model="actualProfile" :rules="rulesProfile" style="margin-top: 5%;">
+            <i-form ref="formInline" :model="actualProfile" style="margin-top: 5%;">
               <FormItem label="Primer nombre:" prop="primernombre" style="margin: 10px 0px 0px 0px">
                 <Input type="text" placeholder="Ingrese su primer nombre" v-model="actualProfile.primernombre"/>
               </FormItem>
@@ -48,7 +48,7 @@
               <h4 style="margin-top: 20px;">Todo esto puede ser posible, pero si el problema persiste, contacta el administrador del sistema.</h4>
             </Card>
             <!-- Boton de confirmacion -->
-            <Button class="form-object" @click="executeChangePass()">Guardar cambios</Button>
+            <Button class="form-object" @click="updateDataProfile()">Guardar cambios</Button>
           </i-col>
         </Row>
       </i-col>
@@ -155,13 +155,13 @@
         <!-- Formulario de ingreso de preguntas de seguridad -->
         <Card dis-hover v-if="selectableQuestions.length !== 0" style="text-align: left; margin-top: 10px">
           <h4>Agregar una nueva pregunta de seguridad</h4>
-          <i-form ref="formSecurity" :rules="rulesProfile" :model="actualQuestion" style="margin-top: 10px;">
-            <FormItem label="Pregunta de seguridad:" prop="securityquestion" style="margin: 0px 0px 0px 0px">
+          <i-form ref="formSecurity" :model="actualQuestion" style="margin-top: 10px;">
+            <FormItem label="Pregunta de seguridad:" prop="question" style="margin: 0px 0px 0px 0px" :error="rulesQuestion.question.result">
               <i-select v-model="actualQuestion.question">
-                <i-option v-for="item in selectableQuestions" :key="item.id" :value="item.id">{{ item.question }}</i-option>
+                <i-option v-for="item in selectableQuestions" :key="item.id" :value="item.id.toString()">{{ item.question }}</i-option>
               </i-select>
             </FormItem>
-            <FormItem label="Respuesta:" prop="response" style="margin: 5px 0px 0px 0px">
+            <FormItem label="Respuesta:" prop="response" style="margin: 15px 0px 0px 0px" :error="rulesQuestion.response.result">
               <Input type="text" placeholder="Ingrese la respuesta" v-model="actualQuestion.response"/>
             </FormItem>
           </i-form>
@@ -170,7 +170,7 @@
           </div>
         </Card>
         <!-- En caso que no existan preguntas para agregar -->
-        <div class="slides-end" v-if="securityQuestions.length === 0">
+        <div class="slides-end" v-if="selectableQuestions.length === 0">
           <img src="../../assets/images/emoji/1f44d.png" alt="">
           <p>No tienes mas preguntas por agregar</p>
         </div>
@@ -184,14 +184,65 @@
     name: 'view-profile',
     data () {
       return {
-        actualProfile: {},
+        actualProfile: require('../../libs/objects').createUserToken(0, '', '', '', '', '', '', '', '', '', '', '', false, [], {}, {}, {}, []),
         rulesProfile: {
-          securityquestion: [
-            { required: true, message: 'Debes seleccionar al menos una pregunta de seguridad', trigger: 'change' }
-          ],
-          response: [
-            { required: true, message: 'No ha especificado una respuesta para esta pregunta', trigger: 'blur' }
-          ]
+          primernombre: {
+            result: '',
+            rules: [
+              {
+                prop: 'primernombre',
+                typevalidation: 'content-null',
+                message: 'Debe especificar al menos un nombre',
+                args: ''
+              }
+            ]
+          },
+          primerapellido: {
+            result: '',
+            rules: [
+              {
+                prop: 'primerapellido',
+                typevalidation: 'content-null',
+                message: 'Debe especificar al menor un apellido',
+                args: ''
+              }
+            ]
+          },
+          fechanacimiento: {
+            result: '',
+            rules: [
+              {
+                prop: 'fechanacimiento',
+                typevalidation: 'content-null',
+                message: 'Debes especificar tu fecha de nacimiento',
+                args: ''
+              }
+            ]
+          }
+        },
+        rulesQuestion: {
+          question: {
+            result: '',
+            rules: [
+              {
+                prop: 'question',
+                typevalidation: 'content-null',
+                message: 'Debe seleccionar al menos una pregunta para continuar',
+                args: ''
+              }
+            ]
+          },
+          response: {
+            result: '',
+            rules: [
+              {
+                prop: 'response',
+                typevalidation: 'content-null',
+                message: 'No ha especificado una respuesta valida para la pregunta',
+                args: ''
+              }
+            ]
+          }
         },
         columnsQuestions: [],
         securityQuestions: [],
@@ -257,6 +308,7 @@
           this.securityQuestions = data // asignamos los datos obtenidos
           // descargar las opciones disponibles de pregunta de seguridad
           storage._database_getAllSecurityQuestions().then((data2) => {
+            this.selectableQuestions = []
             for (let i = 0; i < data2.length; i++) {
               const question = data2[i]
               let coincidense = 0
@@ -281,28 +333,81 @@
         })
       },
       createSecurityQuestion () {
-        this.$refs['formSecurity'].validate((valid) => {
-          if (valid) {
+        let rules = require('../../libs/rules')
+        rules.validateRulesFormField(this.$refs['formSecurity'], this.rulesQuestion).then((rta) => {
+          this.rulesQuestion = rta.rules
+          if (rta.resultValidation === false) {
+            this.$Message.error('Hay campos que necesitan revisarse para continuar')
+          } else {
             this.$parent.handleSpinShow()
             let storage = require('../../libs/storage')
             storage._database_createSecurityQuestionsInUser({
               iduser: this.actualProfile.id,
-              idquestion: this.actualQuestion.question.id,
+              idquestion: this.actualQuestion.question,
               answer: this.actualQuestion.response
             }).then((rta) => {
               this.$Message.success(rta)
+              this.actualQuestion.question = ''
+              this.actualQuestion.response = ''
               this.$parent.handleSpinHide()
               this.getSecurityQuestions()
             }).catch((err) => {
               this.$Message.error(err)
               this.$parent.handleSpinHide()
             })
-          } else {
-            this.$Message.error('Hay problemas en el formulario, reviselo')
+          }
+        }).catch((err) => {
+          this.$Message.error(err)
+        })
+      },
+      deleteSecurityQuestion (item) {
+        this.$Modal.confirm({
+          title: 'Confirmacion de eliminacion',
+          content: '¿Esta seguro de querer eliminar esta pregunta de seguridad?',
+          okText: 'Si, eliminar',
+          cancelText: 'No',
+          closable: false,
+          onOk: () => {
+            this.$parent.handleSpinShow()
+            const storage = require('../../libs/storage')
+            storage._database_deleteSecurityQuestionsInUser(item.id).then((rta) => {
+              this.$Message.success('Registro eliminado')
+              this.$parent.handleSpinHide()
+              this.getSecurityQuestions()
+            }).catch((err) => {
+              this.$Message.error(err)
+              this.$parent.handleSpinHide()
+            })
           }
         })
       },
-      deleteSecurityQuestion (item) {}
+      updateDataProfile () {
+        require('../../libs/rules').validateRulesFormField(this.$refs['formInline'], this.rulesProfile).then((rta) => {
+          this.rulesProfile = rta.rules
+          if (rta.resultValidation === false) {
+            this.$Message.error('Hay campos que necesitan revisarse para continuar')
+          } else {
+            this.$parent.handleSpinShow('Escribiendo datos')
+            let storage = require('../../libs/storage')
+            storage._database_updateProfileBasicInformation({
+              iduser: this.actualProfile.id,
+              primernombre: this.actualProfile.primernombre,
+              segundonombre: this.actualProfile.segundonombre,
+              primerapellido: this.actualProfile.primerapellido,
+              segundoapellido: this.actualProfile.segundoapellido,
+              fechanacimiento: this.actualProfile.fechanacimiento
+            }).then((rta) => {
+              this.$Message.success(rta)
+              this.$parent.handleSpinHide()
+            }).catch((err) => {
+              this.$Message.error(err)
+            })
+          }
+        }).catch((err) => {
+          console.log(err)
+          this.$Message.error(err)
+        })
+      }
     }
   }
 </script>

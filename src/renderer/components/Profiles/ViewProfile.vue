@@ -12,6 +12,7 @@
             <h2>Nickname: {{ actualProfile.username }}</h2>
             <h3>Cargo: {{ actualProfile.cargo }}</h3>
             <h4>Oficina: {{ actualProfile.oficina }}</h4>
+            <i-button class="form-object" @click="changePassword()">Cambiar la contraseña</i-button>
             <!-- Informacion Inicial -->
             <i-form ref="formInline" :model="actualProfile" style="margin-top: 5%;">
               <FormItem label="Primer nombre:" prop="primernombre" style="margin: 10px 0px 0px 0px">
@@ -399,6 +400,7 @@
             }).then((rta) => {
               this.$Message.success(rta)
               this.$parent.handleSpinHide()
+              this.$parent.closeSesion()
             }).catch((err) => {
               this.$Message.error(err)
             })
@@ -406,6 +408,12 @@
         }).catch((err) => {
           console.log(err)
           this.$Message.error(err)
+        })
+      },
+      changePassword () {
+        this.$parent.changePath('changepassword', {
+          username: this.actualProfile.username,
+          type: 'withpassword'
         })
       }
     }

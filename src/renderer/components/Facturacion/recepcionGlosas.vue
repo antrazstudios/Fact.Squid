@@ -476,13 +476,8 @@
         // })
       },
       previewDocument () {
-        const settings = require('../../libs/settings')
-        const fs = require('fs')
         const {shell} = require('electron')
-        const pathDocuments = settings.getDocumentsPath() + 'temps/temp_printpreview' + Date.now() + '.xlsx'
-        console.log(pathDocuments)
-        fs.createReadStream(this.pathTempDocument).pipe(fs.createWriteStream(pathDocuments))
-        shell.openExternal(pathDocuments)
+        shell.openExternal(this.pathTempDocument)
       }
     }
   }

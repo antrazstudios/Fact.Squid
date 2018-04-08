@@ -255,13 +255,14 @@
         this.horariosColumns.push({
           title: 'Periodo Dias',
           render: (h, {row}) => {
-            return row.diainicio + ' - ' + row.diafinal
-          }
+            return h('label', {}, row.diainicio + ' - ' + row.diafinal)
+          },
+          width: 150
         })
         this.horariosColumns.push({
           title: 'Periodo en Tiempo',
           render: (h, {row}) => {
-            return 'Desde ' + row.horainicio + ' hasta ' + row.horafinal
+            return h('label', {}, 'Desde ' + row.horainicio + ' hasta ' + row.horafinal)
           }
         })
         this.horariosColumns.push({
@@ -337,13 +338,13 @@
         this.contactosColumns.push({
           title: 'Nombre',
           render: (h, {row}) => {
-            return row.nombre
+            return h('label', {}, row.nombre)
           }
         })
         this.contactosColumns.push({
           title: 'Cargo',
           render: (h, {row}) => {
-            return row.cargo
+            return h('label', {}, row.cargo)
           }
         })
         if (require('../../libs/settings.js').getSesionProfile().verifyPermission('ROOT') === true) {
@@ -371,7 +372,7 @@
                 }, row.isactive === 1 ? 'Activo' : 'Inactivo')
               ])
             },
-            width: 100
+            width: 110
           })
         }
         this.contactosColumns.push({

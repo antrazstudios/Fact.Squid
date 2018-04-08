@@ -170,14 +170,14 @@
         this.telefonosColumnas.push({
           title: 'Numero',
           render: (h, {row}) => {
-            return row.numero
+            return h('label', {}, row.numero)
           }
         })
         // creacion de la columna que muestra la extension si existe
         this.telefonosColumnas.push({
           title: 'Extension',
           render: (h, {row}) => {
-            return row.ext === 0 ? '<< sin-extension >>' : row.ext
+            return h('label', {}, row.ext === 0 ? '<< sin-extension >>' : row.ext)
           }
         })
         // creacion de la columna de acciones
@@ -253,17 +253,17 @@
         this.emailsColumnas = []
         // creacion de la columna que muestra la direccion
         this.emailsColumnas.push({
-          title: 'Direccion',
+          title: 'Correo',
           render: (h, {row}) => {
-            return row.mail
+            return h('label', {}, row.mail)
           }
         })
         // creacion de la columna que muestra si es la direccion default
         this.emailsColumnas.push({
           title: 'Default',
-          width: 80,
+          width: 100,
           render: (h, {row}) => {
-            return row.isdefault === 1 ? 'SI' : 'NO'
+            return h('label', {}, row.isdefault === 1 ? 'SI' : 'NO')
           }
         })
         // creacion de la columna de acciones

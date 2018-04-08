@@ -221,9 +221,9 @@
         this.columnsContent.push({
           title: 'Autor',
           render: (h, {row}) => {
-            return row.author
+            return h('label', {}, row.author)
           },
-          width: 180
+          width: 220
         })
         // definir la columna del titulo
         this.columnsContent.push({
@@ -244,15 +244,15 @@
         this.columnsContent.push({
           title: 'Fecha Publ.',
           render: (h, {row}) => {
-            return row.date
+            return h('label', {}, row.date)
           },
-          width: 110
+          width: 120
         })
         // definir un poco del contenido
         this.columnsContent.push({
           title: 'Decripcion',
           render: (h, {row}) => {
-            return row.description
+            return h('label', {}, row.description)
           }
         })
         // definir acciones

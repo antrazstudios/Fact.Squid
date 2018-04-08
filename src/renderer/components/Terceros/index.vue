@@ -62,8 +62,8 @@ export default {
       // Item de tipo de identificacion
       this.columnsTerceros.push({
         title: 'Tipo Id.',
-        render: (h, {row}) => {
-          return row.tercero.tipoidentificacion.nombre
+        render: (h, params) => {
+          return h('label', {}, params.row.tercero.tipoidentificacion.nombre)
         },
         width: 100
       })
@@ -71,7 +71,7 @@ export default {
       this.columnsTerceros.push({
         title: 'N. Identificacion',
         render: (h, {row}) => {
-          return row.tercero.identificacion
+          return h('h', {}, row.tercero.identificacion)
         },
         width: 150
       })
@@ -85,7 +85,7 @@ export default {
         this.columnsTerceros.push({
           title: 'Nombres y apellidos',
           render: (h, {row}) => {
-            return row.getFullName()
+            return h('label', {}, row.getFullName())
           }
         })
       }
@@ -115,7 +115,7 @@ export default {
               }, row.tercero.active === 1 ? 'Activo' : 'Inactivo')
             ])
           },
-          width: 100
+          width: 120
         })
       }
       // Botones de accion

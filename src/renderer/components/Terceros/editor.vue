@@ -218,7 +218,7 @@
           this.direccionesColumns.push({
             title: 'Key',
             render: (h, {row}) => {
-              return row.id
+              return h('label', {}, row.id)
             },
             width: 80
           })
@@ -260,7 +260,7 @@
         this.direccionesColumns.push({
           title: 'Direccion',
           render: (h, {row}) => {
-            return row.direccion + ', ' + row.ciudad.nombre + ' - ' + row.ciudad.departamento.nombre + ' - ' + row.ciudad.departamento.pais.nombre
+            return h('label', {}, row.direccion + ', ' + row.ciudad.nombre + ' - ' + row.ciudad.departamento.nombre + ' - ' + row.ciudad.departamento.pais.nombre)
           }
         })
         // Creacion de la columna de Estado
@@ -289,7 +289,7 @@
                 }, row.isactive === 1 ? 'Activo' : 'Inactivo')
               ])
             },
-            width: 100
+            width: 120
           })
         }
         // Creacion de la columna de botones

@@ -16,7 +16,7 @@
     <Row v-if="contactoEdit.id !== 0" :gutter="6">
       <!-- Tabla de Telefonos -->
       <i-col span="12">
-        <i-table v-if="showstelefonosEdit === false" size="small" :columns="telefonosColumnas" :data="telefonos" :stripe="false" :height="240" :loading="telefonosLoading">
+        <i-table border v-if="showstelefonosEdit === false" size="small" :columns="telefonosColumnas" :data="telefonos" :stripe="false" :height="240" :loading="telefonosLoading">
           <div slot="footer" style="text-align: center;">
             <i-button @click="createTelefono">Agregar telefono</i-button>
           </div>
@@ -32,7 +32,7 @@
       </i-col>
       <!-- Tabla de emails -->
       <i-col span="12">
-        <i-table v-if="showsemailsEdit === false" size="small" :columns="emailsColumnas" :data="emails" :stripe="false" :height="240" :loading="emailsLoading">
+        <i-table border v-if="showsemailsEdit === false" size="small" :columns="emailsColumnas" :data="emails" :stripe="false" :height="240" :loading="emailsLoading">
           <div slot="footer" style="text-align: center;">
             <i-button @click="createEmail">Agregar Emails</i-button>
           </div>

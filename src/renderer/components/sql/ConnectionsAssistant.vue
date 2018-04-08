@@ -42,7 +42,7 @@
       </i-col>
     </Row>
     <Row>
-      <i-table ref="connTable" stripe height="200" :columns="columnsConnectionsList" :data="connectionsList" size="small" :stripe="false"></i-table>
+      <i-table border ref="connTable" stripe height="200" :columns="columnsConnectionsList" :data="connectionsList" size="small" :stripe="false"></i-table>
     </Row>
     <Row>
       <Card ref="connEditor" style="margin: 20px 0px; display: none" dis-hover>

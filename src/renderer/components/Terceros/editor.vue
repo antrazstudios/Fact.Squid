@@ -63,7 +63,7 @@
         </Row>
         <!-- Tabla de direcciones -->
         <Row v-if="this.$route.query.id !== 0" style="enable: false;">
-          <i-table size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
+          <i-table border size="small" :columns="direccionesColumns" :data="direccionesEdit" :stripe="false" :height="300" :loading="isTableLoading">
             <div slot="footer" style="text-align: center;">
               <i-button @click="newDireccion()">Agregar direccion</i-button>
             </div>

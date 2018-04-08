@@ -93,7 +93,10 @@ export default new Router({
     {
       path: '/Glosas/recepcion',
       name: 'glosas-recepcion',
-      component: require('@/components/Facturacion/recepcionGlosas').default
+      component: require('@/components/Facturacion/recepcionGlosas').default,
+      props (route) {
+        return route.query || {}
+      }
     }
   ]
 })

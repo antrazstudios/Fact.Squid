@@ -1,10 +1,13 @@
 <template>
   <div class="content">
+    <!-- fileInput para leer el archivo de glosas -->
     <input type="file" style="display:none" ref="fileInput" accept="application/vnd.ms-excel, .xlsx" @change="onFilePicked"/>
+    <!-- Primer Row, formulario de informacion de la plantilla -->
     <Row v-if="visibleChargeInit === false" :gutter="16">
       <i-col span="23">
+        <!-- Formulario de informacion -->
         <Form ref="FormGlosas" :label-width="180">
-          <FormItem label="Gestor de Glosa" :error="gestorError">
+          <FormItem :label="textDisplay1" :error="gestorError">
             <Input disabled :value="gestor"/>
           </FormItem>
           <FormItem label="Entidad Planilla" :error="nitError">
@@ -19,38 +22,44 @@
         </Form>
       </i-col>
       <i-col span="1">
+        <!-- Boton para previsualizar el documento generado -->
         <i-button v-if="pathTempDocument !== ''" type="info" @click="previewDocument">
           <Icon type="document"/>
         </i-button>
       </i-col>
     </Row>
+    <!-- Segundo Row, muestra la tabla de las glosas -->
     <Row v-if="visibleChargeInit === false" style="width: 100%">
       <i-table border :style="'width: 100%; height:' + $parent.maxHeightTable - 280 + 'px'" :columns="columnsGlosas" :data="glosas.facturas" size="small" :stripe="false" :height="$parent.maxHeightTable - 280"></i-table>
     </Row>
+    <!-- Tercer Row, botones inicialesde carga -->
     <Row v-if="visibleChargeInit === true" type="flex" justify="space-around">
       <i-col span="4">
+        <!-- Cargar plantilla de informacion de Glosa o Devolucion -->
         <i-button type="dashed" @click="onPickFile">
           <div style="padding: 20px 0">
               <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-              <p>Seleccione la plantilla para importar los datos de la Glosa</p>
+              <p>{{ textDisplay2 }}</p>
           </div>
         </i-button>
       </i-col>
       <i-col span="4">
+        <!-- Descargar plantilla para cargar Glosa o Devolucion -->
         <i-button type="dashed" @click="downloadFile">
           <div style="padding: 20px 0">
               <Icon type="ios-cloud-download" size="52" style="color: #3399ff"></Icon>
-              <p>Descargar plantilla de datos para glosa</p>
+              <p>{{ textDisplay3 }}</p>
           </div>
         </i-button>
       </i-col>
     </Row>
+    <!-- Cuarto Row, informacion de totales del formulario -->
     <Row v-if="visibleChargeInit === false" type="flex" justify="end">
       <Form inline :label-width="130" style="margin-top: 15px;">
-        <FormItem label="Cant. Glosas">
+        <FormItem :label="textDisplay4">
           <Input :value="glosas.facturas.length" disabled/>
         </FormItem>
-        <FormItem label="Valor Glosas">
+        <FormItem :label="textDisplay5">
           <Input :value="'$ ' + totalvalorglosas.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')" disabled/>
         </FormItem>
         <FormItem label="Valor Aceptado">
@@ -61,6 +70,7 @@
         </FormItem>
       </Form>
     </Row>
+    <!-- Quinto Row, botones de accion -->
     <Row v-if="visibleChargeInit === false" style="margin-top: 10px;" type="flex" justify="end">
       <i-button type="error" style="margin-right: 10px" @click="$router.go(-1)">CANCELAR</i-button>
       <i-button type="info" :disabled="!enabledConfirm" @click="verificarCarga()" style="margin-right: 10px" >VERIFICAR</i-button>
@@ -74,6 +84,12 @@
     name: 'glosas-recepcion',
     data () {
       return {
+        typeRender: '', // Puede ser 0 -> GLOSAS EN GENERAL; 1 -> DEVOLUCIONES EN GENERAL
+        textDisplay1: '', // Puede ser 'Gestor de Glosa', 'Gestor de Devolucion'
+        textDisplay2: '', // Muestra el mensaje de carga de Glosa o Devolucion
+        textDisplay3: '', // Muestra el mensaje de descarga de Glosa o Devolucion
+        textDisplay4: '', // Muestra Cant. de Glosa o Devolucion
+        textDisplay5: '', // Muestra Valor de Glosa o Devolucion
         dialog: require('electron').remote.dialog,
         numGestor: '',
         nitError: '',
@@ -100,6 +116,22 @@
         columnsGlosas: []
       }
     },
+    mounted () {
+      this.typeRender = this.$route.query.type
+      if (this.typeRender === 0) {
+        this.textDisplay1 = 'Gestor de Glosas'
+        this.textDisplay2 = 'Cargar plantilla de informacion de las Glosas'
+        this.textDisplay3 = 'Descargar plantilla de informacion de Glosas'
+        this.textDisplay4 = 'Cant. de Glosas'
+        this.textDisplay5 = 'Valor de Glosas'
+      } else if (this.typeRender === 1) {
+        this.textDisplay1 = 'Gestor de Devoluciones'
+        this.textDisplay2 = 'Cargar plantilla de informacion de las Devoluciones'
+        this.textDisplay3 = 'Descargar plantilla de informacion de Devoluciones'
+        this.textDisplay4 = 'Cant. de Devoluciones'
+        this.textDisplay5 = 'Valor de Devoluciones'
+      }
+    },
     methods: {
       handleChange (date) {
         this.glosas.fechaDocumento = new Date(date)
@@ -110,7 +142,7 @@
       onFilePicked (event) {
         this.files = event.target.files
         if (this.files.length !== 0) {
-          this.$parent.handleSpinShow('Leyendo GLOSA')
+          this.$parent.handleSpinShow(this.typeRender === 0 ? 'Leyendo GLOSA' : 'Leyendo DEVOLUCION')
           this.enabledConfirm = true
           this.visibleChargeInit = false
           this.entidadesConm = []
@@ -216,7 +248,7 @@
             })
           })
         } else if (this.files.length === 0) {
-          this.$Message.error('No ha seleccionado una plantilla de GLOSA')
+          this.$Message.error(this.typeRender === 0 ? 'No ha seleccionado una plantilla de GLOSA' : 'No ha seleccionado una plantilla de DEVOLUCION')
         }
       },
       createdColumns () {
@@ -232,15 +264,15 @@
         this.columnsGlosas.push({
           title: 'Fecha Tramite',
           render: (h, params) => {
-            return params.row.fecha.toLocaleDateString()
+            return h('label', {}, params.row.fecha.toLocaleDateString())
           },
-          width: 130
+          width: 140
         })
         // Creamos columna valor de la glosa
         this.columnsGlosas.push({
-          title: 'Valor Glosa',
+          title: this.typeRender === 0 ? 'Valor Glosa' : 'Valor Devolucion',
           render: (h, params) => {
-            return '$' + params.row.valor.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+            return h('label', {}, '$' + params.row.valor.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'))
           },
           width: 200,
           align: 'right'
@@ -249,7 +281,7 @@
         this.columnsGlosas.push({
           title: 'Valor Aceptado',
           render: (h, params) => {
-            return '$' + params.row.valoraceptado.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+            return h('label', {}, '$' + params.row.valoraceptado.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'))
           },
           width: 200,
           align: 'right'
@@ -258,7 +290,7 @@
         this.columnsGlosas.push({
           title: 'Valor No Aceptado',
           render: (h, params) => {
-            return '$' + params.row.valornoaceptado.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+            return h('label', {}, '$' + params.row.valornoaceptado.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'))
           },
           width: 200,
           align: 'right'
@@ -279,16 +311,6 @@
                 title: params.row.stateInfo
               }
             }, params.row.stateDB)
-            // return h('Tooltip', {
-            //   props: {
-            //     content: params.row.stateInfo
-            //   }
-            // }, h('Tag', {
-            //   props: {
-            //     color: params.row.stateColor
-            //   }
-            // }, params.row.stateDB)
-            // )
           }
         })
       },
@@ -300,8 +322,8 @@
           },
           (filename) => {
             const fs = require('fs')
-            fs.createReadStream(path.join(__static, '/FORMAT_GLOSA.xlsx')).pipe(fs.createWriteStream(filename + '.xlsx'))
-            this.$Message.info('Documento almacenado en: ' + filename + '.xlsx')
+            fs.createReadStream(path.join(__static, this.typeRender === 0 ? '/FORMAT_GLOSA.xlsx' : '/FORMAT_DEVOLUCION.xlsx')).pipe(fs.createWriteStream(filename + '.xlsx'))
+            this.$Message.info('Plantilla almacenado en: ' + filename + '.xlsx')
           }
         )
       },
@@ -414,31 +436,36 @@
             }
           ]
         }).then((rta) => {
-          consecutivo = rta.consecutivo
-          formatoBuffer = rta.formato
-          logoEncabezadoBuffer = rta.encabezado
+          consecutivo = rta.consecutivo // obtenemos el consecutivo generado
+          formatoBuffer = rta.formato // el formato
+          logoEncabezadoBuffer = rta.encabezado // y el logo del encabezado
           // Despues de haber obtenido el consecutivo y el formato, creamos el documento de manera local
           miscelanius.createDocumento({
             consecutivo: consecutivo,
-            entidadNombre: 'UNA ENTIDAD CUALQUIERA DE PRUEBA',
-            nombreGestor: this.gestor,
+            entidadNombre: this.entidadesConm[0].substr(this.entidadesConm[0].indexOf('-') + 1, this.entidadesConm[0].length),
+            nombreGestor: this.gestor.substr(this.gestor.indexOf('-') + 2, this.gestor.length),
+            numeroGestor: this.gestor.substr(0, this.gestor.indexOf(' -')),
             fechaDocumento: this.glosas.fechaDocumento,
             contenido: this.glosas.facturas,
             formato: formatoBuffer,
             encabezadoImg: logoEncabezadoBuffer,
             firmaImg: this.firmaGestor,
-            tipo: 0
+            tipo: this.glosas.tipoDocumento
           }).then((rta) => {
             // almacenamos el path temporal para abrir una vista previa del documento
             this.pathTempDocument = rta
+            // Creamos el documento en el sistema
+            storage._database_createDocumento({
+              idtipo: 2
+            })
           }).catch((err) => {
-            console.log(err)
+            console.log('ERROR GENERANDO DOCUMENTO', err)
             this.$parent.handleSpinHide()
             this.$Message.error(err)
             conexiones.end()
           })
         }).catch((err) => {
-          console.log(err)
+          console.log('ERROR GENERANDO CONSECUTIVO', err)
           this.$parent.handleSpinHide()
           this.$Message.error(err)
           conexiones.end()

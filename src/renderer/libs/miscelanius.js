@@ -181,7 +181,7 @@ exports.createDocumento = (configuracion) => {
   var bufferBlob = Buffer.from(configuracion.formato, 'binary')
   const pathDownload = require('./settings.js').getDocumentsPath()
   const fs = require('fs')
-  fs.writeFile(pathDownload + 'temp_document.xlsx', bufferBlob, (err) => {
+  fs.writeFile(pathDownload + 'temps/temp_document.xlsx', bufferBlob, (err) => {
     if (err) {
       console.log('No ha sido posible guardar el archivo', err)
       deferred.reject(err)
@@ -189,8 +189,8 @@ exports.createDocumento = (configuracion) => {
     // luego se realizarse la escritura del archivo se procede a leer con la libreria de excel
     var Excel = require('exceljs')
     var workbook = new Excel.Workbook()
-    workbook.xlsx.readFile(pathDownload + 'temp_document.xlsx').then(() => {
-      if (configuracion.tipo === 0) {
+    workbook.xlsx.readFile(pathDownload + 'temps/temp_document.xlsx').then(() => {
+      if (configuracion.tipo === 0 || configuracion.tipo === '0') {
         let sheetFormato = workbook.getWorksheet('GLOSA INICIAL')
         // insertamos la imagen
         let imageEncabezado = workbook.addImage({
@@ -337,6 +337,7 @@ exports.createDocumento = (configuracion) => {
         })
         // insertamos titulo de la firma
         sheetFormato.getCell('C' + (row + 12)).value = configuracion.nombreGestor
+        sheetFormato.getCell('C' + (row + 13)).value = configuracion.numeroGestor
         // definimos los bordes de la firma
         sheetFormato.getCell('C' + (row + 12)).border = {
           top: {style: 'thin'}
@@ -350,8 +351,8 @@ exports.createDocumento = (configuracion) => {
         sheetFormato.getCell('F' + (row + 12)).border = {
           top: {style: 'thin'}
         }
-        workbook.xlsx.writeFile(pathDownload + 'temp_document.xlsx').then(() => {
-          deferred.resolve(pathDownload + 'temp_document.xlsx')
+        workbook.xlsx.writeFile(pathDownload + 'temps/temp_document.xlsx').then(() => {
+          deferred.resolve(pathDownload + 'temps/temp_document.xlsx')
         })
       }
     }).catch((err) => {

@@ -21,7 +21,7 @@
       </Form>
       <Form inline :label-width="130">
         <FormItem label="Fecha de Recepcion: ">
-          <DatePicker type="date" :value="fechaRecep"></DatePicker>
+          <DatePicker type="date" :value="fechaRecep" :options="datepickershortcuts" placeholder="Seleccione la fecha de recepcion"></DatePicker>
         </FormItem>
         <FormItem label="Cant. Facturas" :error="cantFacturasError">
           <Input :value="facturacionDb.length" disabled/>
@@ -32,7 +32,7 @@
       </Form>
     </Row>
     <Row v-if="visibleChargeInit === false" style="width: 100%">
-      <i-table :style="'width: 100%; height:' + $parent.maxHeightTable - 140 + 'px'" :columns="columnsFacturas" :data="facturacionDb" size="small" :stripe="false" :height="$parent.maxHeightTable - 140"></i-table>
+      <i-table border :style="'width: 100%; height:' + $parent.maxHeightTable - 140 + 'px'" :columns="columnsFacturas" :data="facturacionDb" size="small" :stripe="false" :height="$parent.maxHeightTable - 140"></i-table>
     </Row>
     <Row v-if="visibleChargeInit === false" style="margin-top: 10px;" type="flex" justify="end">
       <i-button type="error" style="margin-right: 10px" @click="$router.go(-1)">CANCELAR</i-button>
@@ -69,7 +69,17 @@
         files: [],
         enabledConfirm: true,
         visibleChargeInit: true,
-        tercerosBD: []
+        tercerosBD: [],
+        datepickershortcuts: {
+          shortcuts: [
+            {
+              text: 'Today',
+              value () {
+                return new Date()
+              }
+            }
+          ]
+        }
       }
     },
     methods: {
@@ -152,7 +162,7 @@
           title: 'Fecha de la factura',
           render: (h, {row}) => {
             // return row.fecha.toLocaleDateString()
-            return row.fecha.toLocaleDateString()
+            return h('label', {}, row.fecha.toLocaleDateString())
           }
         })
         // regimen temporal
@@ -164,7 +174,7 @@
         this.columnsFacturas.push({
           title: 'Valor de la factura RIPS',
           render: (h, {row}) => {
-            return '$ ' + row.valorfactura.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+            return h('label', {}, '$ ' + row.valorfactura.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'))
           },
           align: 'right'
         })

@@ -1119,6 +1119,7 @@ exports._database_createRelationDocumentoFactura = (configuracion) => {
     query: 'call createRelationDocumentoFactura(?, ?)',
     parameters: [ configuracion.idfactura, configuracion.iddocumento ]
   }, configuracion.connection).then((rta) => {
+    console.log(rta)
     deferred.resolve(rta)
   }).catch((err) => {
     deferred.reject(err)
@@ -1259,7 +1260,6 @@ exports._database_generaConsecutivoDocumento = (configuracion) => {
     let consecutivo = rta.result[1][0].tb_documentos_tipos_prefijo
     consecutivo = consecutivo.replace('#CONSECUTIVE', numero)
     configuracion.parameters.forEach(parameter => {
-      console.log(parameter)
       consecutivo = consecutivo.replace(parameter.param, parameter.content)
     })
     deferred.resolve({

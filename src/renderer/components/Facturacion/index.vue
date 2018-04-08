@@ -40,7 +40,9 @@ export default {
               text: 'Editor Glosas',
               isFolder: false,
               clickAction: () => {
-                this.$parent.changePath('/Glosas/recepcion')
+                this.$parent.changePath('/Glosas/recepcion', {
+                  type: 0
+                })
               },
               icon_style: 'icon',
               button_style: 'text'
@@ -48,7 +50,13 @@ export default {
             {
               icon_type: 'ios-list-outline',
               text: 'Editor Devoluciones',
-              clickAction: () => {},
+              isFolder: false,
+              clickAction: () => {
+                console.log('prueba de click')
+                this.$parent.changePath('/Glosas/recepcion', {
+                  type: 1
+                })
+              },
               icon_style: 'icon',
               button_style: 'text'
             },

@@ -20,7 +20,7 @@
       </i-col>
     </Row>
     <Row v-if="isEditor === false" style="margin-bottom: 20px">
-      <i-table :columns="columnsContent" :data="dbcontent" size="small" :stripe="false" :height="$parent.maxHeightTable"></i-table>
+      <i-table border :columns="columnsContent" :data="dbcontent" size="small" :stripe="false" :height="$parent.maxHeightTable"></i-table>
     </Row>
     <Row v-if="isEditor === true" style="margin-bottom: 20px;">
       <div style="text-align: center">

@@ -447,6 +447,8 @@ exports.createAFfile = (vcodigoprestador, vrazonsocial, vtipoidentificacion, vnu
   let vnumerofacturaReal = ''
   if (vnumerofactura.length === 10) {
     vnumerofacturaReal = 'HUSE0000' + vnumerofactura.replace('HUSE', '')
+  } else if (vnumerofactura.length === 14) {
+    vnumerofacturaReal = vnumerofactura
   }
   // Convertir valores de texto en valores numericos
   vvalorpagar = parseFloat(vvalorpagar)

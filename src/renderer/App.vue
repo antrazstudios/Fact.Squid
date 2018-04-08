@@ -642,6 +642,10 @@
     font-family: 'Gill Sans';
     src: url('./assets/fonts/GillSansStd.otf');
   }
+  @font-face {
+    font-family: 'Product Sans';
+    src: url('./assets/fonts/Product Sans Regular.ttf');
+  }
   #app {
     font-family: 'Poppins', sans-serif;
     -webkit-font-smoothing: antialiased;

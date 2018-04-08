@@ -52,7 +52,7 @@
       <Row v-if="editContactosShow === false && editHorariosShow === false" type="flex" :gutter="16">
         <!-- Tabla de Contactos -->
         <i-col v-if="direccionEdit.id !== 0" span="12">
-          <i-table size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="240" :loading="contactosIsLoading">
+          <i-table border size="small" :columns="contactosColumns" :data="contactos" :stripe="false" :height="240" :loading="contactosIsLoading">
             <div slot="footer" style="text-align: center;">
               <i-button @click="createContacto">Agregar Contacto</i-button>
             </div>
@@ -64,7 +64,7 @@
         </i-col>
         <!-- Tabla de Horarios -->
         <i-col v-if="direccionEdit.id !== 0" span="12">
-          <i-table v-if="selectTipoDireccion.reqhorario === 1" size="small" :columns="horariosColumns" :data="horarios" :stripe="false" :height="240" :loading="horariosIsLoading">
+          <i-table border v-if="selectTipoDireccion.reqhorario === 1" size="small" :columns="horariosColumns" :data="horarios" :stripe="false" :height="240" :loading="horariosIsLoading">
             <div slot="footer" style="text-align: center;">
               <i-button @click="createHorario">Agregar Horario</i-button>
             </div>

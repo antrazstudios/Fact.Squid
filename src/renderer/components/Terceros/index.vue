@@ -24,7 +24,7 @@
       </i-col>
     </Row>
     <Row style="margin-bottom: 20px">
-      <i-table :columns="columnsTerceros" :data="tercerosPages" size="small" :stripe="false" :height="$parent.maxHeightTable"></i-table>
+      <i-table border :columns="columnsTerceros" :data="tercerosPages" size="small" :stripe="false" :height="$parent.maxHeightTable"></i-table>
       <div style="margin-top: 10px;overflow: hidden">
         <div style="float: right;">
           <Page :total="totalPages * 10" @on-change="changePages" ></Page>

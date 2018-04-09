@@ -42,7 +42,7 @@
     <Row v-if="visibleChargeInit === true" type="flex" justify="center">
       <i-button type="dashed" @click="onPickFile">
         <div style="padding: 20px 0">
-            <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+            <Icon type="ios-cloud-upload" size="52"></Icon>
             <p>Seleccione los archivos de RIPS para iniciar la carga</p>
         </div>
       </i-button>
@@ -119,25 +119,36 @@
               miscelanius.readFileRips(archivoRIPS, (collection) => {
                 let count = 0
                 let newCollection = []
-                collection.forEach(element => {
-                  newCollection.push(objects.createFacturas(this.facturacionDb[count].id, this.facturacionDb[count].ripsnumero, this.facturacionDb[count].numero, this.facturacionDb[count].fecha, element.tipoUsuario, this.facturacionDb[count].valorfactura))
-                  count++
-                })
-                this.facturacionDb = newCollection
-                this.$Message.info('Regimen de facturas en RIPS evaluados')
+                if (this.facturacionDb.length !== collection.length) {
+                  this.$Message.error({
+                    content: 'El numero de facturas en el archivo AF no es igual al numero de usuarios del archivo US',
+                    duration: 8
+                  })
+                  this.facturacionDb.forEach(element => {
+                    element.changeStateDB('AF!=US')
+                  })
+                  this.$parent.handleSpinHide()
+                } else {
+                  collection.forEach(element => {
+                    newCollection.push(objects.createFacturas(this.facturacionDb[count].id, this.facturacionDb[count].ripsnumero, this.facturacionDb[count].numero, this.facturacionDb[count].fecha, element.tipoUsuario, this.facturacionDb[count].valorfactura))
+                    count++
+                  })
+                  this.facturacionDb = newCollection
+                  this.$Message.info('Regimen de facturas en RIPS evaluados')
+                  const storage = require('../../libs/storage.js')
+                  storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
+                    this.tercerosBD = data1
+                  }).catch((err) => {
+                    this.$parent.handleSpinHide()
+                    this.$Message.error({
+                      content: err,
+                      duration: 8
+                    })
+                  })
+                }
               })
             }
           }
-          const storage = require('../../libs/storage.js')
-          storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
-            this.tercerosBD = data1
-          }).catch((err) => {
-            this.$parent.handleSpinHide()
-            this.$Message.error({
-              content: err,
-              duration: 8
-            })
-          })
         } else if (this.files.length === 0) {
           this.$Message.error('No ha seleccionado los RIPS')
         }
@@ -163,12 +174,14 @@
           render: (h, {row}) => {
             // return row.fecha.toLocaleDateString()
             return h('label', {}, row.fecha.toLocaleDateString())
-          }
+          },
+          width: 180
         })
         // regimen temporal
         this.columnsFacturas.push({
           title: 'Regimen',
-          key: 'regimenRender'
+          key: 'regimenRender',
+          width: 180
         })
         // Valor de la factura
         this.columnsFacturas.push({
@@ -176,7 +189,8 @@
           render: (h, {row}) => {
             return h('label', {}, '$ ' + row.valorfactura.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'))
           },
-          align: 'right'
+          align: 'right',
+          width: 200
         })
         // Estado de la factura
         this.columnsFacturas.push({
@@ -184,9 +198,10 @@
           render: (h, params) => {
             return h('Tag', {
               props: {
-                color: params.row.stateDB === 'SINVERIFICAR' ? 'blue' : params.row.stateDB === false ? 'green' : 'red'
+                color: params.row.stateColor,
+                title: params.row.stateInfo
               }
-            }, params.row.stateDB === 'SINVERIFICAR' ? 'SIN VERIFICAR' : params.row.stateDB === false ? 'LISTA PARA CREAR' : 'YA EXISTE')
+            }, params.row.stateDB)
           }
         })
       },
@@ -297,7 +312,7 @@
               this.rutaRipsError = 'No se han cargado facturas suficientes para realizar un cargue'
             } else {
               this.rutaRipsError = ''
-              this.$parent.handleSpinShow('Escribiendo datos en el servidor')
+              this.$parent.handleSpinShow('Escribiendo datos en el servidor', 'progress', 0)
               // instanciamos las librerias necesarias
               let miscelanius = require('../../libs/miscelanius')
               let storage = require('../../libs/storage')
@@ -315,6 +330,8 @@
               let countfilesReaders = 0
               // Contador de registros terminados en BD
               let countFactsRegBd = 0
+              // Progreso de la funcion
+              let countPercent = 0
               // recorremos los archivos en la carpeta
               for (let i = 0; i < this.files.length; i++) {
                 // sumamos al contador
@@ -354,7 +371,11 @@
                           connection: conn
                         }).then((result) => {
                           iddocumento = result.result[0][0]['key']
+                          countPercent = countPercent + 10
+                          this.$parent.handleSpinShow('Escribiendo datos en el servidor', 'progress', countPercent)
                           // luego se realiza la carga factura por factura
+                          let step = ((100 - countPercent) / this.facturacionDb.length) / 3
+                          console.log(step)
                           this.facturacionDb.forEach(factura => {
                             storage._database_createFactura({
                               idtercero: factura.idtercero,
@@ -365,6 +386,8 @@
                               connection: conn
                             }).then((result) => {
                               factura.id = result.result[0][0]['key']
+                              countPercent = countPercent + step
+                              this.$parent.handleSpinProgressUpdate(countPercent)
                               // por cada factura creada se le anexa la relacion con el documento de recepcion principal
                               storage._database_createRelationDocumentoFactura({
                                 idfactura: factura.id,
@@ -372,6 +395,8 @@
                                 connection: conn
                               }).then((rta) => {
                                 // por ultimo se cargaran las relaciones de acciones a la factura
+                                countPercent = countPercent + step
+                                this.$parent.handleSpinProgressUpdate(countPercent)
                                 storage.createRelationFactura({
                                   idfactura: factura.id,
                                   idaccion: 1,
@@ -379,8 +404,10 @@
                                   connection: conn
                                 }).then((rta) => {
                                   countFactsRegBd++
+                                  countPercent = countPercent + step
+                                  this.$parent.handleSpinProgressUpdate(countPercent)
                                   if (countFactsRegBd === this.facturacionDb.length) {
-                                    this.$parent.handleSpinHide()
+                                    this.$parent.handleSpinProgressUpdate(100, 'Carga termi')
                                     this.$Message.info('Se han creado ' + countFactsRegBd + ' factura(s) en la BD.')
                                     conn.end()
                                     this.$router.go(-1)

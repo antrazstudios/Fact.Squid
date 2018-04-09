@@ -361,7 +361,24 @@ exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfac
     regimen: vregimen,
     regimenRender: vregimenRender,
     valorfactura: vvalorfactura,
-    stateDB: 'SINVERIFICAR'
+    stateDB: 'SINVERIFICAR',
+    stateColor: 'red',
+    stateInfo: 'Pendiente de verificacion del sistema',
+    changeStateDB (state) {
+      if (state === 'SIN_VERIFICAR') {
+        this.stateDB = 'SIN VERIFICAR'
+        this.stateColor = 'blue'
+        this.stateInfo = 'Pendiente de verificacion del sistema'
+      } else if (state === 'AF!=US') {
+        this.stateDB = 'DIFERENCIAS ENTRE AF Y US'
+        this.stateColor = 'red'
+        this.stateInfo = 'El numero de facturas del AF no coincide con el numero de usuarios del US'
+      } else {
+        this.stateDB = 'LISTO PARA CREAR'
+        this.stateColor = 'green'
+        this.stateInfo = 'A espera de creacion en Plataforma'
+      }
+    }
   }
 }
 
@@ -407,6 +424,10 @@ exports.createGlosas = (vid, vtipo, vfactura, vfecha, vvalor, vvaloraceptado, vv
         this.stateDB = 'NIT INCORRECTO'
         this.stateColor = 'red'
         this.stateInfo = 'El nit de la factura no concuerda con la especificada en la plantilla'
+      } else if (state === 'AF!=US') {
+        this.stateDB = 'DIFERENCIAS ENTRE AF Y US'
+        this.stateColor = 'red'
+        this.stateInfo = 'El numero de facturas del AF no coincide con el numero de usuarios del US'
       } else {
         this.stateDB = 'LISTO PARA CREAR'
         this.stateColor = 'green'

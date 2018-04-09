@@ -82,6 +82,7 @@ exports.readFileRips = (file, _callback) => {
     let result = atob(fileReader.result.replace('data:text/plain;base64,', ''))
     // Llamamos al proceso de decodificacion del archivo segun el tipo de archivo
     let collection = this.decodeFileRips(tipoArchivo, result)
+    console.log('COLLECTION', {collection: collection, tipoarchivo: tipoArchivo})
     // llamamos al callback y retornamos el valor
     _callback(collection)
   })
@@ -138,12 +139,13 @@ exports.decodeXLSXGlosas = (documento) => {
     let worksheetGLOSAS = documento.getWorksheet('GLOSAS')
     // verificamos la version del decodificador
     // verificacion del decodificador version 1.0
-    if (worksheetDETAILS.getCell('B1').value === '1.0') {
+    if (worksheetDETAILS.getCell('B1').value === '3.0') {
       worksheetGLOSAS.eachRow((row, rowNumber) => {
         if (row.values[1] === 'DOCUMENTO GESTOR') {
           glosa.documentoGestor = row.values[2]
         } else if (row.values[1] === 'FECHA DOCUMENTO') {
-          glosa.fechaDocumento = row.values[2]
+          glosa.fechaDocumento = new Date(row.values[6], row.values[5] - 1, row.values[4], 12, 0, 0, 0)
+          console.log(glosa.fechaDocumento)
         } else if (row.values[1] === 'TIPO') {
           glosa.tipoDocumento = row.values[2].substr(0, 1)
         } else if (row.values[1] === 'NIT') {
@@ -190,7 +192,7 @@ exports.createDocumento = (configuracion) => {
     var Excel = require('exceljs')
     var workbook = new Excel.Workbook()
     workbook.xlsx.readFile(pathDownload + 'temps/temp_document.xlsx').then(() => {
-      if (configuracion.tipo === 0 || configuracion.tipo === '0') {
+      if (configuracion.tipo === 2 || configuracion.tipo === '2') {
         let sheetFormato = workbook.getWorksheet('GLOSA INICIAL')
         // insertamos la imagen
         let imageEncabezado = workbook.addImage({

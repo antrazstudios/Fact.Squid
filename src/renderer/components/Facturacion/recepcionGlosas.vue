@@ -38,7 +38,7 @@
         <!-- Cargar plantilla de informacion de Glosa o Devolucion -->
         <i-button type="dashed" @click="onPickFile">
           <div style="padding: 20px 0">
-              <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+              <Icon type="ios-cloud-upload" size="52"></Icon>
               <p>{{ textDisplay2 }}</p>
           </div>
         </i-button>
@@ -47,7 +47,7 @@
         <!-- Descargar plantilla para cargar Glosa o Devolucion -->
         <i-button type="dashed" @click="downloadFile">
           <div style="padding: 20px 0">
-              <Icon type="ios-cloud-download" size="52" style="color: #3399ff"></Icon>
+              <Icon type="ios-cloud-download" size="52"></Icon>
               <p>{{ textDisplay3 }}</p>
           </div>
         </i-button>
@@ -55,7 +55,7 @@
     </Row>
     <!-- Cuarto Row, informacion de totales del formulario -->
     <Row v-if="visibleChargeInit === false" type="flex" justify="end">
-      <Form inline :label-width="130" style="margin-top: 15px;">
+      <Form inline  style="margin-top: 5px;">
         <FormItem :label="textDisplay4">
           <Input :value="glosas.facturas.length" disabled/>
         </FormItem>
@@ -413,18 +413,22 @@
         // this.$parent.handleSpinShow('Escribiendo datos en el servidor')
         // creamos una conexion constante para hacer registros en bloques
         const storage = require('../../libs/storage')
+        const settings = require('../../libs/settings')
         const miscelanius = require('../../libs/miscelanius')
+        const fs = require('fs')
         const conexiones = storage.getActualConnection()
-        let consecutivo, formatoBuffer, logoEncabezadoBuffer
+        let consecutivo, formatoBuffer, logoEncabezadoBuffer, fileBuffer
+        let countFactsRegBd = 0
         // Establecemos conexion
         conexiones.connect((err) => {
           if (err) {
             this.$Message.error(err)
           }
         })
+        this.$parent.handleSpinShow()
         // generamos un nuevo consecutivo y lo obtenemos
         storage._database_generaConsecutivoDocumento({
-          iddocumento: 2,
+          iddocumento: this.glosas.tipoDocumento,
           parameters: [
             {
               param: '#MANAGER',
@@ -454,9 +458,75 @@
           }).then((rta) => {
             // almacenamos el path temporal para abrir una vista previa del documento
             this.pathTempDocument = rta
-            // Creamos el documento en el sistema
-            storage._database_createDocumento({
-              idtipo: 2
+            // Creamos un buffer con el documento que vamos a cargar
+            fs.readFile(this.pathTempDocument, (err, data) => {
+              if (err) {
+                console.log(err)
+                this.$Message.error('Error al leer el archivo de la glosa: ' + err)
+              } else {
+                fileBuffer = data
+                conexiones.connect()
+                // Creamos el documento en el sistema
+                storage._database_createDocumento({
+                  idtipo: this.glosas.tipoDocumento,
+                  consecutivo: consecutivo,
+                  anexo: fileBuffer,
+                  anexoformat: '.xlsx',
+                  observacion: 'Ingreso de glosas de gestor mediante plantilla por: ' + settings.getSesionProfile().getFullName() + '-' + settings.getSesionProfile().identificacion,
+                  connection: conexiones
+                }).then((result) => {
+                  let iddocumento = result.result[0][0]['key']
+                  this.glosas.facturas.forEach(glosa => {
+                    storage._database_createGlosa({
+                      tipo: this.glosas.tipoDocumento,
+                      fecha: this.glosas.fechaDocumento,
+                      valor: glosa.valor,
+                      valoraceptado: glosa.valoraceptado,
+                      valornoaceptado: glosa.valornoaceptado,
+                      numerointerno: glosa.numerotramiteinterno
+                    }).then((rtaCG) => {
+                      glosa.id = rtaCG.result[0][0]['key']
+                      storage._database_createRelationDocumentoFactura({
+                        idfactura: glosa.idfactura,
+                        iddocumento: iddocumento,
+                        idglosa: glosa.id,
+                        connection: conexiones
+                      }).then((rtaCRDF) => {
+                        storage.createRelationFactura({
+                          idfactura: glosa.idfactura,
+                          idaccion: 2,
+                          idusuario: settings.getSesionProfile().id,
+                          connection: conexiones
+                        }).then((rtaCRF) => {
+                          countFactsRegBd++
+                          if (countFactsRegBd === this.glosas.facturas.length) {
+                            this.$parent.handleSpinHide()
+                            this.$Message.info('Se han creado ' + countFactsRegBd + ' glosas(s) en la BD.')
+                            conexiones.end()
+                            this.$router.go(-1)
+                          }
+                        }).catch((err) => {
+                          console.log('ERROR DE CREACION DE LOG DE FACTURA', err)
+                          this.$parent.handleSpinHide()
+                          conexiones.end()
+                        })
+                      }).catch((err) => {
+                        console.log('ERROR DE CREACION DE LA RELACION DE FACTURA Y DOCUMENTO', err)
+                        this.$parent.handleSpinHide()
+                        conexiones.end()
+                      })
+                    }).catch((err) => {
+                      console.log('ERROR DE CREACION DE GLOSA', err)
+                      this.$parent.handleSpinHide()
+                      conexiones.end()
+                    })
+                  })
+                }).catch((err) => {
+                  console.log('ERROR DE CREACION DOCUMENTO', err)
+                  this.$parent.handleSpinHide()
+                  conexiones.end()
+                })
+              }
             })
           }).catch((err) => {
             console.log('ERROR GENERANDO DOCUMENTO', err)

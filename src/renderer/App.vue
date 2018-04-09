@@ -199,6 +199,14 @@
     <Modal v-model="vDeveloperAuth" :ok-text="'Autenticarse'" :cancel-text="'Cancelar'" :title="'Autenticacion de Servicio de Desarrolladores'" :mask-closable="false" @on-ok="developerAuth()">
       <i-input type="password" v-model="vDeveloperPass" placeholder="Ingrese su contraseña de desarrollador"></i-input>
     </Modal>
+    <Spin v-if="visibleLoadObject" fix>
+      <div>
+        <Icon v-if="visibleLoadType === 'normal'" class="spin-icon-load" type="ios-loop" size="40"/>
+        <i-progress v-if="visibleLoadType === 'progress'" :percent="visibleLoadPercent" :status="visibleLoadStatus"></i-progress>
+        <p v-if="visibleLoadStatus !== 'success'" class="spin-text-load">{{visibleLoadText}}</p>
+        <i-button v-if="visibleLoadStatus === 'success'" @click="visibleLoadAction">{{visibleLoadActionText}}</i-button>
+      </div>
+    </Spin>
   </div>
 </template>
 
@@ -210,6 +218,13 @@
     components: { NotificationsView, MenuSelector },
     data () {
       return {
+        visibleLoadObject: true,
+        visibleLoadType: 'normal',
+        visibleLoadText: 'Un momento por favor, esta operacion solo tardara unos minutos',
+        visibleLoadPercent: 0,
+        visibleLoadStatus: 'normal',
+        visibleLoadAction: null,
+        visibleLoadActionText: 'Listo!',
         tecnologies: [
           {
             icon_type: 'https://cdn-images-1.medium.com/max/1600/0*gPcFC_SaJmZSuRas.png',
@@ -556,22 +571,26 @@
         this.electronRemote.getCurrentWindow().setMaximizable(false)
         this.electronRemote.getCurrentWindow().setResizable(false)
       },
-      handleSpinShow (message = 'Espere un momento por favor') {
-        this.$Spin.show({
-          render: (h) => {
-            return h('div', [
-              h('div', {
-                'class': 'modal-contenedor--img'
-              }),
-              h('label', {
-                'class': 'modal-contenedor--label'
-              }, message)
-            ])
-          }
-        })
+      handleSpinShow (message = 'Un momento por favor, esta operacion solo tardara unos minutos', type = 'normal', percent = 0) { // type ? normal : progress;;;; percent ? progreso del proceso
+        this.visibleLoadObject = true
+        this.visibleLoadType = type
+        this.visibleLoadText = message
+        this.visibleLoadPercent = percent
+        this.visibleLoadStatus = 'active'
+      },
+      handleSpinProgressUpdate (percent, message = 'no-update', action = null, actionText = 'Listo!') {
+        if (message !== 'no-update') {
+          this.visibleLoadText = message
+        }
+        this.visibleLoadPercent = Number(percent).toFixed(0)
+        this.visibleLoadActionText = actionText
+        this.visibleLoadAction = action
+        if (this.visibleLoadPercent >= 100) {
+          this.visibleLoadStatus = 'success'
+        }
       },
       handleSpinHide () {
-        this.$Spin.hide()
+        this.visibleLoadObject = false
       },
       gotoProfile () {
         this.changePath('/Profile')
@@ -633,7 +652,7 @@
   }
 </script>
 
-<style lang="css">
+<style>
   @font-face {
     font-family: 'Poppins';
     src: url('./assets/fonts/Poppins-Regular.ttf');
@@ -650,6 +669,23 @@
     font-family: 'Poppins', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  /* Animacion de Loading */
+  .spin-icon-load{
+    animation: ani-load-spin 2s linear infinite;
+  }
+  .spin-text-load{
+    animation: ani-load-text 1.5s linear infinite;
+  }
+  @keyframes ani-load-spin {
+    from { transform: rotate(0deg);}
+    50%  { transform: rotate(180deg);}
+    to   { transform: rotate(360deg);}
+  }
+  @keyframes ani-load-text {
+    from { opacity: 1; }
+    50% { opacity: 0.5; }
+    to { opacity: 1; }
   }
 /* Scrollbars */
   ::-webkit-scrollbar {

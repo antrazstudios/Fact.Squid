@@ -1110,14 +1110,15 @@ exports._database_createRelationDocumentoFactura = (configuracion) => {
   // Parameters:
   // * configuracion. idfactura = numero id de la factura relacionada
   // * configuracion. iddocumento = numero de id del documento que tiene este documento
+  // * configuracion. idglosa = numero de id de glosa, OPCIONAL
   // * configuracion. connection = conexion para usar en caso de que sean bloques de ejecucion, debe enviarse asi sean en null
   // return:
   // nada
   // ------------------------| End Description |------------------------
   let deferred = q.defer()
   this._database_runQuery({
-    query: 'call createRelationDocumentoFactura(?, ?)',
-    parameters: [ configuracion.idfactura, configuracion.iddocumento ]
+    query: 'call createRelationDocumentoFactura(?, ?, ?)',
+    parameters: [ configuracion.idfactura, configuracion.iddocumento, configuracion.idglosa ]
   }, configuracion.connection).then((rta) => {
     console.log(rta)
     deferred.resolve(rta)
@@ -1247,6 +1248,7 @@ exports._database_generaConsecutivoDocumento = (configuracion) => {
   // un objeto con el consecutivo y el BLOB del formato
   // ------------------------| End Description |------------------------
   let deferred = q.defer()
+  console.log(configuracion)
   this._database_runQuery({
     query: 'call getLastIdDocumento(?)',
     parameters: [ configuracion.iddocumento ]
@@ -1267,6 +1269,33 @@ exports._database_generaConsecutivoDocumento = (configuracion) => {
       formato: rta.result[1][0].tb_formatos_contenido,
       encabezado: rta.result[1][0].tb_formatos_logoencabezado
     })
+  }).catch((err) => {
+    deferred.reject(err)
+  })
+  // retorna la promesa
+  return deferred.promise
+}
+
+// -----------------------------------------------------------------------------------------------------------
+exports._database_createGlosa = (configuracion) => {
+  // --------------------------| Description |--------------------------
+  // Description: Crea acciones para la factura (trazbilidad)
+  // Parameters:
+  // * configuracion. tipo = numero del tipo de glosa, es igual al tipo de documento
+  // * configuracion. fecha = fecha de la glosa
+  // * configuracion. valor = valor de la glosa
+  // * configuracion. valoraceptado = valor aceptado de la glosa
+  // * configuracion. valornoaceptado = valor no aceptado de la glosa
+  // * configuracion. numerointerno = numero de tramite interno de la glosa [software externo]
+  // return:
+  // nada
+  // ------------------------| End Description |------------------------
+  let deferred = q.defer()
+  this._database_runQuery({
+    query: 'call createGlosa(?, ?, ?, ?, ?, ?)',
+    parameters: [ configuracion.tipo, configuracion.fecha, configuracion.valor, configuracion.valoraceptado, configuracion.valornoaceptado, configuracion.numerointerno ]
+  }, configuracion.connection).then((rta) => {
+    deferred.resolve(rta)
   }).catch((err) => {
     deferred.reject(err)
   })

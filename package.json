@@ -52,9 +52,9 @@
       "icon": "build/icons/factsquid_iconColor256x256.png"
     },
     "nsis": {
-      "installerIcon": "build/icons/factsquid_iconInstall.icon",
-      "uninstallerIcon": "build/icons/factsquid_iconUninstall.icon",
-      "installerHeaderIcon": "build/icons/factsquid_iconInstall.icon"
+      "installerIcon": "build/icons/factsquid_iconInstall.ico",
+      "uninstallerIcon": "build/icons/factsquid_iconUninstall.ico",
+      "installerHeaderIcon": "build/icons/factsquid_iconInstall.ico"
     }
   },
   "dependencies": {

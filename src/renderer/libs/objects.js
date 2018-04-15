@@ -331,6 +331,180 @@ exports.createNotices = (vkey, vorigin, voriginicon, vdate, vauthor, vimgsrc, vt
   }
 }
 
+// Objeto de errores de validacion y lectura
+exports.createErrorReader = (vtype, vline = 0, vadditionalinfo = '') => {
+  // variable de finalizacion de error
+  let estadoFinal, colorFinal, infoFinal, tituloFinal
+  let lineamientosACT = 'Febrero 1 de 2018:Version 6'
+  // switch para seleccionar el error
+  // Estructura de codigo:
+  // * #e74c3c => Errores; se anteponen # a los nombres de estado y accion
+  // * #2ecc71 => OK's; se anteponen * a los nombres de estado y accion
+  // * #f1c40f => Advertencias; se anteponen ! a los nombres de estado y accion
+  // * #3498db => Informaciones; se anteponen ? a los nombres deestado y accion
+  // ***************************************************************************
+  // Selector de descripcion de casos
+  switch (vtype) {
+    // Estados de Contenedor de RIPS
+    case '?CREATED':
+      estadoFinal = 'PEND. DE LECTURA'
+      infoFinal = 'Archivo pendiente por leer'
+      break
+    case '?READED':
+      estadoFinal = 'LEIDO, PEND. REVISAR'
+      infoFinal = 'Archivo pendiente por Rrevisar'
+      break
+    case '#READED':
+      estadoFinal = 'LEIDO, CON ERRORES'
+      infoFinal = 'Archivo imposible de leer o contiene errores'
+      break
+    case '?VERIFIED':
+      estadoFinal = 'REVISADO'
+      infoFinal = 'Archivo verificado, sin errores'
+      break
+    case '#VERIFIED':
+      estadoFinal = 'REVISADO, CON ERRORES'
+      infoFinal = 'Archivo sin errores de lineamientos de RIPS'
+      break
+    case '*OK':
+      estadoFinal = 'CARGADO'
+      infoFinal = 'Archivo cargado a la Base de datos'
+      break
+    // Estados de LOG de RIPS
+    case '#READ/IO':
+      estadoFinal = 'ERROR DE LECTURA'
+      infoFinal = 'Al leer el archivo fue imposible terminarlo, esto puede tratarse de un archivo corrupto, de dificil acceso, o a un error del I/O de su sistema operativo' + vadditionalinfo
+      break
+    case '*READ/IO':
+      estadoFinal = 'LECTURA IO EXISTOSA'
+      infoFinal = 'El sistema pudo leer exitosamente el archivo'
+      break
+    case '#READ/STRUCTURE':
+      estadoFinal = 'ERROR DE ESTRUCTURA'
+      infoFinal = 'Error de Estructura del archivo, con respecto a los lineamientos ' + lineamientosACT + ', es necesario corregir la estructura del archivo para continuar con la validacion'
+      break
+    case '*READ/STRUCTURE':
+      estadoFinal = 'ESTRUCTURA CORRECTA'
+      infoFinal = 'Lectura exitosa de la estructura de archivo'
+      break
+    case '!READ/EXIST':
+      estadoFinal = 'ARCHIVO NO EXISTE'
+      infoFinal = 'Este archivo no existe o no fue seleccionado para su lectura'
+      break
+    case '?READ/EXIST':
+      estadoFinal = 'ARCHIVO EXISTE'
+      infoFinal = 'Archivo de datos localizado'
+      break
+    case '#VALIDATOR/UNKNOWN':
+      estadoFinal = 'VALIDADOR: ERROR DESCONOCIDO'
+      infoFinal = 'Error al momento de pasar por el validador el archivo, descripcion: ' + vadditionalinfo
+      break
+    case '#VALIDATOR/STRUCTURE':
+      estadoFinal = 'ERROR DE ESTRUCTURA'
+      infoFinal = 'La estrcutura no coincide con los lineamientos: ' + lineamientosACT + ' en la linea ' + vline + ': ' + vadditionalinfo
+      break
+    case '?VALIDATOR/STRUCTURE/COLUMNS':
+      estadoFinal = 'COLUMNAS CORRECTA'
+      infoFinal = 'Las columnas coinciden con los lineamientos: ' + lineamientosACT + ' en la linea ' + vline + '.'
+      break
+    case '#VALIDATOR/TYPE||VALUE':
+      estadoFinal = 'ERROR DE TIPO O VALOR'
+      infoFinal = 'La linea ' + vline + ' presenta un error de Valor y/o tipo: ' + vadditionalinfo
+      break
+    case '?VALIDATOR/OK':
+      estadoFinal = 'ARCHIVO VALIDADO CORRECTAMENTE'
+      infoFinal = 'El archivo fue validado exitosamente, no posee errores'
+      break
+    default:
+      estadoFinal = 'READER STATE DONT EXIST'
+      infoFinal = 'La logica de estado de lector seleccionada no existe, asegurese de usar # o * o ! o ? y el operador / para separar las acciones'
+      break
+  }
+  // Selector de color de casos
+  if (vtype.indexOf('#') > -1) {
+    colorFinal = '#e74c3c'
+    tituloFinal = 'ERROR'
+  } else if (vtype.indexOf('*') > -1) {
+    colorFinal = '#2ecc71'
+    tituloFinal = 'EXITOSO'
+  } else if (vtype.indexOf('!') > -1) {
+    colorFinal = '#f1c40f'
+    tituloFinal = 'ADVERTENCIA'
+  } else if (vtype.indexOf('?') > -1) {
+    colorFinal = '#3498db'
+    tituloFinal = 'INFORMACION'
+  }
+  // retornamos el objeto
+  return {
+    stateTitle: tituloFinal,
+    stateDB: estadoFinal,
+    stateColor: colorFinal,
+    stateInfo: infoFinal
+  }
+}
+
+// Crea los contenedores de RIPS
+exports.createRIPSContainer = (vpref) => {
+  let vname = ''
+  switch (vpref) {
+    case 'FACTURAS':
+      vname = 'Resultado de Facturas'
+      break
+    case 'CT':
+      vname = 'Control'
+      break
+    case 'US':
+      vname = 'Usuarios'
+      break
+    case 'AF':
+      vname = 'Transacciones'
+      break
+    case 'AC':
+      vname = 'Consultas'
+      break
+    case 'AP':
+      vname = 'Procedimientos'
+      break
+    case 'AU':
+      vname = 'Urgencias'
+      break
+    case 'AH':
+      vname = 'Hospitalizacion'
+      break
+    case 'AN':
+      vname = 'Recien Nacidos'
+      break
+    case 'AM':
+      vname = 'Medicamentos'
+      break
+    case 'AT':
+      vname = 'Otros servicios'
+      break
+    case 'AD':
+      vname = 'descripcion agrupada de los servicios de salud prestados'
+      break
+    default:
+      vname = 'ERROR'
+      break
+  }
+  let RIPScontainer = name === 'ERROR' ? 'ERROR' : name === 'Resultado de Facturas' ? { collection: [] } : {
+    pref: vpref,
+    fileName: '',
+    name: 'Archivo de ' + vname,
+    buffer: null,
+    ext: '.TXT',
+    result: [],
+    state: false,
+    errors: 0,
+    stateDB: this.createErrorReader('?CREATED'),
+    lines: 0,
+    updateFileName (vnameFile) {
+      this.fileName = vnameFile.replace('.TXT', '')
+    }
+  }
+  return RIPScontainer
+}
+
 // Facturas de la DB
 exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfactura, vregimenRender = 0) => {
   // validacion del regimen segun estructura de los RIPS
@@ -450,7 +624,54 @@ exports.createGlosas = (vid, vtipo, vfactura, vfecha, vvalor, vvaloraceptado, vv
 // 8. Archivo de medicamentos
 // 9. Archivo de otros servicios
 exports.createCTfile = (vcodigoprestador, vfecharemision, vcodigoarchivo, vtotalregistros) => {
-  return {
+  const miscelanius = require('./miscelanius')
+  let error = []
+  let resulttype
+  // verificacion del codigo de prestador
+  let tempcodigoprestador = vcodigoprestador.split('').length
+  if (tempcodigoprestador !== 12) {
+    error.push('El codigo del prestador (Columna 1) debe tener un total de 12 digitos, y este contiene ' + tempcodigoprestador.length)
+  } else {
+    resulttype = miscelanius.verifiedType('numeric', vcodigoprestador)
+    if (resulttype === 'ERROR') {
+      error.push('El codigo del prestador (Columna 1) debe ser numerico y contiene caracteres no permitidos')
+    } else {
+      vcodigoprestador = resulttype
+    }
+  }
+  // verificacion de la fecha de remision
+  let tempfecharemision = vfecharemision.split('').length
+  if (tempfecharemision !== 10) {
+    error.push('La fecha de remision (Columna 2) excede el limite permitido, el formato dd/mm/aaaa no se cumple')
+  } else {
+    resulttype = miscelanius.verifiedType('date', vfecharemision, 'dd/mm/aaaa')
+    if (resulttype === 'ERROR') {
+      error.push('La fecha de remision (Columna 2) debe ser no cumple formato fecha dd/mm/aaaa')
+    } else {
+      vfecharemision = resulttype
+    }
+  }
+  // verificacion del nombre del documento
+  let tempcodigoarchivo = vcodigoarchivo.split('').length
+  if (tempcodigoarchivo !== 8) {
+    error.push('El codigo del archivo (Columna 3) excede el limite permitido, 2 digitos para tipo de archivo, 6 para numero de remision')
+  } else {
+    resulttype = miscelanius.verifiedType('string-numeric', vcodigoarchivo)
+    if (resulttype === 'ERROR') {
+      error.push('El codigo del archivo (Columna 3) debe ser un campo alfanumerico')
+    } else {
+      vcodigoarchivo = resulttype
+    }
+  }
+  // verificacion de la cantidad de lineas
+  resulttype = miscelanius.verifiedType('numeric', vtotalregistros)
+  if (resulttype === 'ERROR') {
+    error.push('El numero de registros (Columna 4) debe ser un campo numerico')
+  } else {
+    vtotalregistros = resulttype
+  }
+  // retornamos dependiendo de las validaciones
+  return error.length !== 0 ? { error: error } : {
     codigoPrestador: vcodigoprestador, // Numero de doce digitos -> se valida formato, longitud
     fechaRemision: vfecharemision, // fecha de envio de los datos dd/mm/aaaa -> se valida formato, la fecha no puede ser superior a la actual
     codigoArchivo: vcodigoarchivo, // dos caracteres para identificar el tipo de archivo, seis caracteres como maximo para el numero de remision del archivo, se valida que los nombres no se encuentren repetidos

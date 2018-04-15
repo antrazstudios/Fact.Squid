@@ -56,6 +56,8 @@
       return {
         rutaRips: '',
         rutaRipsError: '',
+        ripsContainer: [],
+        ripsContainerError: '',
         numEntidad: '',
         numEntidadError: '',
         numEnvio: 0,
@@ -89,66 +91,78 @@
       onFilePicked (event) {
         this.files = event.target.files
         if (this.files.length !== 0) {
-          this.$parent.handleSpinShow('Cargando RIPS')
+          // this.$parent.handleSpinShow('Cargando RIPS')
           this.enabledConfirm = true
           this.numEnvio = 0
           this.visibleChargeInit = false
-          const miscelanius = require('../../libs/miscelanius')
-          const objects = require('../../libs/objects')
+          const rips = require('../../libs/rips')
           this.rutaRips = this.files[0].path.replace(this.files[0].name, '')
           this.facturacionDb = []
           this.valorFacturas = 0
-          for (let i = 0; i < this.files.length; i++) {
-            const archivoRIPS = this.files[i]
-            if (archivoRIPS.name.substr(0, 2) === 'AF') {
-              miscelanius.readFileRips(archivoRIPS, (collection) => {
-                collection.forEach(element => {
-                  this.facturacionDb.push(objects.createFacturas(0, element.numeroFactura, element.numeroFacturaReal, element.fechaExpedicionFactura, 'SIN ESPECIFICAR', element.valorPagar))
-                  this.valorFacturas = this.valorFacturas + element.valorPagar
+          rips.readFileRips(this.files, (data) => {
+            this.ripsContainer = data
+            this.ripsContainer.forEach(element => {
+              if (element.state === true) {
+                rips.decodeFileRips(element, this.ripsContainer).then((data) => {
+                  element = data
+                }).catch((err) => {
+                  element.result.push(err)
                 })
-                this.numEnvio = parseInt(this.rutaRips.replace(/\D/g, ''))
-                this.createColumns()
-                this.$parent.handleSpinHide()
-                this.$Message.info('Facturas cargadas exitosamente')
-              })
-            }
-          }
-          for (let i = 0; i < this.files.length; i++) {
-            const archivoRIPS = this.files[i]
-            if (archivoRIPS.name.substr(0, 2) === 'US') {
-              miscelanius.readFileRips(archivoRIPS, (collection) => {
-                let count = 0
-                let newCollection = []
-                if (this.facturacionDb.length !== collection.length) {
-                  this.$Message.error({
-                    content: 'El numero de facturas en el archivo AF no es igual al numero de usuarios del archivo US',
-                    duration: 8
-                  })
-                  this.facturacionDb.forEach(element => {
-                    element.changeStateDB('AF!=US')
-                  })
-                  this.$parent.handleSpinHide()
-                } else {
-                  collection.forEach(element => {
-                    newCollection.push(objects.createFacturas(this.facturacionDb[count].id, this.facturacionDb[count].ripsnumero, this.facturacionDb[count].numero, this.facturacionDb[count].fecha, element.tipoUsuario, this.facturacionDb[count].valorfactura))
-                    count++
-                  })
-                  this.facturacionDb = newCollection
-                  this.$Message.info('Regimen de facturas en RIPS evaluados')
-                  const storage = require('../../libs/storage.js')
-                  storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
-                    this.tercerosBD = data1
-                  }).catch((err) => {
-                    this.$parent.handleSpinHide()
-                    this.$Message.error({
-                      content: err,
-                      duration: 8
-                    })
-                  })
-                }
-              })
-            }
-          }
+              }
+            })
+            console.log('VERIFICACION, FINAL', this.ripsContainer)
+          })
+          // for (let i = 0; i < this.files.length; i++) {
+          //   const archivoRIPS = this.files[i]
+          //   if (archivoRIPS.name.substr(0, 2) === 'AF') {
+          //     miscelanius.readFileRips(archivoRIPS, (collection) => {
+          //       collection.forEach(element => {
+          //         this.facturacionDb.push(objects.createFacturas(0, element.numeroFactura, element.numeroFacturaReal, element.fechaExpedicionFactura, 'SIN ESPECIFICAR', element.valorPagar))
+          //         this.valorFacturas = this.valorFacturas + element.valorPagar
+          //       })
+          //       this.numEnvio = parseInt(this.rutaRips.replace(/\D/g, ''))
+          //       this.createColumns()
+          //       this.$parent.handleSpinHide()
+          //       this.$Message.info('Facturas cargadas exitosamente')
+          //     })
+          //   }
+          // }
+          // for (let i = 0; i < this.files.length; i++) {
+          //   const archivoRIPS = this.files[i]
+          //   if (archivoRIPS.name.substr(0, 2) === 'US') {
+          //     miscelanius.readFileRips(archivoRIPS, (collection) => {
+          //       let count = 0
+          //       let newCollection = []
+          //       if (this.facturacionDb.length !== collection.length) {
+          //         this.$Message.error({
+          //           content: 'El numero de facturas en el archivo AF no es igual al numero de usuarios del archivo US',
+          //           duration: 8
+          //         })
+          //         this.facturacionDb.forEach(element => {
+          //           element.changeStateDB('AF!=US')
+          //         })
+          //         this.$parent.handleSpinHide()
+          //       } else {
+          //         collection.forEach(element => {
+          //           newCollection.push(objects.createFacturas(this.facturacionDb[count].id, this.facturacionDb[count].ripsnumero, this.facturacionDb[count].numero, this.facturacionDb[count].fecha, element.tipoUsuario, this.facturacionDb[count].valorfactura))
+          //           count++
+          //         })
+          //         this.facturacionDb = newCollection
+          //         this.$Message.info('Regimen de facturas en RIPS evaluados')
+          //         const storage = require('../../libs/storage.js')
+          //         storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
+          //           this.tercerosBD = data1
+          //         }).catch((err) => {
+          //           this.$parent.handleSpinHide()
+          //           this.$Message.error({
+          //             content: err,
+          //             duration: 8
+          //           })
+          //         })
+          //       }
+          //     })
+          //   }
+          // }
         } else if (this.files.length === 0) {
           this.$Message.error('No ha seleccionado los RIPS')
         }

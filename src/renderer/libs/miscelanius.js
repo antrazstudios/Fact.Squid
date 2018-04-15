@@ -21,6 +21,73 @@ exports.filterMethod = (obj, columns, value) => {
   })
 }
 
+// Verifica el tipo de dato de una cadena String y la regresa en su tipo Original
+// recibe en type: numeric, double, string, string-numeric, string-special, date
+exports.verifiedType = (type, value, format = null) => {
+  let result = 'ERROR'
+  let permitidosNumeric = '1234567890'
+  let permitidosDate = '1234567890' + '/'
+  let permitidosStringUPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  switch (type) {
+    case 'numeric':
+      const valuesPermitidosN = this._verifiedValuesPermitidos(permitidosNumeric, value)
+      if (valuesPermitidosN === false) {
+        return result
+      }
+      result = parseInt(value)
+      break
+    case 'date':
+      const valuesPermitidosD = this._verifiedValuesPermitidos(permitidosDate, value)
+      if (valuesPermitidosD === false) {
+        return result
+      }
+      let tempDate = this.convertStringToDate(value, format)
+      if (tempDate === 'ERROR') {
+        return tempDate
+      } else {
+        result = tempDate
+      }
+      break
+    case 'string-numeric':
+      const valuesPermitidosSN = this._verifiedValuesPermitidos(permitidosStringUPPER + permitidosNumeric, value)
+      if (valuesPermitidosSN === false) {
+        return result
+      }
+      result = value
+      break
+    default:
+      break
+  }
+  return result
+}
+
+exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) => {
+  // let coincidencia = 0
+  if (value.length === 2) {
+    if (typeadditional === null || typeadditional === 'numeric') {
+      value = parseInt(value)
+    }
+    if (permitidos.indexOf(value) !== -1) {
+      return true
+    } else {
+      return false
+    }
+  } else {
+    for (let i = 0; i < value.split('').length; i++) {
+      let coincidencia = 0
+      for (let j = 0; j < permitidos.split('').length; j++) {
+        if (value.split('')[i] === permitidos.split('')[j]) {
+          coincidencia = 1
+        }
+      }
+      if (coincidencia === 0) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
 exports.getEmojiURL = (code) => {
   return '/assets/images/emoji-72x72/' + code + '.png'
 }
@@ -54,6 +121,21 @@ exports.convertDateToStringStorage = (val) => {
   return dateWork.toLocaleDateString() + ' ' + dateWork.toLocaleTimeString()
 }
 
+exports.convertStringToDate = (value, format) => {
+  let dateSplit
+  let result
+  switch (format) {
+    case 'dd/mm/aaaa':
+      dateSplit = value.split('/')
+      result = new Date(parseInt(dateSplit[2]), parseInt(dateSplit[1]) - 1, parseInt(dateSplit[0]), 12, 0, 0, 0)
+      break
+    default:
+      result = 'ERROR DE CONVERSION, FORMATO NO RECONOCIDO'
+      break
+  }
+  return result
+}
+
 exports.convertDateToStringSQL = (val) => {
   let dateWork = new Date(val)
   let dateMatriz = dateWork.toLocaleDateString().split('/')
@@ -69,57 +151,6 @@ exports.convertBase64ToBLOB = (val, contentType) => {
   var byteArray = new Uint8Array(byteNumbers)
   var blob = new Blob([byteArray], {type: contentType})
   return blob
-}
-
-exports.readFileRips = (file, _callback) => {
-  // instanciamos al filereader
-  let fileReader = new FileReader()
-  // creamos un evento al terminar la carga de lectura del archivo
-  fileReader.addEventListener('load', () => {
-    // obtenemos el tipo de archivo que se cargara dependiendo del nombre
-    let tipoArchivo = file.name.substr(0, 2)
-    // obtenemos la cadena de texto separada con comas del base64 de la lectura
-    let result = atob(fileReader.result.replace('data:text/plain;base64,', ''))
-    // Llamamos al proceso de decodificacion del archivo segun el tipo de archivo
-    let collection = this.decodeFileRips(tipoArchivo, result)
-    console.log('COLLECTION', {collection: collection, tipoarchivo: tipoArchivo})
-    // llamamos al callback y retornamos el valor
-    _callback(collection)
-  })
-  // realizamos la lectura del archivo
-  fileReader.readAsDataURL(file)
-}
-
-exports.decodeFileRips = (tipoArchivo, Contenido) => {
-  // instanciar los objetos
-  let objects = require('./objects')
-  // matriz de respuesta
-  let result = []
-  // separamos las lineas del contenido
-  let lines = Contenido.split('\n')
-  if (tipoArchivo === 'AF') {
-    // Comenzamos a recorrer las lineas del archivo una por una
-    for (let i = 0; i < lines.length; i++) {
-      const linea = lines[i]
-      // Por cada linea las separamos por , y debemos obtener exactamente un length de 17
-      let matrizContenido = linea.split(',')
-      if (matrizContenido.length === 17) {
-        result.push(objects.createAFfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13], matrizContenido[14], matrizContenido[15], matrizContenido[16]))
-      }
-    }
-  } else if (tipoArchivo === 'US') {
-    // Comenzamos a recorrer las lineas del archivo una por una
-    for (let i = 0; i < lines.length; i++) {
-      const linea = lines[i]
-      // Por cada linea las separamos por , y debemos obtener exactamente un length de 17
-      let matrizContenido = linea.split(',')
-      if (matrizContenido.length === 14) {
-        result.push(objects.createUSfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13]))
-      }
-    }
-  }
-  // retornamos la mtriz de resultado
-  return result
 }
 
 exports.decodeXLSXGlosas = (documento) => {

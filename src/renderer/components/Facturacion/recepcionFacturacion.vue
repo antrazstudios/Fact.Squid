@@ -41,10 +41,10 @@
               <DatePicker type="date" :value="fechaRecep" :options="datepickershortcuts" placeholder="Seleccione la fecha de recepcion"></DatePicker>
             </FormItem>
             <FormItem label="Cant. Facturas" :error="cantFacturasError">
-              <Input :value="facturacionDb.length" disabled/>
+              <Input style="width: 60px" :value="facturacionDb.length" disabled/>
             </FormItem>
             <FormItem label="Valor Facturas" :error="valorFacturasError">
-              <Input :value="'$ ' + valorFacturas.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')" disabled/>
+              <Input style="width: 180px" :value="'$ ' + valorFacturas.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')" disabled/>
             </FormItem>
           </Form>
         </Row>

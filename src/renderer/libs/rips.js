@@ -123,7 +123,6 @@ exports.decodeFileRips = (ripsContainer, ripCollection) => {
 
 // Funcion publica que crea objetos de facturacion, siempre y cuando no existan errores en los objetos
 exports.generateObjects = (ripsContainer) => {
-  
 }
 
 // Funcion de sistema utilizada para leer el contenido de archivos desde un fileReader

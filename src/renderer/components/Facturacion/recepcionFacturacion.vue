@@ -57,14 +57,33 @@
       </i-col>
       <i-col span="6" v-if="ripsContainer.length !== 0">
         <Card style="width: 100%; height: 100%;" dis-hover>
-          <Row style="margin-bottom: 10px;">
+          <Row style="margin-bottom: 3px;">
             <i-col span="21">
-              <h2>RESULTADO REVISION</h2>
+              <h3>RESULTADO REVISION</h3>
             </i-col>
             <i-col span="3">
               <i-button>
                 <Icon type="ios-printer"></Icon>
               </i-button>
+            </i-col>
+          </Row>
+          <Row style="margin-bottom: 5px;">
+            <i-col span="24">
+              <h4>Filtro resultados:</h4>
+              <CheckboxGroup v-model="filtersResult">
+                <Checkbox label="INFORMACION">
+                  <span>Info.</span>
+                </Checkbox>
+                <Checkbox label="EXITOSO">
+                  <span>Exitoso</span>
+                </Checkbox>
+                <Checkbox label="ADVERTENCIA">
+                  <span>Advert.</span>
+                </Checkbox>
+                <Checkbox label="ERROR">
+                  <span>Error</span>
+                </Checkbox>
+              </CheckboxGroup>
             </i-col>
           </Row>
           <Collapse accordion v-model="autoSelectFile">
@@ -96,9 +115,9 @@
                   {{container.stateDB.stateDB}}
                 </Tag>
               </Tooltip>
-              <div slot="content">
+              <div slot="content" style="height: 98px; overflow: auto">
                 <Collapse accordion>
-                  <Panel v-for="item in container.result" :key="item.id">
+                  <Panel v-for="item in container.result" :key="item.id" v-if="filtersResult.indexOf(item.stateTitle) > -1">
                     {{item.stateDB}}
                     <Icon :color="item.stateColor" :type="item.stateTitle === 'EXITOSO' ? 'checkmark-circled' : item.stateTitle === 'INFORMACION' ? 'information-circled' : item.stateTitle === 'ADVERTENCIA' ? 'alert-circled' : 'close-circled'"></Icon>
                     <div slot="content">
@@ -132,6 +151,7 @@
     name: 'facturacion-recepcion',
     data () {
       return {
+        filtersResult: ['ERROR', 'ADVERTENCIA'],
         autoSelectFile: 'CT',
         rutaRips: '',
         rutaRipsError: '',

@@ -31,14 +31,14 @@ exports.verifiedType = (type, value, format = null) => {
   let permitidosSpecial = '-+[](){}'
   switch (type) {
     case 'numeric':
-      const valuesPermitidosN = this._verifiedValuesPermitidos(permitidosNumeric, value)
+      const valuesPermitidosN = this._verifiedValuesPermitidos(permitidosNumeric, value, 'number')
       if (valuesPermitidosN === false) {
         return result
       }
       result = parseInt(value)
       break
     case 'date':
-      const valuesPermitidosD = this._verifiedValuesPermitidos(permitidosDate, value)
+      const valuesPermitidosD = this._verifiedValuesPermitidos(permitidosDate, value, 'date')
       if (valuesPermitidosD === false) {
         return result
       }
@@ -50,14 +50,14 @@ exports.verifiedType = (type, value, format = null) => {
       }
       break
     case 'string-numeric':
-      const valuesPermitidosSN = this._verifiedValuesPermitidos(permitidosStringUPPER + permitidosNumeric, value)
+      const valuesPermitidosSN = this._verifiedValuesPermitidos(permitidosStringUPPER + permitidosNumeric, value, 'string')
       if (valuesPermitidosSN === false) {
         return result
       }
       result = value
       break
     case 'string-special':
-      const valuesPermitidosSS = this._verifiedValuesPermitidos(permitidosNumeric + permitidosSpecial, value)
+      const valuesPermitidosSS = this._verifiedValuesPermitidos(permitidosNumeric + permitidosSpecial, value, 'string')
       if (valuesPermitidosSS === false) {
         return result
       }
@@ -70,30 +70,42 @@ exports.verifiedType = (type, value, format = null) => {
 }
 
 exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) => {
-  value = value.toString()
-  if (value.length === 2) {
-    if (typeadditional === null || typeadditional === 'numeric') {
-      value = parseInt(value)
+  // verificamos el tipo de valor recepcionado
+  if (this._getType(value) === 'string') { // en caso de ser string
+    let splitValue = [] // creamos un split del value recepcionado, para eliminar valores vacios
+    for (var i = 0; i < value.length; i++) { // recorremos caracter por caracter el string
+      let tempValue = value.charAt(i).toString() // descomponemos el string
+      if (tempValue.charCodeAt(0) !== 13) { // verificamos que no este vacio el char actual
+        splitValue.push(tempValue) // si no esta vacio se agrega al nuevo arreglo
+      }
     }
-    if (permitidos.indexOf(value) !== -1) {
-      return true
-    } else {
-      return false
-    }
-  } else {
-    for (let i = 0; i < value.split('').length; i++) {
-      let coincidencia = 0
-      for (let j = 0; j < permitidos.split('').length; j++) {
-        if (value.split('')[i] === permitidos.split('')[j]) {
-          coincidencia = 1
+    // Recorremos el nuevo array generado limpio
+    for (let i = 0; i < splitValue.length; i++) {
+      let coincidencia = 0 // bandera de coincidencias
+      for (let j = 0; j < permitidos.split('').length; j++) { // recorremos los valores permitidos
+        if (splitValue[i] === permitidos.split('')[j]) { // comparamos que el char actual del array generado este entre los permitidos
+          coincidencia = 1 // definimos que existe coincidencia
         }
       }
+      // al teminar el recorrido de los array, verificamos si no existio coincidencia para retornar false
       if (coincidencia === 0) {
         return false
       }
     }
+  } else {
+    if (this._getType(value) === typeadditional) { // en caso que no sea string, verificamos coincidencia del formato requerido frente al real
+      return true
+    } else {
+      return false
+    }
   }
   return true
+}
+
+exports._getType = (obj) => {
+  // var type
+  // faster than if/else
+  return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase()
 }
 
 exports.getEmojiURL = (code) => {

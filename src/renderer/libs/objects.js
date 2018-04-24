@@ -351,11 +351,11 @@ exports.createErrorReader = (vtype, vline = 0, vadditionalinfo = '') => {
       infoFinal = 'Archivo pendiente por leer'
       break
     case '?READED':
-      estadoFinal = 'LEIDO, PEND. REVISAR'
+      estadoFinal = 'PEND. REVISAR'
       infoFinal = 'Archivo pendiente por Rrevisar'
       break
     case '#READED':
-      estadoFinal = 'LEIDO, CON ERRORES'
+      estadoFinal = 'ERROR LECTURA'
       infoFinal = 'Archivo imposible de leer o contiene errores'
       break
     case '?VERIFIED':
@@ -363,7 +363,7 @@ exports.createErrorReader = (vtype, vline = 0, vadditionalinfo = '') => {
       infoFinal = 'Archivo verificado, sin errores'
       break
     case '#VERIFIED':
-      estadoFinal = 'REVISADO, CON ERRORES'
+      estadoFinal = 'ERROR REVISION'
       infoFinal = 'Archivo sin errores de lineamientos de RIPS'
       break
     case '*OK':
@@ -682,19 +682,139 @@ exports.createCTfile = (vcodigoprestador, vfecharemision, vcodigoarchivo, vtotal
 // ESTRUCTURA DEL ARCHIVO AF
 // este archivo contiene las facturas del envio o paquete
 exports.createAFfile = (vcodigoprestador, vrazonsocial, vtipoidentificacion, vnumeroidentificacion, vnumerofactura, vfechaexpedicionfactura, vfechainicio, vfechafinal, vcodigoentidadadm, vnombreentidadadm, vnumerocontrato, vplanbeneficios, vnumeropoliza, vvalorcopago, vvalorcomision, vvalordescuentos, vvalorpagar) => {
-  // deserializar fecha
-  let tempDate = vfechaexpedicionfactura.split('/')
-  vfechaexpedicionfactura = new Date(tempDate[2] + '-' + tempDate[1] + '-' + tempDate[0] + 'T00:00:00')
-  // evaluar el numero de caracteres del numero de factura y convertir el item al tipo de factura de dinamica
-  let vnumerofacturaReal = ''
-  if (vnumerofactura.length === 10) {
-    vnumerofacturaReal = 'HUSE0000' + vnumerofactura.replace('HUSE', '')
-  } else if (vnumerofactura.length === 14) {
-    vnumerofacturaReal = vnumerofactura
+  const miscelanius = require('./miscelanius')
+  let error = []
+  let resulttype
+  let vnumerofacturaReal
+  // verificacion del codigo de prestador
+  let tempcodigoprestador = vcodigoprestador.split('').length
+  if (tempcodigoprestador !== 0) {
+    if (tempcodigoprestador !== 12) {
+      error.push('El codigo del prestador (Columna 1) debe tener un total de 12 digitos, y este contiene ' + tempcodigoprestador.length)
+    } else {
+      resulttype = miscelanius.verifiedType('numeric', vcodigoprestador)
+      if (resulttype === 'ERROR') {
+        error.push('El codigo del prestador (Columna 1) debe ser numerico y contiene caracteres no permitidos')
+      } else {
+        vcodigoprestador = resulttype
+      }
+    }
+  } else {
+    error.push('El campode codigo de prestador no puede estar vacio')
+  }
+  // verificacion de la razon social
+  let temprazonsocial = vrazonsocial.split('').length
+  if (temprazonsocial === 0) {
+    error.push('El campo de razonsocial (Columna 2) no puede estar vacio')
+  }
+  // verificacion del tipo de identificacion
+  let temptipoid = vtipoidentificacion.split('').length
+  if (temptipoid === 0) {
+    error.push('El campo de tipo de identificacion (Columna 3) no puede estar vacio')
+  } else {
+    if (vtipoidentificacion !== 'NI' && vtipoidentificacion !== 'CC' && vtipoidentificacion !== 'CE' && vtipoidentificacion !== 'PA') {
+      error.push('El tipo de identificacion del prestador (Columna 3) no coincide con los permitidos: NI, CC, CE, PA')
+    }
+  }
+  // verificacion del numero de identificacion
+  let tempnumeroidentificacion = vnumeroidentificacion.split('').length
+  if (tempnumeroidentificacion === 0) {
+    error.push('El campo de numero de identificacion (Columna 4) no puede estar vacio')
+  } else {
+    if (tempnumeroidentificacion <= 16) {
+      resulttype = miscelanius.verifiedType('string-special', vnumeroidentificacion)
+      if (resulttype === 'ERROR') {
+        error.push('El numero de identificacion (Columna 4) debe ser numerico y este contiene caracteres no permitidos')
+      } else {
+        vnumeroidentificacion = resulttype
+      }
+    } else {
+      error.push('El numero de identificacion (Columna 4) no puede exceder los 16 caracteres')
+    }
+  }
+  // verificacion del numero de la factura
+  let tempnumerofactura = vnumerofactura.split('').length
+  if (tempnumerofactura === 0) {
+    error.push('El campo de numero de factura (Columna 5) no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('string-numeric', vnumerofactura)
+    if (resulttype === 'ERROR') {
+      error.push('El numero de la factura (Columna 5) debe ser alfanumerico y este contiene caracteres no permitidos')
+    } else {
+      vnumerofactura = resulttype
+      // funcion unica del HUS
+      vnumerofacturaReal = 'HUSE0000' + resulttype.replace('HUSE', '')
+    }
+  }
+  // verificacion de la fecha de expedicion de la factura
+  let tempfechaexp = vfechaexpedicionfactura.split('').length
+  if (tempfechaexp === 0) {
+    error.push('La fecha de expedicion de la factura (Columna 6) no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('date', vfechaexpedicionfactura)
+    if (resulttype === 'ERROR') {
+      error.push('La fecha de expedicion (Columna 6) no cumple el formato permitido dd/mm/aaaa')
+    } else {
+      if (resulttype >= new Date(Date.now())) {
+        error.push('La fecha de emision de la factura no puede ser mayor a la fecha actual')
+      } else {
+        vfechaexpedicionfactura = resulttype
+      }
+    }
+  }
+  // verificacion de la fecha de fin del periodo reportado
+  let tempfechafinal = vfechafinal.split('').length
+  if (tempfechafinal === 0) {
+    error.push('La fecha final de periodo (Columna 8) no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('date', vfechafinal)
+    if (resulttype === 'ERROR') {
+      error.push('La fecha final del periodo (Columna 8) no cumple el formato permitido dd/mm/aaaa')
+    } else {
+      if (resulttype >= new Date(Date.now())) {
+        error.push('La fecha de inicio del periodo no puede ser menor que la fecha actual')
+      } else {
+        vfechafinal = resulttype
+      }
+    }
+  }
+  // verificacion de la fecha de inicio del periodo reportado
+  let tempfechainicio = vfechainicio.split('').length
+  if (tempfechainicio === 0) {
+    error.push('La fecha de inicio de periodo (Columna 7) no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('date', vfechainicio)
+    if (resulttype === 'ERROR') {
+      error.push('La fecha de inicio (Columna 7) no cumple el formato permitido dd/mm/aaaa')
+    } else {
+      if (resulttype <= new Date(Date.now()) && resulttype < vfechafinal) {
+        error.push('La fecha de inicio del periodo no puede ser menor que la fecha actual, o mayor a la fecha final del periodo')
+      } else {
+        vfechainicio = resulttype
+      }
+    }
+  }
+  // codigo de verificacion
+  let tempcodigoentidadm = vcodigoentidadadm.split('').length
+  if (tempcodigoentidadm === 0) {
+    error.push('El codigo de la entidad emisora (Columna 8), no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('string-numeric', vcodigoentidadadm)
+    if (resulttype === 'ERROR') {
+      error.push('El codigo de la entidad emisora no cumple con el formato alfanumerico requerido')
+    } else {
+      vcodigoentidadadm = resulttype
+    }
+  }
+  // nombre de la entidad
+  let tempnombreentidad = vnombreentidadadm.split('').length
+  if (tempnombreentidad === 0) {
+    error.push('El nombre de la entidad emisora (Columna 9), no puede estar vacio')
   }
   // Convertir valores de texto en valores numericos
   vvalorpagar = parseFloat(vvalorpagar)
-  return {
+  // retornamos dependiendo de las validaciones
+  return error.length !== 0 ? { error: error } : {
     codigoPrestador: vcodigoprestador, // Numero de doce digitos -> se valida formato, longitud
     razonSocial: vrazonsocial, // Nombre completo de la entidad emisora -> no debe estar vacio
     tipoIdentificacion: vtipoidentificacion, // Tipo de documento emisora -> NI: NIT, CC: Cedula Ciudadania, CE: Cedula Extranjeria, PA: Pasaporte
@@ -719,6 +839,171 @@ exports.createAFfile = (vcodigoprestador, vrazonsocial, vtipoidentificacion, vnu
 // ESTRUCTURA DEL ARCHIVO US
 // este archivo contiene los datos de los usuarios atentidos
 exports.createUSfile = (vtipoidentificacion, vnumeroidentificacion, vcodigoentidadadm, vtipousuario, vprimerapellido, vsegundoapellido, vprimernombre, vsegundonombre, vedad, vunidadmedida, vsexo, vcodigodepartamentoresidenciahabitual, vcodigomunicipioresidenciahabitual, vzonaresidencia) => {
+  const miscelanius = require('./miscelanius')
+  let error = []
+  let resulttype
+  // verificar el tipo de identificacion
+  let temptipoid = vtipoidentificacion.split('').length
+  if (temptipoid === 0) {
+    error.push('El campo de tipo de identificacion (Columna 1) no puede estar vacio')
+  } else {
+    if (vtipoidentificacion !== 'CC' && vtipoidentificacion !== 'CE' && vtipoidentificacion !== 'CD' && vtipoidentificacion !== 'PA' && vtipoidentificacion !== 'SC' && vtipoidentificacion !== 'PE' && vtipoidentificacion !== 'RE' && vtipoidentificacion !== 'RC' && vtipoidentificacion !== 'TI' && vtipoidentificacion !== 'CN' && vtipoidentificacion !== 'AS' && vtipoidentificacion !== 'MS') {
+      error.push('El tipo de identificacion del usuario (Columna 1) no coincide con los permitidos: CC,CE,CD,PA,SC,PE,RE,RC,TI,CN,AS,MS')
+    }
+  }
+  // verificar numero de identificacion
+  let tempnumeroid = vnumeroidentificacion.split('').length
+  if (tempnumeroid === 0) {
+    error.push('El numero de identificacion del usuario (Columna 2) no puede estar vacio')
+  } else {
+    // verificacion de longitud dependiendo del tipo de documento
+    switch (vtipoidentificacion) {
+      case 'CC':
+        if (tempnumeroid > 10) {
+          error.push('El tipo de identificacion es CC, el numero de identificacion debe tener como maximo 10 caracteres')
+        }
+        break
+      case 'CE':
+        if (tempnumeroid > 6) {
+          error.push('El tipo de identificacion es CE, el numero de identificacion debe tener como maximo 6 caracteres')
+        }
+        break
+      case 'CD' || 'PA' || 'SC':
+        if (tempnumeroid > 16) {
+          error.push('El tipo de identificacion es CD o PA o SC, el numero de identificacion debe tener como maximo 16 caracteres')
+        }
+        break
+      case 'PE' || 'RE':
+        if (tempnumeroid > 15) {
+          error.push('El tipo de identificacion es PE o RE, el numero de identificacion debe tener como maximo 15 caracteres')
+        }
+        break
+      case 'RC' || 'TI':
+        if (tempnumeroid > 11) {
+          error.push('El tipo de identificacion es RC o TI, el numero de identificacion debe tener como maximo 11 caracteres')
+        }
+        break
+      case 'CN':
+        if (tempnumeroid > 9) {
+          error.push('El tipo de identificacion es CN, el numero de identificacion debe tener como maximo 9 caracteres')
+        }
+        break
+      case 'AS':
+        if (tempnumeroid > 10) {
+          error.push('El tipo de identificacion es AS, el numero de identificacion debe tener como maximo 10 caracteres')
+        }
+        break
+      case 'MS':
+        if (tempnumeroid > 12) {
+          error.push('El tipo de identificacion es MS, el numero de identificacion debe tener como maximo 12 caracteres')
+        }
+        break
+    }
+    // verificacion del tipo de dato del numero de identificacion
+    resulttype = miscelanius.verifiedType('numeric', vnumeroidentificacion)
+    if (resulttype === 'ERROR') {
+      error.push('El numero de documento del usuario debe ser numerico (Columna 2)')
+    } else {
+      vnumeroidentificacion = resulttype
+    }
+  }
+  // verificar el codigo de la entidad emisora
+  let tempcodigoentidadm = vcodigoentidadadm.split('').length
+  if (tempcodigoentidadm === 0) {
+    error.push('El codigo de la entidad emisora (Columna 3), no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('string-numeric', vcodigoentidadadm)
+    if (resulttype === 'ERROR') {
+      error.push('El codigo de la entidad emisora no cumple con el formato alfanumerico requerido')
+    } else {
+      vcodigoentidadadm = resulttype
+    }
+  }
+  // verificar el tipo de usuario
+  let temptipousuario = vtipousuario.split('').length
+  if (temptipousuario === 0) {
+    error.push('El tipo de usuario (Columna 4), no puede estar vacio')
+  } else {
+    resulttype = miscelanius.verifiedType('numeric', vtipousuario)
+    if (resulttype === 'ERROR') {
+      error.push('El tipo de usuario no cumple con el formato numerico requerido')
+    } else {
+      if (resulttype > 0 && resulttype < 9) {
+        vtipousuario = resulttype
+      } else {
+        error.push('El numero de tipo de usuario debe estar entre 1 y 8 para ser valido')
+      }
+    }
+  }
+  // verificar que el campo de apellido no este vacio
+  let tempapellido = vprimerapellido.split('').length
+  if (tempapellido === 0) {
+    error.push('El primer apellido del usuario no puede estar vacio')
+  }
+  // verificar que el campo de nombre no este vacio
+  let tempnombre = vprimernombre.split('').length
+  if (tempnombre === 0) {
+    error.push('El primer nombre del usuario no puede estar vacio')
+  }
+  // verificar el tipo de unidad de medida
+  let tempunidad = vunidadmedida.split('').length
+  if (tempunidad === 0) {
+    error.push('El numero de la unidad de medida no puede estar vacia')
+  } else {
+    resulttype = miscelanius.verifiedType('numeric', vunidadmedida)
+    if (resulttype === 'ERROR') {
+      error.push('El numero de unidad de medida no cumple con el formato, establecido')
+    } else {
+      if (resulttype > 0 && resulttype < 4) {
+        vunidadmedida = resulttype
+      } else {
+        error.push('El numero de la unidad de medida debe estar entre 1 y 3')
+      }
+    }
+  }
+  // verificacion de la edad del paciente
+  let tempedad = vedad.split('').length
+  if (tempedad === 0) {
+    error.push('El valorde la edad del paciente no puede estar vacio.')
+  } else {
+    resulttype = miscelanius.verifiedType('numeric', vedad)
+    if (resulttype === 'ERROR') {
+      error.push('El campo de la edad no cumple con el formato')
+    } else {
+      switch (vunidadmedida) {
+        case 1:
+          if (resulttype < 1 || resulttype > 120) {
+            error.push('El tipo de unidad es 1 = Años, por lo tanto el rango de la edad debe estar entre 1 y 120 años.')
+          } else {
+            vedad = resulttype
+          }
+          break
+        case 2:
+          if (resulttype < 1 || resulttype > 11) {
+            error.push('El tipo de unidad es 2 = Meses, por lo tanto el rango de la edad debe estar entre 1 y 11 meses.')
+          } else {
+            vedad = resulttype
+          }
+          break
+        case 3:
+          if (resulttype < 1 || resulttype > 29) {
+            error.push('El tipo de unidad es 3 = Dias, por lo tanto el rango de la edad debe estar entre 1 y 29 dias.')
+          } else {
+            vedad = resulttype
+          }
+          break
+      }
+    }
+  }
+  // verificacion del genero del paciente
+  let tempsexo = vsexo.split('').length
+  if (tempsexo === 0) {
+    error.push('El sexo del paciente no se encuentra entre los valores permitidos')
+  } else {
+    if (vsexo !== 'M' && vsexo !== 'F') {
+      error.push('El sexo especificado no es un valor permitido, M o F')
+    }
+  }
   return {
     tipoIdentificacion: vtipoidentificacion, // Tipo de identificacion,
     // -> condiciones de valicacion:

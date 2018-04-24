@@ -28,6 +28,7 @@ exports.verifiedType = (type, value, format = null) => {
   let permitidosNumeric = '1234567890'
   let permitidosDate = '1234567890' + '/'
   let permitidosStringUPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  let permitidosSpecial = '-+[](){}'
   switch (type) {
     case 'numeric':
       const valuesPermitidosN = this._verifiedValuesPermitidos(permitidosNumeric, value)
@@ -55,6 +56,13 @@ exports.verifiedType = (type, value, format = null) => {
       }
       result = value
       break
+    case 'string-special':
+      const valuesPermitidosSS = this._verifiedValuesPermitidos(permitidosNumeric + permitidosSpecial, value)
+      if (valuesPermitidosSS === false) {
+        return result
+      }
+      result = value
+      break
     default:
       break
   }
@@ -62,7 +70,7 @@ exports.verifiedType = (type, value, format = null) => {
 }
 
 exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) => {
-  // let coincidencia = 0
+  value = value.toString()
   if (value.length === 2) {
     if (typeadditional === null || typeadditional === 'numeric') {
       value = parseInt(value)

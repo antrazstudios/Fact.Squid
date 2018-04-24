@@ -1,38 +1,116 @@
 <template>
   <div class="content">
     <input type="file" style="display:none" ref="fileInput" accept="text/plain, .txt" @change="onFilePicked" multiple/>
-    <Row v-if="visibleChargeInit === false">
-      <Form ref="FormRips" :label-width="130">
-        <FormItem label="Ruta de Rips" :error="rutaRipsError">
-          <Input disabled :value="rutaRips">
-            <Button slot="append" icon="folder" @click="onPickFile"></Button>
-          </Input>
-        </FormItem>
-      </Form>
-      <Form inline :label-width="130">
-        <FormItem label="Numero envio" :error="numEnvioError">
-          <InputNumber type="" v-model="numEnvio"/>
-        </FormItem>
-        <FormItem label="Entidad" :error="numEntidadError">
-          <i-select v-model="numEntidad" filterable style="width: 500px">
-            <i-option v-for ="item in tercerosBD" :value="item.tercero.id" :key="item.tercero.id">{{item.tercero.identificacion + ' - ' + item.nombre}}</i-option>
-          </i-select>
-        </FormItem>
-      </Form>
-      <Form inline :label-width="130">
-        <FormItem label="Fecha de Recepcion: ">
-          <DatePicker type="date" :value="fechaRecep" :options="datepickershortcuts" placeholder="Seleccione la fecha de recepcion"></DatePicker>
-        </FormItem>
-        <FormItem label="Cant. Facturas" :error="cantFacturasError">
-          <Input :value="facturacionDb.length" disabled/>
-        </FormItem>
-        <FormItem label="Valor Facturas" :error="valorFacturasError">
-          <Input :value="'$ ' + valorFacturas.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')" disabled/>
-        </FormItem>
-      </Form>
-    </Row>
-    <Row v-if="visibleChargeInit === false" style="width: 100%">
-      <i-table border :style="'width: 100%; height:' + $parent.maxHeightTable - 140 + 'px'" :columns="columnsFacturas" :data="facturacionDb" size="small" :stripe="false" :height="$parent.maxHeightTable - 140"></i-table>
+    <Row type="flex">
+      <i-col span="18">
+        <Row v-if="visibleChargeInit === false">
+          <Form ref="FormRips" :label-width="130">
+            <FormItem label="Ruta de Rips" :error="rutaRipsError">
+              <Row type="flex" justify="end">
+                <i-col span="22">
+                  <Input style="width: 100%" disabled :value="rutaRips"/>
+                </i-col>
+                <i-col span="2">
+                  <Button icon="folder" @click="onPickFile"></Button>
+                </i-col> 
+              </Row>
+            </FormItem>
+          </Form>
+          <Form :label-width="130">
+            <FormItem label="Numero envio" :error="numEnvioError">
+              <Row type="flex">
+                <i-col span="4">
+                  <InputNumber v-model="numEnvio"/>
+                </i-col>
+                <i-col span="2">
+                  <label>Entidad</label>
+                </i-col>
+                <i-col span="17">
+                  <i-select v-model="numEntidad" filterable style="width: 100%; margin-right: 10px">
+                    <i-option v-for ="item in tercerosBD" :value="item.tercero.id" :key="item.tercero.id">{{item.tercero.identificacion + ' - ' + item.nombre}}</i-option>
+                  </i-select>
+                </i-col>
+                <i-co span="1"></i-co>
+              </Row>
+            </FormItem>
+            <!-- <FormItem label="Entidad" :error="numEntidadError">
+            </FormItem> -->
+          </Form>
+          <Form inline :label-width="130">
+            <FormItem label="Fecha de Recepcion: ">
+              <DatePicker type="date" :value="fechaRecep" :options="datepickershortcuts" placeholder="Seleccione la fecha de recepcion"></DatePicker>
+            </FormItem>
+            <FormItem label="Cant. Facturas" :error="cantFacturasError">
+              <Input :value="facturacionDb.length" disabled/>
+            </FormItem>
+            <FormItem label="Valor Facturas" :error="valorFacturasError">
+              <Input :value="'$ ' + valorFacturas.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')" disabled/>
+            </FormItem>
+          </Form>
+        </Row>
+        <Row v-if="visibleChargeInit === false" style="width: 100%">
+          <i-col span="23">
+            <i-table border :style="'width: 100%; height:' + $parent.maxHeightTable - 140 + 'px;'" :columns="columnsFacturas" :data="facturacionDb" size="small" :stripe="false" :height="$parent.maxHeightTable - 140"></i-table>
+          </i-col>
+          <i-col span="1"></i-col>
+        </Row>
+      </i-col>
+      <i-col span="6" v-if="ripsContainer.length !== 0">
+        <Card style="width: 100%; height: 100%;" dis-hover>
+          <Row style="margin-bottom: 10px;">
+            <i-col span="21">
+              <h2>RESULTADO REVISION</h2>
+            </i-col>
+            <i-col span="3">
+              <i-button>
+                <Icon type="ios-printer"></Icon>
+              </i-button>
+            </i-col>
+          </Row>
+          <Collapse accordion v-model="autoSelectFile">
+            <Panel v-for="container in ripsContainer" :key="container.id" :name="container.pref" v-if="container.pref !== 'FACTURAS'">
+              {{container.pref}} ::
+              <Tooltip :content="container.fileName !== '' ? 'El archivo fue seleccionado y leido' : 'No selecciono este archivo'">
+                <Tag :color="container.fileName !== '' ? 'green' : 'red'">
+                  <Icon :type="container.fileName !== '' ? 'checkmark-circled' : 'close-circled'"></Icon>
+                  {{container.fileName !== '' ? '' : 'NO EXISTE EN CARPETA RIPS'}}
+                </Tag>
+              </Tooltip>
+              <!-- {{container.fileName !== '' ? ':' : ''}} -->
+              <Tooltip v-if="container.fileName !== ''" :content="container.lines + ' lineas'" placement="right">
+                <Tag color="blue">
+                  <Icon type="ios-paper"></Icon>
+                  {{container.lines}}
+                </Tag>
+              </Tooltip>
+              <!-- {{container.fileName !== '' ? ':' : ''}} -->
+              <Tooltip v-if="container.fileName !== ''" :content="container.errors + ' errores'" placement="right">
+                <Tag :color="container.errors === 0 ? 'blue' : 'red'">
+                  <Icon type="bug"></Icon>
+                  {{container.errors}}
+                </Tag>
+              </Tooltip>
+              <!-- {{container.fileName !== '' ? ':' : ''}} -->
+              <Tooltip v-if="container.fileName !== ''" :content="container.stateDB.stateInfo" placement="left">
+                <Tag :color="container.stateDB.stateColor">
+                  {{container.stateDB.stateDB}}
+                </Tag>
+              </Tooltip>
+              <div slot="content">
+                <Collapse accordion>
+                  <Panel v-for="item in container.result" :key="item.id">
+                    {{item.stateDB}}
+                    <Icon :color="item.stateColor" :type="item.stateTitle === 'EXITOSO' ? 'checkmark-circled' : item.stateTitle === 'INFORMACION' ? 'information-circled' : item.stateTitle === 'ADVERTENCIA' ? 'alert-circled' : 'close-circled'"></Icon>
+                    <div slot="content">
+                      {{item.stateInfo}}
+                    </div>
+                  </Panel>
+                </Collapse>
+              </div>
+            </Panel>
+          </Collapse>
+        </Card>
+      </i-col>
     </Row>
     <Row v-if="visibleChargeInit === false" style="margin-top: 10px;" type="flex" justify="end">
       <i-button type="error" style="margin-right: 10px" @click="$router.go(-1)">CANCELAR</i-button>
@@ -42,8 +120,8 @@
     <Row v-if="visibleChargeInit === true" type="flex" justify="center">
       <i-button type="dashed" @click="onPickFile">
         <div style="padding: 20px 0">
-            <Icon type="ios-cloud-upload" size="52"></Icon>
-            <p>Seleccione los archivos de RIPS para iniciar la carga</p>
+          <Icon type="ios-cloud-upload" size="52"></Icon>
+          <p>Seleccione los archivos de RIPS para iniciar la carga</p>
         </div>
       </i-button>
     </Row>
@@ -54,6 +132,7 @@
     name: 'facturacion-recepcion',
     data () {
       return {
+        autoSelectFile: 'CT',
         rutaRips: '',
         rutaRipsError: '',
         ripsContainer: [],
@@ -110,59 +189,17 @@
                 })
               }
             })
-            console.log('VERIFICACION, FINAL', this.ripsContainer)
+            this.numEnvio = this.rutaRips.replace(/\D/g, '')
           })
-          // for (let i = 0; i < this.files.length; i++) {
-          //   const archivoRIPS = this.files[i]
-          //   if (archivoRIPS.name.substr(0, 2) === 'AF') {
-          //     miscelanius.readFileRips(archivoRIPS, (collection) => {
-          //       collection.forEach(element => {
-          //         this.facturacionDb.push(objects.createFacturas(0, element.numeroFactura, element.numeroFacturaReal, element.fechaExpedicionFactura, 'SIN ESPECIFICAR', element.valorPagar))
-          //         this.valorFacturas = this.valorFacturas + element.valorPagar
-          //       })
-          //       this.numEnvio = parseInt(this.rutaRips.replace(/\D/g, ''))
-          //       this.createColumns()
-          //       this.$parent.handleSpinHide()
-          //       this.$Message.info('Facturas cargadas exitosamente')
-          //     })
-          //   }
-          // }
-          // for (let i = 0; i < this.files.length; i++) {
-          //   const archivoRIPS = this.files[i]
-          //   if (archivoRIPS.name.substr(0, 2) === 'US') {
-          //     miscelanius.readFileRips(archivoRIPS, (collection) => {
-          //       let count = 0
-          //       let newCollection = []
-          //       if (this.facturacionDb.length !== collection.length) {
-          //         this.$Message.error({
-          //           content: 'El numero de facturas en el archivo AF no es igual al numero de usuarios del archivo US',
-          //           duration: 8
-          //         })
-          //         this.facturacionDb.forEach(element => {
-          //           element.changeStateDB('AF!=US')
-          //         })
-          //         this.$parent.handleSpinHide()
-          //       } else {
-          //         collection.forEach(element => {
-          //           newCollection.push(objects.createFacturas(this.facturacionDb[count].id, this.facturacionDb[count].ripsnumero, this.facturacionDb[count].numero, this.facturacionDb[count].fecha, element.tipoUsuario, this.facturacionDb[count].valorfactura))
-          //           count++
-          //         })
-          //         this.facturacionDb = newCollection
-          //         this.$Message.info('Regimen de facturas en RIPS evaluados')
-          //         const storage = require('../../libs/storage.js')
-          //         storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
-          //           this.tercerosBD = data1
-          //         }).catch((err) => {
-          //           this.$parent.handleSpinHide()
-          //           this.$Message.error({
-          //             content: err,
-          //             duration: 8
-          //           })
-          //         })
-          //       }
-          //     })
-          //   }
-          // }
+          const storage = require('../../libs/storage.js')
+          storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
+            this.tercerosBD = data1
+          }).catch((err) => {
+            this.$Message.error({
+              content: err,
+              duration: 8
+            })
+          })
         } else if (this.files.length === 0) {
           this.$Message.error('No ha seleccionado los RIPS')
         }
@@ -389,7 +426,6 @@
                           this.$parent.handleSpinShow('Escribiendo datos en el servidor', 'progress', countPercent)
                           // luego se realiza la carga factura por factura
                           let step = ((100 - countPercent) / this.facturacionDb.length) / 3
-                          console.log(step)
                           this.facturacionDb.forEach(factura => {
                             storage._database_createFactura({
                               idtercero: factura.idtercero,

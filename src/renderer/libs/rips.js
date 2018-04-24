@@ -86,7 +86,7 @@ exports.readFileRips = (files, _callback) => {
   })
 }
 
-// Funcion publica que lee valida cada uno de los archivos de un contenedor de rips
+// Funcion publica que valida cada uno de los archivos de un contenedor de rips
 exports.decodeFileRips = (ripsContainer, ripCollection) => {
   let deferred = q.defer()
   let objects = require('./objects')
@@ -104,6 +104,9 @@ exports.decodeFileRips = (ripsContainer, ripCollection) => {
         case 'CT':
           ripsContainer = this._validatorCT(ripsContainer, ripCollection)
           break
+        case 'AF':
+          ripsContainer = this._validatorAF(ripsContainer, ripCollection)
+          break
         case 'US':
           ripsContainer = this._validatorUS(ripsContainer, ripCollection)
           break
@@ -114,29 +117,13 @@ exports.decodeFileRips = (ripsContainer, ripCollection) => {
     console.log(ripsContainer.pref, error)
     deferred.reject(objects.createErrorReader('#VALIDATOR/UNKNOWN', 0, error))
   }
-  // if (tipoArchivo === 'AF') {
-  //   // Comenzamos a recorrer las lineas del archivo una por una
-  //   for (let i = 0; i < lines.length; i++) {
-  //     const linea = lines[i]
-  //     // Por cada linea las separamos por , y debemos obtener exactamente un length de 17
-  //     let matrizContenido = linea.split(',')
-  //     if (matrizContenido.length === 17) {
-  //       result.push(objects.createAFfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13], matrizContenido[14], matrizContenido[15], matrizContenido[16]))
-  //     }
-  //   }
-  // } else if (tipoArchivo === 'US') {
-  //   // Comenzamos a recorrer las lineas del archivo una por una
-  //   for (let i = 0; i < lines.length; i++) {
-  //     const linea = lines[i]
-  //     // Por cada linea las separamos por , y debemos obtener exactamente un length de 17
-  //     let matrizContenido = linea.split(',')
-  //     if (matrizContenido.length === 14) {
-  //       result.push(objects.createUSfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13]))
-  //     }
-  //   }
-  // }
   // retornamos la promesa
   return deferred.promise
+}
+
+// Funcion publica que crea objetos de facturacion, siempre y cuando no existan errores en los objetos
+exports.generateObjects = (ripsContainer) => {
+  
 }
 
 // Funcion de sistema utilizada para leer el contenido de archivos desde un fileReader
@@ -149,6 +136,7 @@ exports._readerFile = (file, ext) => {
     fileReader.onload = () => {
       result = atob(fileReader.result.replace(plainBase64, ''))
       deferred.resolve(result)
+      console.log()
     }
     fileReader.readAsDataURL(file)
   } catch (error) {
@@ -205,7 +193,6 @@ exports._validatorCT = (ripObject, ripCollection) => {
   let verifiedFiles = 0 // nombres de archivos verificados y cantidad de registros verificados
   let line = 1
   ripObject.buffer.forEach(element => {
-    console.log(element)
     let nameVerified = false
     let numberVerified = false
     ripCollection.forEach(file => {
@@ -221,13 +208,17 @@ exports._validatorCT = (ripObject, ripCollection) => {
       verifiedFiles = verifiedFiles + 1
     } else if (nameVerified === true && numberVerified === false) {
       ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', line, 'La cantidad de registros en el archivo: ' + element.codigoArchivo + ' no coincide con el especificado en la Columna 4'))
+      errorCount = errorCount + 1
     } else if (nameVerified === false && numberVerified === true) {
       ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', line, 'El nombre del archivo ' + element.codigoArchivo + ' especificado en la Columna 3, no coincide con el real del archivo'))
+      errorCount = errorCount + 1
     } else if (nameVerified === false && numberVerified === false) {
       ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', line, 'La cantidad de registros en el archivo: ' + element.codigoArchivo + ' no coincide con el especificado en la Columna 4'))
       ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', line, 'El nombre del archivo ' + element.codigoArchivo + ' especificado en la Columna 3, no coincide con el real del archivo'))
+      errorCount = errorCount + 2
     }
   })
+  ripObject.errors = errorCount
   if (errorCount === 0) {
     ripObject.stateDB = objects.createErrorReader('?VERIFIED')
   } else {
@@ -236,7 +227,92 @@ exports._validatorCT = (ripObject, ripCollection) => {
   return ripObject
 }
 
-// Funcion de sistema utilizada pra validar un archivo del tipo US
+// Funcion de sistema utilizada pra validar un archivo del tipo AF
+exports._validatorAF = (ripObject, ripCollection) => {
+  const objects = require('./objects')
+  let columnLimit = 17 // limite de columnasdel archivo
+  let tempbuffer = [] // objeto temporal para hacer cambios
+  let errorCount = 0 // contador de errores
+  // recorrer linea por linea el buffer
+  for (let i = 0; i < ripObject.buffer.length; i++) {
+    const linea = ripObject.buffer[i] // obtenemos la linea actual en la que esta parada
+    let matrizContenido = linea.split(',') // obtenemos la matriz de la linea
+    // verificamos que el numero de columnas de la linea sea el indicado por el tipo de archivo
+    if (matrizContenido.length === columnLimit) {
+      // guardamos el Log de estructura en el temporal
+      ripObject.result.push(objects.createErrorReader('?VALIDATOR/STRUCTURE/COLUMNS', i + 1))
+      // le damos formato correcto a los objetos de la linea
+      // verificacion del primer objeto []
+      // creamos los objetos del tipo CTFile
+      let result = objects.createAFfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13], matrizContenido[14], matrizContenido[15], matrizContenido[16])
+      if (result['error']) {
+        for (let k = 0; k < result.error.length; k++) {
+          const error = result.error[k]
+          ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', i + 1, error))
+          errorCount = errorCount + 1
+        }
+      } else {
+        tempbuffer.push(result)
+      }
+    } else { // en caso de no cumplir con el numero de columnas, lanzar error de estructura y detener la validacion
+      ripObject.result.push(objects.createErrorReader('#VALIDATOR/STRUCTURE', i + 1, 'El numero de columnas para este archivo es de ' + columnLimit + ' y esta linea cuenta con ' + matrizContenido.length))
+      errorCount = errorCount + 1
+    }
+  }
+  // verificamos si existieron cambios en el buffer temporal y reemplazamos
+  if (tempbuffer.length !== 0) {
+    ripObject.buffer = tempbuffer
+  }
+  ripObject.errors = errorCount
+  if (errorCount === 0) {
+    ripObject.stateDB = objects.createErrorReader('?VERIFIED')
+  } else {
+    ripObject.stateDB = objects.createErrorReader('#VERIFIED')
+  }
+  return ripObject
+}
+
+// Funcion de sistema utilizada para validar un archivo del tipo US
 exports._validatorUS = (ripObject, ripCollection) => {
-  console.log('ok')
+  const objects = require('./objects')
+  let columnLimit = 14 // limite de columnasdel archivo
+  let tempbuffer = [] // objeto temporal para hacer cambios
+  let errorCount = 0 // contador de errores
+  // recorrer linea por linea el buffer
+  for (let i = 0; i < ripObject.buffer.length; i++) {
+    const linea = ripObject.buffer[i] // obtenemos la linea actual en la que esta parada
+    let matrizContenido = linea.split(',') // obtenemos la matriz de la linea
+    // verificamos que el numero de columnas de la linea sea el indicado por el tipo de archivo
+    if (matrizContenido.length === columnLimit) {
+      // guardamos el Log de estructura en el temporal
+      ripObject.result.push(objects.createErrorReader('?VALIDATOR/STRUCTURE/COLUMNS', i + 1))
+      // le damos formato correcto a los objetos de la linea
+      // verificacion del primer objeto []
+      // creamos los objetos del tipo CTFile
+      let result = objects.createUSfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13])
+      if (result['error']) {
+        for (let k = 0; k < result.error.length; k++) {
+          const error = result.error[k]
+          ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', i + 1, error))
+          errorCount = errorCount + 1
+        }
+      } else {
+        tempbuffer.push(result)
+      }
+    } else { // en caso de no cumplir con el numero de columnas, lanzar error de estructura y detener la validacion
+      ripObject.result.push(objects.createErrorReader('#VALIDATOR/STRUCTURE', i + 1, 'El numero de columnas para este archivo es de ' + columnLimit + ' y esta linea cuenta con ' + matrizContenido.length))
+      errorCount = errorCount + 1
+    }
+  }
+  // verificamos si existieron cambios en el buffer temporal y reemplazamos
+  if (tempbuffer.length !== 0) {
+    ripObject.buffer = tempbuffer
+  }
+  ripObject.errors = errorCount
+  if (errorCount === 0) {
+    ripObject.stateDB = objects.createErrorReader('?VERIFIED')
+  } else {
+    ripObject.stateDB = objects.createErrorReader('#VERIFIED')
+  }
+  return ripObject
 }

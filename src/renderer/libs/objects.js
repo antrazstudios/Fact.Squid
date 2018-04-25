@@ -364,7 +364,7 @@ exports.createErrorReader = (vtype, vline = 0, vadditionalinfo = '') => {
       break
     case '#VERIFIED':
       estadoFinal = 'ERROR REVISION'
-      infoFinal = 'Archivo sin errores de lineamientos de RIPS'
+      infoFinal = 'Archivo con errores en revision'
       break
     case '*OK':
       estadoFinal = 'CARGADO'
@@ -506,7 +506,7 @@ exports.createRIPSContainer = (vpref) => {
 }
 
 // Facturas de la DB
-exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfactura, vregimenRender = 0) => {
+exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vnumIdentificacion, vregimen, vvalorfactura, vregimenRender = 0) => {
   // validacion del regimen segun estructura de los RIPS
   // let vregimenRender
   if (vregimen === '1' || vregimen === 1) {
@@ -531,6 +531,7 @@ exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfac
     idtercero: 0,
     ripsnumero: vripsnumero,
     numero: vnumero,
+    numIdentificacion: vnumIdentificacion,
     fecha: vfecha,
     regimen: vregimen,
     regimenRender: vregimenRender,
@@ -551,6 +552,26 @@ exports.createFacturas = (vid, vripsnumero, vnumero, vfecha, vregimen, vvalorfac
         this.stateDB = 'LISTO PARA CREAR'
         this.stateColor = 'green'
         this.stateInfo = 'A espera de creacion en Plataforma'
+      }
+    },
+    changeRegimen (newregimen) {
+      this.regimen = newregimen
+      if (newregimen === '1' || newregimen === 1) {
+        this.regimenRender = 'CONTRIBUTITVO'
+      } else if (newregimen === '2' || newregimen === 2) {
+        this.regimenRender = 'SUBSIDIADO'
+      } else if (newregimen === '3' || newregimen === 3) {
+        this.regimenRender = 'VINCULADO'
+      } else if (newregimen === '4' || newregimen === 4) {
+        this.regimenRender = 'PARTICULAR'
+      } else if (newregimen === '5' || newregimen === 5) {
+        this.regimenRender = 'OTRO'
+      } else if (newregimen === '6' || newregimen === 6) {
+        this.regimenRender = 'DESPLAZADO CONTRIBUTIVO'
+      } else if (newregimen === '7' || newregimen === 7) {
+        this.regimenRender = 'DESPLAZADO SUBSIDIADO'
+      } else if (newregimen === '8' || newregimen === 8) {
+        this.regimenRender = 'DESPLAZADO NO ASEGURADO'
       }
     }
   }
@@ -751,7 +772,7 @@ exports.createAFfile = (vcodigoprestador, vrazonsocial, vtipoidentificacion, vnu
   if (tempfechaexp === 0) {
     error.push('La fecha de expedicion de la factura (Columna 6) no puede estar vacio')
   } else {
-    resulttype = miscelanius.verifiedType('date', vfechaexpedicionfactura)
+    resulttype = miscelanius.verifiedType('date', vfechaexpedicionfactura, 'dd/mm/aaaa')
     if (resulttype === 'ERROR') {
       error.push('La fecha de expedicion (Columna 6) no cumple el formato permitido dd/mm/aaaa')
     } else {

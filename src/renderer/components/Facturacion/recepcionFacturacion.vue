@@ -2,7 +2,7 @@
   <div class="content">
     <input type="file" style="display:none" ref="fileInput" accept="text/plain, .txt" @change="onFilePicked" multiple/>
     <Row type="flex">
-      <i-col span="18">
+      <i-col span="17">
         <Row v-if="visibleChargeInit === false">
           <Form ref="FormRips" :label-width="130">
             <FormItem label="Ruta de Rips" :error="rutaRipsError">
@@ -55,9 +55,9 @@
           <i-col span="1"></i-col>
         </Row>
       </i-col>
-      <i-col span="6" v-if="ripsContainer.length !== 0">
+      <i-col span="7" v-if="ripsContainer.length !== 0">
         <Card style="width: 100%; height: 100%;" dis-hover>
-          <Row style="margin-bottom: 3px;">
+          <Row style="margin-bottom: 0px;">
             <i-col span="21">
               <h3>RESULTADO REVISION</h3>
             </i-col>
@@ -115,7 +115,7 @@
                   {{container.stateDB.stateDB}}
                 </Tag>
               </Tooltip>
-              <div slot="content" style="height: 98px; overflow: auto">
+              <div slot="content" style="height: 90px; overflow: auto">
                 <Collapse accordion>
                   <Panel v-for="item in container.result" :key="item.id" v-if="filtersResult.indexOf(item.stateTitle) > -1">
                     {{item.stateDB}}
@@ -152,7 +152,8 @@
     data () {
       return {
         filtersResult: ['ERROR', 'ADVERTENCIA'],
-        autoSelectFile: 'CT',
+        render: false,
+        autoSelectFile: '',
         rutaRips: '',
         rutaRipsError: '',
         ripsContainer: [],
@@ -164,7 +165,7 @@
         valorFacturas: '0',
         valorFacturasError: '',
         cantFacturasError: '',
-        fechaRecep: Date.now(),
+        fechaRecep: new Date(Date.now()),
         columnsFacturas: [],
         facturacionDb: [],
         files: [],
@@ -191,15 +192,20 @@
         this.files = event.target.files
         if (this.files.length !== 0) {
           // this.$parent.handleSpinShow('Cargando RIPS')
+          this.createColumns()
           this.enabledConfirm = true
+          this.render = false
           this.numEnvio = 0
           this.visibleChargeInit = false
           const rips = require('../../libs/rips')
           this.rutaRips = this.files[0].path.replace(this.files[0].name, '')
           this.facturacionDb = []
           this.valorFacturas = 0
+          // Leemos o descodificamos los archivos
           rips.readFileRips(this.files, (data) => {
             this.ripsContainer = data
+            // Validamos cada archivo
+            let countcontainer = 0
             this.ripsContainer.forEach(element => {
               if (element.state === true) {
                 rips.decodeFileRips(element, this.ripsContainer).then((data) => {
@@ -208,7 +214,20 @@
                   element.result.push(err)
                 })
               }
+              countcontainer = countcontainer + 1
+              if (element.errors !== 0) {
+                this.autoSelectFile = element.pref
+              }
+              if (countcontainer === this.ripsContainer.length) {
+                this.facturacionDb = rips.generateObjects(this.ripsContainer)
+                this.valorFacturas = 0
+                this.facturacionDb.forEach(factura => {
+                  this.valorFacturas = this.valorFacturas + factura.valorfactura
+                })
+              }
             })
+            // Creamos los objetos de las facturas
+            // Creamos las columnas para representar los datos
             this.numEnvio = this.rutaRips.replace(/\D/g, '')
           })
           const storage = require('../../libs/storage.js')
@@ -228,11 +247,11 @@
         // limpiamos las columnas
         this.columnsFacturas = []
         // numero de la factura en RIPS
-        this.columnsFacturas.push({
-          title: 'Numero Factura RIPS',
-          key: 'ripsnumero',
-          width: 200
-        })
+        // this.columnsFacturas.push({
+        //   title: 'Numero Factura RIPS',
+        //   key: 'ripsnumero',
+        //   width: 200
+        // })
         // numero de la factura
         this.columnsFacturas.push({
           title: 'Numero Factura Real',

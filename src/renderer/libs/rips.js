@@ -66,6 +66,11 @@ exports.readFileRips = (files, _callback) => {
               _callback(ordenLectura)
             }
           }).catch((err) => {
+            console.log('ERROR DE LECTURA', {
+              element: element,
+              error: err
+            })
+            console.log(err)
             // en caso que no sea posible la lectura
             element.stateDB = objects.createErrorReader('#READED')
             element.state = false // definimos como no existente o leible el archivo
@@ -110,6 +115,15 @@ exports.decodeFileRips = (ripsContainer, ripCollection) => {
         case 'US':
           ripsContainer = this._validatorUS(ripsContainer, ripCollection)
           break
+        case 'AC':
+          ripsContainer = this._validatorAC(ripsContainer, ripCollection)
+          break
+        case 'AP':
+          ripsContainer = this._validatorAP(ripsContainer, ripCollection)
+          break
+        case 'AU':
+          ripsContainer = this._validatorAU(ripsContainer, ripCollection)
+          break
       }
       deferred.resolve(ripsContainer)
     }
@@ -123,6 +137,58 @@ exports.decodeFileRips = (ripsContainer, ripCollection) => {
 
 // Funcion publica que crea objetos de facturacion, siempre y cuando no existan errores en los objetos
 exports.generateObjects = (ripsContainer) => {
+  // instanciamos el objeto para crear objetos
+  const obj = require('./objects')
+  let datos = []
+  // Crear objetos de facturas iniciales desde el af
+  ripsContainer[2].buffer.forEach(aF => {
+    datos.push(obj.createFacturas(0, aF.numeroFactura, aF.numeroFacturaReal, aF.fechaExpedicionFactura, 0, 'SIN ESPECIFICAR', aF.valorPagar))
+  })
+  // recorremos las facturas para actualizar datos de identificacion del usuario
+  datos.forEach(dato => {
+    // verificamos que el regimenRender es igual a 0
+    if (dato.regimenRender === 0) {
+      // verificamos que exista la factura en el archivo de consultas
+      let num = 0
+      if (ripsContainer[5].buffer !== null) {
+        ripsContainer[5].buffer.forEach(consulta => {
+          if (consulta.numeroFactura === dato.ripsnumero) {
+            dato.numIdentificacion = consulta.numeroIdentificacion
+            num = 1
+          }
+        })
+      }
+      // en caso que no haya encontrado ninguna factura an AC
+      if (num === 0) {
+        if (ripsContainer[7].buffer !== null) {
+          ripsContainer[7].buffer.forEach(urgencia => {
+            if (urgencia.numeroFactura === dato.ripsnumero) {
+              dato.numIdentificacion = urgencia.numeroIdentificacion
+              num = 1
+            }
+          })
+        }
+        // en caso que no haya encontrado ninguna factura en AU
+        if (num === 0) {
+          if (ripsContainer[6].buffer !== null) {
+            ripsContainer[6].buffer.forEach(procedimiento => {
+              if (procedimiento.numeroFactura === dato.ripsnumero) {
+                dato.numIdentificacion = procedimiento.numeroIdentificacion
+                num = 1
+              }
+            })
+          }
+        }
+      }
+      ripsContainer[3].buffer.forEach(usuario => {
+        if (usuario.numeroIdentificacion === parseInt(dato.numIdentificacion)) {
+          dato.changeRegimen(usuario.tipoUsuario)
+        }
+      })
+    }
+  })
+  // retornamos la collecion arreglada
+  return datos
 }
 
 // Funcion de sistema utilizada para leer el contenido de archivos desde un fileReader
@@ -134,11 +200,15 @@ exports._readerFile = (file, ext) => {
   try {
     fileReader.onload = () => {
       result = atob(fileReader.result.replace(plainBase64, ''))
+      // console.log({
+      //   file: file,
+      //   content: result
+      // })
       deferred.resolve(result)
-      console.log()
     }
     fileReader.readAsDataURL(file)
   } catch (error) {
+    console.log(error)
     if (error) {
       deferred.reject(error)
     }
@@ -289,6 +359,141 @@ exports._validatorUS = (ripObject, ripCollection) => {
       // verificacion del primer objeto []
       // creamos los objetos del tipo CTFile
       let result = objects.createUSfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13])
+      if (result['error']) {
+        for (let k = 0; k < result.error.length; k++) {
+          const error = result.error[k]
+          ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', i + 1, error))
+          errorCount = errorCount + 1
+        }
+      } else {
+        tempbuffer.push(result)
+      }
+    } else { // en caso de no cumplir con el numero de columnas, lanzar error de estructura y detener la validacion
+      ripObject.result.push(objects.createErrorReader('#VALIDATOR/STRUCTURE', i + 1, 'El numero de columnas para este archivo es de ' + columnLimit + ' y esta linea cuenta con ' + matrizContenido.length))
+      errorCount = errorCount + 1
+    }
+  }
+  // verificamos si existieron cambios en el buffer temporal y reemplazamos
+  if (tempbuffer.length !== 0) {
+    ripObject.buffer = tempbuffer
+  }
+  ripObject.errors = errorCount
+  if (errorCount === 0) {
+    ripObject.stateDB = objects.createErrorReader('?VERIFIED')
+  } else {
+    ripObject.stateDB = objects.createErrorReader('#VERIFIED')
+  }
+  return ripObject
+}
+
+// Funcion de sistema utilizada para validar un archivo el tipo AC
+exports._validatorAC = (ripObject, ripCollection) => {
+  const objects = require('./objects')
+  let columnLimit = 17 // limite de columnasdel archivo
+  let tempbuffer = [] // objeto temporal para hacer cambios
+  let errorCount = 0 // contador de errores
+  // recorrer linea por linea el buffer
+  for (let i = 0; i < ripObject.buffer.length; i++) {
+    const linea = ripObject.buffer[i] // obtenemos la linea actual en la que esta parada
+    let matrizContenido = linea.split(',') // obtenemos la matriz de la linea
+    // verificamos que el numero de columnas de la linea sea el indicado por el tipo de archivo
+    if (matrizContenido.length === columnLimit) {
+      // guardamos el Log de estructura en el temporal
+      ripObject.result.push(objects.createErrorReader('?VALIDATOR/STRUCTURE/COLUMNS', i + 1))
+      // le damos formato correcto a los objetos de la linea
+      // verificacion del primer objeto []
+      // creamos los objetos del tipo CTFile
+      let result = objects.createACfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13], matrizContenido[14], matrizContenido[15], matrizContenido[16])
+      if (result['error']) {
+        for (let k = 0; k < result.error.length; k++) {
+          const error = result.error[k]
+          ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', i + 1, error))
+          errorCount = errorCount + 1
+        }
+      } else {
+        tempbuffer.push(result)
+      }
+    } else { // en caso de no cumplir con el numero de columnas, lanzar error de estructura y detener la validacion
+      ripObject.result.push(objects.createErrorReader('#VALIDATOR/STRUCTURE', i + 1, 'El numero de columnas para este archivo es de ' + columnLimit + ' y esta linea cuenta con ' + matrizContenido.length))
+      errorCount = errorCount + 1
+    }
+  }
+  // verificamos si existieron cambios en el buffer temporal y reemplazamos
+  if (tempbuffer.length !== 0) {
+    ripObject.buffer = tempbuffer
+  }
+  ripObject.errors = errorCount
+  if (errorCount === 0) {
+    ripObject.stateDB = objects.createErrorReader('?VERIFIED')
+  } else {
+    ripObject.stateDB = objects.createErrorReader('#VERIFIED')
+  }
+  return ripObject
+}
+
+// Funcion de sistema utilizada para validar un archivo el tipo AP
+exports._validatorAP = (ripObject, ripCollection) => {
+  const objects = require('./objects')
+  let columnLimit = 15 // limite de columnasdel archivo
+  let tempbuffer = [] // objeto temporal para hacer cambios
+  let errorCount = 0 // contador de errores
+  // recorrer linea por linea el buffer
+  for (let i = 0; i < ripObject.buffer.length; i++) {
+    const linea = ripObject.buffer[i] // obtenemos la linea actual en la que esta parada
+    let matrizContenido = linea.split(',') // obtenemos la matriz de la linea
+    // verificamos que el numero de columnas de la linea sea el indicado por el tipo de archivo
+    if (matrizContenido.length === columnLimit) {
+      // guardamos el Log de estructura en el temporal
+      ripObject.result.push(objects.createErrorReader('?VALIDATOR/STRUCTURE/COLUMNS', i + 1))
+      // le damos formato correcto a los objetos de la linea
+      // verificacion del primer objeto []
+      // creamos los objetos del tipo CTFile
+      let result = objects.createAPfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13], matrizContenido[14])
+      if (result['error']) {
+        for (let k = 0; k < result.error.length; k++) {
+          const error = result.error[k]
+          ripObject.result.push(objects.createErrorReader('#VALIDATOR/TYPE||VALUE', i + 1, error))
+          errorCount = errorCount + 1
+        }
+      } else {
+        tempbuffer.push(result)
+      }
+    } else { // en caso de no cumplir con el numero de columnas, lanzar error de estructura y detener la validacion
+      ripObject.result.push(objects.createErrorReader('#VALIDATOR/STRUCTURE', i + 1, 'El numero de columnas para este archivo es de ' + columnLimit + ' y esta linea cuenta con ' + matrizContenido.length))
+      errorCount = errorCount + 1
+    }
+  }
+  // verificamos si existieron cambios en el buffer temporal y reemplazamos
+  if (tempbuffer.length !== 0) {
+    ripObject.buffer = tempbuffer
+  }
+  ripObject.errors = errorCount
+  if (errorCount === 0) {
+    ripObject.stateDB = objects.createErrorReader('?VERIFIED')
+  } else {
+    ripObject.stateDB = objects.createErrorReader('#VERIFIED')
+  }
+  return ripObject
+}
+
+// Funcion de sistema utilizada para validar un archivo el tipo AU
+exports._validatorAU = (ripObject, ripCollection) => {
+  const objects = require('./objects')
+  let columnLimit = 17 // limite de columnasdel archivo
+  let tempbuffer = [] // objeto temporal para hacer cambios
+  let errorCount = 0 // contador de errores
+  // recorrer linea por linea el buffer
+  for (let i = 0; i < ripObject.buffer.length; i++) {
+    const linea = ripObject.buffer[i] // obtenemos la linea actual en la que esta parada
+    let matrizContenido = linea.split(',') // obtenemos la matriz de la linea
+    // verificamos que el numero de columnas de la linea sea el indicado por el tipo de archivo
+    if (matrizContenido.length === columnLimit) {
+      // guardamos el Log de estructura en el temporal
+      ripObject.result.push(objects.createErrorReader('?VALIDATOR/STRUCTURE/COLUMNS', i + 1))
+      // le damos formato correcto a los objetos de la linea
+      // verificacion del primer objeto []
+      // creamos los objetos del tipo CTFile
+      let result = objects.createAUfile(matrizContenido[0], matrizContenido[1], matrizContenido[2], matrizContenido[3], matrizContenido[4], matrizContenido[5], matrizContenido[6], matrizContenido[7], matrizContenido[8], matrizContenido[9], matrizContenido[10], matrizContenido[11], matrizContenido[12], matrizContenido[13], matrizContenido[14], matrizContenido[15], matrizContenido[16])
       if (result['error']) {
         for (let k = 0; k < result.error.length; k++) {
           const error = result.error[k]

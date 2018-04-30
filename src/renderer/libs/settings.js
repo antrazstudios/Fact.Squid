@@ -1,4 +1,5 @@
 const Config = require('electron-config')
+const log4js = require('log4js')
 const config = new Config({
   encryptionKey: 'oiV32mVp5lOwYneFESjrWq2xFByNOvNj'
 })
@@ -7,6 +8,55 @@ const sesion = new Config({
   encryptionKey: 'SLctEZS0NNqt4poRexN9ZdBvFJbUdlbf18r'
 })
 const fs = require('fs')
+
+exports.createLogFileConfig = () => {
+  log4js.configure(
+    {
+      appenders: {
+        history: {
+          type: 'dateFile',
+          filename: 'logfile.log',
+          maxLogSize: 10485760,
+          backups: 30,
+          category: 'history',
+          level: 'ALL'
+        },
+        debugtime: {
+          type: 'logLevelFilter',
+          category: 'debugtime',
+          level: 'DEBUG',
+          appender: {
+            type: 'console'
+          }
+        }
+      }
+    }
+  )
+}
+
+exports.updateLogFile = (message, level = 'info') => {
+  const logger = log4js.getLogger()
+  const user = this.getSesionProfile()
+  const conn = this.getConnectionName()
+  const messageReady = '·#' + user + '#··#' + conn + '#· ' + message
+  switch (level) {
+    case 'info':
+      logger.info(messageReady)
+      break
+    case 'error':
+      logger.error(messageReady)
+      break
+    case 'warn':
+      logger.warn(messageReady)
+      break
+    case 'fatal':
+      logger.fatal(messageReady)
+      break
+    case 'trace':
+      logger.trace(messageReady)
+      break
+  }
+}
 
 exports.getDocumentsExist = (_callback) => {
   let pathIndexDoc = config.path.replace('config.json', '') + 'packages-documentation/README.md'

@@ -124,7 +124,11 @@ exports.decodeFileRips = (ripsContainer, ripCollection) => {
         case 'AU':
           ripsContainer = this._validatorAU(ripsContainer, ripCollection)
           break
+        default:
+          ripsContainer.stateDB = objects.createErrorReader('!DES')
+          break
       }
+
       deferred.resolve(ripsContainer)
     }
   } catch (error) {

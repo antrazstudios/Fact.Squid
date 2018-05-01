@@ -17,9 +17,7 @@ exports.createLogFileConfig = () => {
           type: 'dateFile',
           filename: 'logfile.log',
           maxLogSize: 10485760,
-          backups: 30,
-          category: 'history',
-          level: 'ALL'
+          backups: 30
         },
         debugtime: {
           type: 'logLevelFilter',
@@ -28,6 +26,12 @@ exports.createLogFileConfig = () => {
           appender: {
             type: 'console'
           }
+        }
+      },
+      categories: {
+        default: {
+          appenders: ['history'],
+          level: 'ALL'
         }
       }
     }
@@ -38,7 +42,7 @@ exports.updateLogFile = (message, level = 'info') => {
   const logger = log4js.getLogger()
   const user = this.getSesionProfile()
   const conn = this.getConnectionName()
-  const messageReady = '·#' + user + '#··#' + conn + '#· ' + message
+  const messageReady = '·#' + user.getFullName() + '#··#' + conn + '#· ' + message
   switch (level) {
     case 'info':
       logger.info(messageReady)

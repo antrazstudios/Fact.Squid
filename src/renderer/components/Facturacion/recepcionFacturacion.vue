@@ -1,8 +1,12 @@
 <template>
   <div class="content">
+    <!-- Input de almacenamiento de archivos -->
     <input type="file" style="display:none" ref="fileInput" accept="text/plain, .txt" @change="onFilePicked" multiple/>
+    <!-- Contenido de la vista -->
     <Row type="flex">
+      <!-- Vista lateral izq. datos de la facturas -->
       <i-col span="17">
+        <!-- Visualizacion de datos -->
         <Row v-if="visibleChargeInit === false">
           <Form ref="FormRips" :label-width="130">
             <FormItem label="Ruta de Rips" :error="rutaRipsError">
@@ -48,6 +52,7 @@
             </FormItem>
           </Form>
         </Row>
+        <!-- Tabla de visualizacion -->
         <Row v-if="visibleChargeInit === false" style="width: 100%">
           <i-col span="23">
             <i-table border :style="'width: 100%; height:' + $parent.maxHeightTable - 140 + 'px;'" :columns="columnsFacturas" :data="facturacionDb" size="small" :stripe="false" :height="$parent.maxHeightTable - 140"></i-table>
@@ -55,8 +60,10 @@
           <i-col span="1"></i-col>
         </Row>
       </i-col>
+      <!-- Vista lateral der. datos de los resultados de la validacion -->
       <i-col span="7" v-if="ripsContainer.length !== 0">
         <Card style="width: 100%; height: 100%;" dis-hover>
+          <!-- Titulo y accion de impresion -->
           <Row style="margin-bottom: 0px;">
             <i-col span="21">
               <h3>RESULTADO REVISION</h3>
@@ -67,6 +74,7 @@
               </i-button>
             </i-col>
           </Row>
+          <!-- Filtro de resultados de validacion -->
           <Row style="margin-bottom: 5px;">
             <i-col span="24">
               <h4>Filtro resultados:</h4>
@@ -86,6 +94,7 @@
               </CheckboxGroup>
             </i-col>
           </Row>
+          <!-- Visor de resultaods -->
           <Collapse accordion v-model="autoSelectFile">
             <Panel v-for="container in ripsContainer" :key="container.id" :name="container.pref" v-if="container.pref !== 'FACTURAS'">
               {{container.pref}} ::
@@ -131,11 +140,13 @@
         </Card>
       </i-col>
     </Row>
+    <!-- Botones de accion final -->
     <Row v-if="visibleChargeInit === false" style="margin-top: 10px;" type="flex" justify="end">
       <i-button type="error" style="margin-right: 10px" @click="$router.go(-1)">CANCELAR</i-button>
       <i-button type="info" :disabled="!enabledConfirm" style="margin-right: 10px" @click="verificarCarga">VERIFICAR</i-button>
       <i-button type="info" :disabled="enabledConfirm" @click="confirmarCarga">CONFIRMAR</i-button>
     </Row>
+    <!-- Boton de carga inicial de los RIPS -->
     <Row v-if="visibleChargeInit === true" type="flex" justify="center">
       <i-button type="dashed" @click="onPickFile">
         <div style="padding: 20px 0">
@@ -191,7 +202,7 @@
       onFilePicked (event) {
         this.files = event.target.files
         if (this.files.length !== 0) {
-          // this.$parent.handleSpinShow('Cargando RIPS')
+          this.$parent.handleSpinShow('Cargando RIPS')
           this.createColumns()
           this.enabledConfirm = true
           this.render = false
@@ -206,6 +217,8 @@
             this.ripsContainer = data
             // Validamos cada archivo
             let countcontainer = 0
+            this.$parent.handleSpinShow('Validando Archivos')
+            // Recorremos los envios
             this.ripsContainer.forEach(element => {
               if (element.state === true) {
                 rips.decodeFileRips(element, this.ripsContainer).then((data) => {
@@ -224,16 +237,22 @@
                 this.facturacionDb.forEach(factura => {
                   this.valorFacturas = this.valorFacturas + factura.valorfactura
                 })
+                this.$parent.handleSpinHide()
               }
             })
-            // Creamos los objetos de las facturas
-            // Creamos las columnas para representar los datos
-            this.numEnvio = this.rutaRips.replace(/\D/g, '')
+            // Obtenemos un numero de envio, segun la ruta
+            this.numEnvio = parseInt(this.rutaRips.replace(/\D/g, ''))
+          }).catch((err) => {
+            this.$Message.error(err)
+            this.$parent.handleSpinHide()
           })
           const storage = require('../../libs/storage.js')
+          this.$parent.handleSpinShow('Cargando terceros juridicos')
           storage._database_consultTerceros({ type: 'juridica' }).then((data1) => {
+            this.$parent.handleSpinHide()
             this.tercerosBD = data1
           }).catch((err) => {
+            this.$parent.handleSpinHide()
             this.$Message.error({
               content: err,
               duration: 8
@@ -241,6 +260,7 @@
           })
         } else if (this.files.length === 0) {
           this.$Message.error('No ha seleccionado los RIPS')
+          this.$parent.handleSpinHide()
         }
       },
       createColumns () {

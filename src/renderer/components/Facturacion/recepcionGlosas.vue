@@ -23,7 +23,7 @@
       </i-col>
       <i-col span="1">
         <!-- Boton para previsualizar el documento generado -->
-        <i-button v-if="pathTempDocument !== ''" type="info" @click="previewDocument">
+        <i-button type="info" @click="previewDocument">
           <Icon type="document"/>
         </i-button>
       </i-col>

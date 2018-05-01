@@ -370,6 +370,10 @@ exports.createErrorReader = (vtype, vline = 0, vadditionalinfo = '') => {
       estadoFinal = 'CARGADO'
       infoFinal = 'Archivo cargado a la Base de datos'
       break
+    case '!DES':
+      estadoFinal = 'REV. DESACTIVADA'
+      infoFinal = 'La revision de este tipo de archivo esta desactivada'
+      break
     // Estados de LOG de RIPS
     case '#READ/IO':
       estadoFinal = 'ERROR DE LECTURA'

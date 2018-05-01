@@ -597,6 +597,9 @@
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
+        let sett = require('./libs/settings')
+        sett.createLogFileConfig()
+        sett.updateLogFile('Esta es una prueba')
       },
       searchClick () {
         this.visibleSearch = !this.visibleSearch

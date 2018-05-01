@@ -106,9 +106,17 @@
           <Tag class="footer-item-tag noclicker" v-bind:style="{ backgroundColor: colorVersion}">
             {{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}
           </Tag>
-          <Tag class="footer-item-tag noclicker" v-if="developerMode === true">
-            Modo Desarrollador
-          </Tag>
+          <Poptip trigger="hover" v-if="developerMode === true">
+            <Tag class="footer-item-tag clicker" style="background-color: #2c3e50">Modo Desarrollador</Tag>
+            <div slot="content">
+              <Row>
+                <Button style="width: 100%; margin-bottom: 5px" @click="changePath('/Settings/log')">Logs del sistema</Button>
+              </Row>
+              <Row>
+                <Button style="width: 100%">Depuracion del sistema</Button>
+              </Row>
+            </div>
+          </Poptip>
           <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
             <h4 style="display: inline-block;">Usuario actual: {{actualProfile.username}}</h4>
           </Tag>
@@ -213,9 +221,10 @@
 <script>
   import MenuSelector from './components/miscelanius/menuOptions'
   import NotificationsView from './components/miscelanius/notificationsView'
+  import LogsView from './components/Settings/log'
   export default {
     name: 'factsquid',
-    components: { NotificationsView, MenuSelector },
+    components: { NotificationsView, MenuSelector, LogsView },
     data () {
       return {
         visibleLoadObject: true,
@@ -343,7 +352,7 @@
         colorVersion: '',
         loaderMessage: '...',
         actualProfile: '',
-        developerMode: false,
+        developerMode: true,
         visibleProfile: false,
         visibleSearch: false,
         visibleNotifications: false,
@@ -384,6 +393,13 @@
       }
       // Se oculta el Spin de espera
       this.handleSpinHide()
+      // definimos el estado del modo Desarrollador
+      const sett = require('./libs/settings')
+      if (sett.getContentFromLocalKey('developerMode') === 0) {
+        this.developerMode = false
+      } else {
+        this.developerMode = true
+      }
     },
     created: function () {
       // Mostrar la espera en pantalla
@@ -462,7 +478,9 @@
     },
     methods: {
       developerAuth () {
+        let response = 0
         if (this.vDeveloperPass === 'Gata1125*') {
+          response = 1
           this.developerMode = true
           this.$Message.warning('MODO DESARROLLADOR ACTIVADO')
           this.vDeveloperPass = ''
@@ -472,8 +490,11 @@
           } else {
             this.$Message.error('ERROR DE AUTENTICACION')
           }
+          response = 0
           this.developerMode = false
         }
+        const sett = require('./libs/settings')
+        sett.addContentToLocalKey('developerMode', response)
       },
       connectionsAssitantShow () {
         this.changePath('/sql/connectionsassistant')
@@ -597,9 +618,6 @@
       },
       profileClick () {
         this.visibleProfile = !this.visibleProfile
-        let sett = require('./libs/settings')
-        sett.createLogFileConfig()
-        sett.updateLogFile('Esta es una prueba')
       },
       searchClick () {
         this.visibleSearch = !this.visibleSearch

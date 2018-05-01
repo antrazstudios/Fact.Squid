@@ -12,3 +12,5 @@ thumbs.db
 *.bak
 
 keys
+
+logfile-production\.log

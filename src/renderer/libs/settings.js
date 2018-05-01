@@ -1,66 +1,14 @@
-const Config = require('electron-config')
-const log4js = require('log4js')
+const Config = require('electron-config') // Config es la constante de la libreria de manejo de archivos de configuracion encriptados
+const fs = require('fs') // fs es una constante global para el manejo de archivos
+// Se genera una nueva configuracion de Config para almacenar los ajustes globales del sistema
 const config = new Config({
   encryptionKey: 'oiV32mVp5lOwYneFESjrWq2xFByNOvNj'
 })
+// Se genera una nueva configuracion de Config para almacenar la sesion actual en el sistema
 const sesion = new Config({
   name: 'sesion',
   encryptionKey: 'SLctEZS0NNqt4poRexN9ZdBvFJbUdlbf18r'
 })
-const fs = require('fs')
-
-exports.createLogFileConfig = () => {
-  log4js.configure(
-    {
-      appenders: {
-        history: {
-          type: 'dateFile',
-          filename: 'logfile.log',
-          maxLogSize: 10485760,
-          backups: 30
-        },
-        debugtime: {
-          type: 'logLevelFilter',
-          category: 'debugtime',
-          level: 'DEBUG',
-          appender: {
-            type: 'console'
-          }
-        }
-      },
-      categories: {
-        default: {
-          appenders: ['history'],
-          level: 'ALL'
-        }
-      }
-    }
-  )
-}
-
-exports.updateLogFile = (message, level = 'info') => {
-  const logger = log4js.getLogger()
-  const user = this.getSesionProfile()
-  const conn = this.getConnectionName()
-  const messageReady = '·#' + user.getFullName() + '#··#' + conn + '#· ' + message
-  switch (level) {
-    case 'info':
-      logger.info(messageReady)
-      break
-    case 'error':
-      logger.error(messageReady)
-      break
-    case 'warn':
-      logger.warn(messageReady)
-      break
-    case 'fatal':
-      logger.fatal(messageReady)
-      break
-    case 'trace':
-      logger.trace(messageReady)
-      break
-  }
-}
 
 exports.getDocumentsExist = (_callback) => {
   let pathIndexDoc = config.path.replace('config.json', '') + 'packages-documentation/README.md'
@@ -170,6 +118,12 @@ exports.createConfigContent = () => {
   if (verificacion === false) {
     config.set('connections', [{ 'id': 0, 'name': 'localhost', 'host': '127.0.0.1', 'port': 3306, 'database': 'billsdelivery_1', 'usd': 'root', 'pwd': 'gata1125' }])
     message = message + 'Se han insertado los siguientes datos en la configuracion del sistema:  \r\n ' + '*Conexion por defecto : localhost' + '\r\n'
+  }
+  // verifcacion de la existencia de la llave de modo desarrollador
+  verificacion = config.has('developerMode')
+  if (verificacion === false) {
+    config.set('developerMode', 0)
+    message = message + 'Se han insertado los siguientes datos en la configuracion del sistema:  \r\n ' + '*Modo desarrollador : desactivado' + '\r\n'
   }
   return {'message': '*createConfigContent* Acciones realizadas: \r\n ' + message}
 }

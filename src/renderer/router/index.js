@@ -61,6 +61,11 @@ export default new Router({
       component: require('@/components/Settings/about/').default
     },
     {
+      path: '/Settings/log',
+      name: 'settings-log',
+      component: require('@/components/Settings/log').default
+    },
+    {
       path: '/Facturacion/index',
       name: 'facturacion-index',
       component: require('@/components/Facturacion/index/').default

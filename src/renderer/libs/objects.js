@@ -1,3 +1,23 @@
+// Logs del sistema
+exports.createLogs = (vdatetime, vlevel, vcategory, vnickname, vconn, vcapturepath, vdescription) => {
+  if (vnickname === 'NOT-LOGGED') {
+    vnickname = 'SYSTEM'
+  }
+  if (vconn === 'NOT-CONN') {
+    vconn = 'SIN CONEXION'
+  }
+  return {
+    // Propiedades
+    datetime: vdatetime,
+    level: vlevel,
+    category: vcategory,
+    nickname: vnickname,
+    conn: vconn,
+    capturePath: vcapturepath,
+    description: vdescription
+  }
+}
+
 // usuario del tipo BD
 exports.createUser = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vpassword, vidcargo, vfechanacimiento, vimagenperfil, vidoficina, visactive, vcreatedtime, vcreateduser, vupdatedtime, vupdateduser) => {
   return {

@@ -250,7 +250,7 @@
             }
           ],
           filterMultiple: true,
-          filterMethod (value, row) {
+          filterValueinArray (value, row) {
             if (value === 1) {
               return row.level === 'DEBUG'
             } else if (value === 2) {
@@ -285,7 +285,7 @@
           },
           filters: this.createFiltersNickname(),
           filterMultiple: true,
-          filterMethod (value, row) {
+          filterValueinArray (value, row) {
             if (value === row.nickname) {
               return true
             } else {

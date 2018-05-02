@@ -220,9 +220,9 @@ export default {
       if (this.searchText !== '') {
         if (this.searchState === false) {
           if (this.switchTercero === true) {
-            this.tercerosJur = require('../../libs/miscelanius.js').filterMethod(this.tercerosJur, this.columnsTerceros, this.searchText)
+            this.tercerosJur = require('../../libs/miscelanius.js').filterValueinArray(this.tercerosJur, this.columnsTerceros, this.searchText)
           } else {
-            this.tercerosNat = require('../../libs/miscelanius.js').filterMethod(this.tercerosNat, this.columnsTerceros, this.searchText)
+            this.tercerosNat = require('../../libs/miscelanius.js').filterValueinArray(this.tercerosNat, this.columnsTerceros, this.searchText)
           }
           this.searchState = true
           this.changeConsult()

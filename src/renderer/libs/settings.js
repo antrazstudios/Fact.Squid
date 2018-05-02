@@ -235,7 +235,7 @@ exports.removeConnectionWithName = (name) => {
   let i = 0
   for (i; i <= connections.length - 1; i++) {
     if (connections[i].name === name) {
-      require('./miscelanius.js').removeObjectinArray(connections, 'name', name)
+      require('./miscelanius.js').removeValueinArray(connections, 'name', name)
     }
   }
   config.set('connections', connections)

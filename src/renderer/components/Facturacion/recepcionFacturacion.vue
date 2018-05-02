@@ -464,7 +464,8 @@
                     // Si la cantidad de archivos aceptados y leidos son iguales se comprimiran
                     if (countfilesAccept === countfilesReaders) {
                       // creamos un archivo comprimido
-                      miscelanius.createaZipFile(zipContent).then((content) => {
+                      const pathDownload = require('../../libs/settings').getDocumentsPath() + 'temp'
+                      miscelanius.createZipFile(zipContent, pathDownload, 'temp_compressRIPSZip.zip').then((content) => {
                         // en caso de que se haya comprimido efectivamente
                         // creamos una conexion al servidor de base de datos
                         let conn = storage.getActualConnection()

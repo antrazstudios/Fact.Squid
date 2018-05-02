@@ -19,54 +19,42 @@
           <!-- Columna de accesos del menu -->
           <i-col span="17">
             <div>
-              <MenuItem name="1" @click="changePath('/')">
-                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Inicio" placement="bottom">
-                  <router-link style="color: inherit" :to="{ name: 'landing-page'}">
-                    <icon type="ios-home"/>
-                    <span v-if="actualWidthWindow > 1373">Inicio</span>
-                  </router-link>
-                </Tooltip>
-              </MenuItem>
-              <MenuItem name="2">
-                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Terceros" placement="bottom">
-                  <router-link style="color: inherit" :to="{ name: 'terceros' }">
-                    <icon type="ios-body"/>
-                    <span v-if="actualWidthWindow > 1373">Terceros</span>
-                  </router-link>
-                </Tooltip>
-              </MenuItem>
-              <MenuItem name="3">
-                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Facturacion" placement="bottom">
-                  <router-link style="color: inherit" :to="{ name: 'facturacion-index' }">
-                    <icon type="social-usd"/>
-                    <span v-if="actualWidthWindow > 1373">Facturacion</span>
-                  </router-link>
-                </Tooltip>
-              </MenuItem>
-              <MenuItem name="4">
-                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Radicacion" placement="bottom">
-                  <router-link style="color: inherit" :to="{ name: 'radicacion-index' }">
-                    <icon type="cube"/>
-                    <span v-if="actualWidthWindow > 1373">Radicacion</span>
-                  </router-link>
-                </Tooltip>
-              </MenuItem>
-              <MenuItem name="5">
-                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Cartera" placement="bottom">
-                  <router-link style="color: inherit" :to="{ name: 'cartera-index' }">
-                    <icon type="cash"/>
-                    <span v-if="actualWidthWindow > 1373">Cartera</span>
-                  </router-link>
-                </Tooltip>
-              </MenuItem>
-              <MenuItem name="6">
-                <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Reporteador" placement="bottom">
-                  <router-link style="color: inherit" :to="{ name: 'reporteador-index' }">
-                    <icon type="ionic"/>
-                    <span v-if="actualWidthWindow > 1373">Reporteador</span>
-                  </router-link>
-                </Tooltip>
-              </MenuItem>
+              <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Inicio" placement="bottom">
+                <i-button type="text" @click="changePath('/')">
+                  <icon type="ios-home"/>
+                  <span v-if="actualWidthWindow > 1373">Inicio</span>
+                </i-button>
+              </Tooltip>
+              <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Terceros" placement="bottom">
+                <i-button type="text" @click="changePath('/terceros')">
+                  <icon type="ios-body"/>
+                  <span v-if="actualWidthWindow > 1373">Terceros</span>
+                </i-button>
+              </Tooltip>
+              <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Facturacion" placement="bottom">
+                <i-button type="text" @click="changePath('/Facturacion/index')">
+                  <icon type="social-usd"/>
+                  <span v-if="actualWidthWindow > 1373">Facturacion</span>
+                </i-button>
+              </Tooltip>
+              <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Radicacion" placement="bottom">
+                <i-button type="text" @click="changePath('/Radicacion/index')">
+                  <icon type="cube"/>
+                  <span v-if="actualWidthWindow > 1373">Radicacion</span>
+                </i-button>
+              </Tooltip>
+              <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Cartera" placement="bottom">
+                <i-button type="text" @click="changePath('/Cartera/index')">
+                  <icon type="cash"/>
+                  <span v-if="actualWidthWindow > 1373">Cartera</span>
+                </i-button>
+              </Tooltip>
+              <Tooltip :disabled="actualWidthWindow < 1374 ? false : true" content="Reporteador" placement="bottom">
+                <i-button type="text" @click="changePath('/Reporteador/index')">
+                  <icon type="clipboard"/>
+                  <span v-if="actualWidthWindow > 1373">Reporteador</span>
+                </i-button>
+              </Tooltip>
             </div>
           </i-col>
           <!-- Columna de acciones del toolbar -->
@@ -103,9 +91,11 @@
       <Row type="flex" justify="space-between">
         <!-- Contenedor Izquierdo -->
         <div class="footer-container">
+          <!-- Muestra la version de la aplicacion y la compilacion -->
           <Tag class="footer-item-tag noclicker" v-bind:style="{ backgroundColor: colorVersion}">
             {{require('./libs/settings.js').getDeployVersionApp() + ' ' + require('./libs/settings.js').getVersionApp()}}
           </Tag>
+          <!-- Muestra opciones del modo Desarrollador -->
           <Poptip trigger="hover" v-if="developerMode === true">
             <Tag class="footer-item-tag clicker" style="background-color: #2c3e50">Modo Desarrollador</Tag>
             <div slot="content">
@@ -113,21 +103,26 @@
                 <Button style="width: 100%; margin-bottom: 5px" @click="changePath('/Settings/log')">Logs del sistema</Button>
               </Row>
               <Row>
-                <Button style="width: 100%">Depuracion del sistema</Button>
+                <Button style="width: 100%; margin-bottom: 5px">Depuracion del sistema</Button>
+              </Row>
+              <Row>
+                <Button style="width: 100%">Salir del modo Desarrollador</Button>
               </Row>
             </div>
           </Poptip>
+          <!-- Muestra el usuario logeado en el sistema -->
           <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
             <h4 style="display: inline-block;">Usuario actual: {{actualProfile.username}}</h4>
           </Tag>
         </div>
         <!-- Contenedor Derecho -->
         <div class="footer-container">
+          <!-- Muestra la conexion actual a la base de datos -->
           <Tag class="footer-item-tag text" v-if="actualProfile !== ''">
             <Icon type="link"/>
             Conectado a: {{ require('./libs/settings.js').getConnectionName() }}
           </Tag>
-          
+          <!-- Muestra las opciones con las conexiones a la base de datos -->
           <Poptip trigger="hover" title="Conexiones a BD" placement="top-end">
             <Tag class="footer-item-tag clicker" style="background-color: #1abc9c" @click="connectionsAssitantShow()">Conexiones</Tag>
             <div slot="content">
@@ -146,6 +141,7 @@
     <div v-bind:class="showMenuBar === true ? 'titlebar' : 'titlebar-shadow'">
       <Row type="flex" justify="center">
         <i-col span="3"></i-col>
+        <!-- Muestra el titulo de la aplicacion -->
         <i-col span="18" style="-webkit-app-region: drag;">
           <label class="titlebar-title">Fact
             <div class="titlebar-icon">
@@ -153,6 +149,7 @@
             </div>
           </label>
         </i-col>
+        <!-- Botones en caso de que sea en Windows su ubicacion -->
         <i-col style="text-align: right; z-index: 999" span="3">
           <i-button v-if="platform !== 'darwin'" style="z-index: 99" :disabled="!windowButtonCloseState" title="Minizar" type="text" icon="minus" size="small" @click="windowMinimize()"></i-button>
           <i-button v-if="platform !== 'darwin'" style="z-index: 99" :disabled="!windowButtonCloseState" :title="windowState === 'maximized' ? 'Restaurar' : 'Maximizar'" type="text" :icon="windowState === 'maximized' ? 'arrow-shrink' : 'arrow-expand'" size="small" @click="windowState === 'maximized' ? windowRestore() : windowMaximize()"></i-button>
@@ -160,7 +157,6 @@
         </i-col>
       </Row>    
     </div>
-
     <!-- Modals -->
     <!-- Informacion del sistema -->
     <Modal v-model="aboutModal">
@@ -219,12 +215,12 @@
 </template>
 
 <script>
+  // Zona de importacion de objetos
+  import NotificationsView from './components/miscelanius/notificationsView' // Muestra las notificaciones del sistema
   import MenuSelector from './components/miscelanius/menuOptions'
-  import NotificationsView from './components/miscelanius/notificationsView'
-  import LogsView from './components/Settings/log'
   export default {
     name: 'factsquid',
-    components: { NotificationsView, MenuSelector, LogsView },
+    components: { NotificationsView, MenuSelector },
     data () {
       return {
         visibleLoadObject: true,

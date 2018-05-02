@@ -360,7 +360,7 @@
       searchClick () {
         if (this.searchText !== '') {
           if (this.searchState === false) {
-            this.connectionsList = require('../../libs/miscelanius.js').filterMethod(this.connectionsList, this.columnsConnectionsList, this.searchText)
+            this.connectionsList = require('../../libs/miscelanius.js').filterValueinArray(this.connectionsList, this.columnsConnectionsList, this.searchText)
             this.searchState = true
             this.$refs.searchButtonRun.$el.style.display = 'none'
             this.$refs.searchButtonCancel.$el.style.display = ''

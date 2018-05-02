@@ -1,7 +1,18 @@
-
-const q = require('q')
-
-exports.removeObjectinArray = (arr, attr, value) => {
+// Instancias de Librerias
+const q = require('q') // Requiere la libreria q para exportar promesas como objetos sin afectar la modularidad
+const settings = require('./settings') // Seinstancia libreria de settings.
+/**
+ * Elimina un objeto de una matriz de acuerdo a un valor en cierto atributo.
+ *
+ * Recorre una matriz verificando elemento por elemento en cada atributo enviado en la matriz de atributos
+ * que el valor sea el indicado y elimina el objeto.
+ *
+ * @param {array} arr - Recibe una matriz para trabajar.
+ * @param {string} attr - Define el atributo en donde se busca el valor para comparar y remover.
+ * @param {string} value - El valor de comparacion que define la eliminacion del objeto.
+ * @returns {array} Matriz nueva con el o los objetos removidos.
+ */
+exports.removeValueinArray = (arr, attr, value) => {
   var i = arr.length
   while (i--) {
     if (arr[i] && arr[i].hasOwnProperty(attr) && (arguments.length > 2 && arr[i][attr] === value)) {
@@ -11,8 +22,16 @@ exports.removeObjectinArray = (arr, attr, value) => {
   return arr
 }
 
-exports.filterMethod = (obj, columns, value) => {
-  return obj.filter((row) => {
+/**
+ * Filtra un arreglo o una matriz de acuerdo a ciertos parametros.
+ *
+ * @param {array} arr - Recibe una matriz para trabajar.
+ * @param {array} columns - Recibe una matriz que contiene las columnas del arreglo incial para evaluar el filtro.
+ * @param {string} value - El valor para comparar y ejecutar el filtro.
+ * @returns {array} Matriz filtrada
+ */
+exports.filterValueinArray = (arr, columns, value) => {
+  return arr.filter((row) => {
     for (let i = 0; i < columns.length - 1; i++) {
       if (String(row[columns[i].key]).toLowerCase().indexOf(value.toLowerCase()) !== -1) {
         return true
@@ -21,8 +40,13 @@ exports.filterMethod = (obj, columns, value) => {
   })
 }
 
-// Verifica el tipo de dato de una cadena String y la regresa en su tipo Original
-// recibe en type: numeric, double, string, string-numeric, string-special, date
+/**
+ * Verifica el tipo de dato de una cadena String y la regresa en su tipo Original, retorna el valor en el tipo correcto.
+ *
+ * @param {string} type - El tipo de valor que puede verificar: 'numeric', 'double', 'string', 'string-numeric', 'string-special', 'date'.
+ * @param {obj} value - Es un objeto en el que se hara la verificacion.
+ * @param {string} [format=null] - Se utiliza para verificar formatos en fechas: 'dd/mm/aaaa', 'dd-mm-aaaa'.
+ */
 exports.verifiedType = (type, value, format = null) => {
   let result = 'ERROR'
   let permitidosNumeric = '1234567890'
@@ -31,14 +55,14 @@ exports.verifiedType = (type, value, format = null) => {
   let permitidosSpecial = '-+[](){}'
   switch (type) {
     case 'numeric':
-      const valuesPermitidosN = this._verifiedValuesPermitidos(permitidosNumeric, value, 'number')
+      const valuesPermitidosN = this._verifiedPermittedValues(permitidosNumeric, value, 'number')
       if (valuesPermitidosN === false) {
         return result
       }
       result = parseInt(value)
       break
     case 'date':
-      const valuesPermitidosD = this._verifiedValuesPermitidos(permitidosDate, value, 'date')
+      const valuesPermitidosD = this._verifiedPermittedValues(permitidosDate, value, 'date')
       if (valuesPermitidosD === false) {
         return result
       }
@@ -50,14 +74,14 @@ exports.verifiedType = (type, value, format = null) => {
       }
       break
     case 'string-numeric':
-      const valuesPermitidosSN = this._verifiedValuesPermitidos(permitidosStringUPPER + permitidosNumeric, value, 'string')
+      const valuesPermitidosSN = this._verifiedPermittedValues(permitidosStringUPPER + permitidosNumeric, value, 'string')
       if (valuesPermitidosSN === false) {
         return result
       }
       result = value
       break
     case 'string-special':
-      const valuesPermitidosSS = this._verifiedValuesPermitidos(permitidosNumeric + permitidosSpecial, value, 'string')
+      const valuesPermitidosSS = this._verifiedPermittedValues(permitidosNumeric + permitidosSpecial, value, 'string')
       if (valuesPermitidosSS === false) {
         return result
       }
@@ -69,7 +93,15 @@ exports.verifiedType = (type, value, format = null) => {
   return result
 }
 
-exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) => {
+/**
+ * Verifica valores permitidos entre dos cadenas de texto o tipos de datos.
+ *
+ * @param {string} permittedString - Cadena de caracteres permitidos.
+ * @param {string} value - Valor que se comparara con los caracteres permitidos.
+ * @param {obj} [additionaltype=null] - Valor opcional que se utiliza para comparar tipos que no son string.
+ * @returns {boolean} Retorna 'false' si falla la verificacion y 'true' si es exitosa.
+ */
+exports._verifiedPermittedValues = (permittedString, value, additionaltype = null) => {
   // verificamos el tipo de valor recepcionado
   if (this._getType(value) === 'string') { // en caso de ser string
     let splitValue = [] // creamos un split del value recepcionado, para eliminar valores vacios
@@ -82,8 +114,8 @@ exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) =
     // Recorremos el nuevo array generado limpio
     for (let i = 0; i < splitValue.length; i++) {
       let coincidencia = 0 // bandera de coincidencias
-      for (let j = 0; j < permitidos.split('').length; j++) { // recorremos los valores permitidos
-        if (splitValue[i] === permitidos.split('')[j]) { // comparamos que el char actual del array generado este entre los permitidos
+      for (let j = 0; j < permittedString.split('').length; j++) { // recorremos los valores permittedString
+        if (splitValue[i] === permittedString.split('')[j]) { // comparamos que el char actual del array generado este entre los permittedString
           coincidencia = 1 // definimos que existe coincidencia
         }
       }
@@ -93,7 +125,7 @@ exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) =
       }
     }
   } else {
-    if (this._getType(value) === typeadditional) { // en caso que no sea string, verificamos coincidencia del formato requerido frente al real
+    if (this._getType(value) === additionaltype) { // en caso que no sea string, verificamos coincidencia del formato requerido frente al real
       return true
     } else {
       return false
@@ -102,33 +134,45 @@ exports._verifiedValuesPermitidos = (permitidos, value, typeadditional = null) =
   return true
 }
 
+/**
+ * Obtiene el nombre del tipo del objeto o variable que recibe.
+ *
+ * @param {var} obj - Objeto a obtener el tipo.
+ * @returns {string} El nombre del tipo del objeto.
+ */
 exports._getType = (obj) => {
   // var type
   // faster than if/else
   return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase()
 }
 
-exports.getEmojiURL = (code) => {
-  return '/assets/images/emoji-72x72/' + code + '.png'
-}
-
-exports.createaZipFile = (filesCollection) => {
+/**
+ * Funcion que crea un archivo comprimido en formato 'ZIP' de una coleccion de archivos.
+ *
+ * @param {array} filesCollection - Matriz que contiene los archivos a convertir en un archivo comprimido.
+ * @param {string} [pathToSave='default'] - Cadena que representa la ubicacion en la que se quiere almacenar el archivo.
+ * @param {string} [filenameToSave='tempZipFile.zip'] - Cadena que representa el nombre del archivo junto con la extension '.zip'.
+ * @returns {promise} Retorna una promesa, en 'catch' una variable con el error, en 'then' { pathFile, blobFile }.
+ */
+exports.createZipFile = (filesCollection, pathToSave = 'default', filenameToSave = 'tempZipFile.zip') => {
   let deferred = q.defer()
   var JSZip = require('jszip')
   var zip = new JSZip()
-  const pathDownload = require('./settings.js').getDocumentsPath()
+  if (pathToSave === 'default') {
+    pathToSave = settings.getDocumentsPath() + 'temp'
+  }
   filesCollection.forEach(file => {
     zip.file(file.name, file.content)
   })
   zip.generateAsync({type: 'arraybuffer'}).then((blob) => {
     var bufferBlob = Buffer.from(blob, 'binary')
-    require('fs').writeFile(pathDownload + 'temp_compressRIPSZip.zip', bufferBlob, (err) => {
+    require('fs').writeFile(pathToSave + filenameToSave, bufferBlob, (err) => {
       if (err) {
         console.log('No ha sido posible guardar el archivo', err)
         deferred.reject(err)
       }
       deferred.resolve({
-        pathFile: pathDownload + 'temp_compressRIPSZip.zip',
+        pathFile: pathToSave + filenameToSave,
         blobFile: bufferBlob
       })
     })
@@ -136,17 +180,34 @@ exports.createaZipFile = (filesCollection) => {
   return deferred.promise
 }
 
+/**
+ * Convierte una fecha en una cadena para almacenar.
+ *
+ * @param {Date} val - La fecha en su respectivo formato para convertir.
+ * @returns {string} Fecha en cadena de texto en formato para datetime dd-mm-aaaa ##:##:##.
+ */
 exports.convertDateToStringStorage = (val) => {
   let dateWork = new Date(val)
   return dateWork.toLocaleDateString() + ' ' + dateWork.toLocaleTimeString()
 }
 
+/**
+ * Convierte una cadena de texto y la convierte a fecha siguiento un formato especifico.
+ *
+ * @param {string} value - Recibe una cadena para convertir.
+ * @param {string} format - Recibe una cadena con el formato de fecha a convertir: 'dd/mm/aaaa', 'dd-mm-aaaa'.
+ * @returns {Date} Objeto Date con la fecha. si no especifica hora, la hora que toma es 12:00:00, o una cadena de texto en caso de no poder realizar la conversion.
+ */
 exports.convertStringToDate = (value, format) => {
   let dateSplit
   let result
   switch (format) {
     case 'dd/mm/aaaa':
       dateSplit = value.split('/')
+      result = new Date(parseInt(dateSplit[2]), parseInt(dateSplit[1]) - 1, parseInt(dateSplit[0]), 12, 0, 0, 0)
+      break
+    case 'dd-mm-aaaa':
+      dateSplit = value.split('-')
       result = new Date(parseInt(dateSplit[2]), parseInt(dateSplit[1]) - 1, parseInt(dateSplit[0]), 12, 0, 0, 0)
       break
     default:
@@ -156,12 +217,25 @@ exports.convertStringToDate = (value, format) => {
   return result
 }
 
+/**
+ * Convierte una variable en un objeto de fecha.
+ *
+ * @deprecated 0.0.2 Use convertDateToStringStorage() instead.
+ * @param {var} val - Recibe una variable.
+ */
 exports.convertDateToStringSQL = (val) => {
   let dateWork = new Date(val)
   let dateMatriz = dateWork.toLocaleDateString().split('/')
   return dateMatriz[2] + '-' + dateMatriz[1] + '-' + dateMatriz[0]
 }
 
+/**
+ * Convierte un Base64 en BLOB para realizar el almacenamiento.
+ *
+ * @param {String} val Cadena del tipo Base64 para convertir a {BLOB}.
+ * @param {String} contentType - Tipo de contenido a convertir.
+ * @returns {Blob} Objeto convertido en Blob.
+ */
 exports.convertBase64ToBLOB = (val, contentType) => {
   var byteCharacters = atob(val)
   var byteNumbers = new Array(byteCharacters.length)
@@ -173,6 +247,12 @@ exports.convertBase64ToBLOB = (val, contentType) => {
   return blob
 }
 
+/**
+ * Lee un documento XLSX de glosa, y retorna un objeto con los datos del mismo.
+ *
+ * @param {Object} documento - Objeto woorkbook de la libreria 'exceljs.
+ * @returns {Q.Promise<Array>} Un apromesa (.then) Collecion del objeto Glosa de Objects.js, (catch) Variable que contiene el 'err' generado durante la ejecucion.
+ */
 exports.decodeXLSXGlosas = (documento) => {
   let deferred = q.defer()
   try {
@@ -217,6 +297,21 @@ exports.decodeXLSXGlosas = (documento) => {
   return deferred.promise
 }
 
+/**
+ * Crea un documento dependiendo del tipo de documentos establecidos en la BD principal o modelo de la misma.
+ *
+ * @param {Object} configuracion - Configuracion para crear un archivo.
+ * @param {String} configuracion.consecutivo - numero del consecutivo del documento para generar la glosas.
+ * @param {String} configuracion.entidadNombre - nombre de la entidad destinataria del paquete de glosas.
+ * @param {String} configuracion.nombreGestor - nombre del gestor remitente de la glosa.
+ * @param {String} configuracion.fechaDocumento - fecha en que se genera el documento.
+ * @param {String} configuracion.contenido - collecion de glosas que van dentro del paquete de glosas.
+ * @param {String} configuracion.formato - formato en modo buffer para ser trabajado.
+ * @param {String} configuracion.encabezadoImg - Imagen del operador que va en el encabezado.
+ * @param {String} configuracion.tipo - tipo de documento segun nomenclatura del modelo actual de la BD.
+ * @param {Buffer} configuracion.firmaImg - Imagen de la firma digital del gestor.
+ * @returns {Buffer} - Buffer para carga a la BD
+ */
 exports.createDocumento = (configuracion) => {
   // configuracion. consecutivo = numero del consecutivo del documento para generar la glosas
   // configuracion. entidadNombre = nombre de la entidad destinataria del paquete de glosas

@@ -1,116 +1,169 @@
-// Logs del sistema
-exports.createLogs = (vdatetime, vlevel, vcategory, vnickname, vconn, vcapturepath, vdescription) => {
-  if (vnickname === 'NOT-LOGGED') {
-    vnickname = 'SYSTEM'
-  }
-  if (vconn === 'NOT-CONN') {
-    vconn = 'SIN CONEXION'
-  }
-  return {
-    // Propiedades
-    datetime: vdatetime,
-    level: vlevel,
-    category: vcategory,
-    nickname: vnickname,
-    conn: vconn,
-    capturePath: vcapturepath,
-    description: vdescription
-  }
-}
-
-// usuario del tipo BD
-exports.createUser = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vpassword, vidcargo, vfechanacimiento, vimagenperfil, vidoficina, visactive, vcreatedtime, vcreateduser, vupdatedtime, vupdateduser) => {
-  return {
-    // Propiedades
-    id: vid,
-    identificacion: videntificacion,
-    tipoidentificacion: vtipoidentificacion,
-    primernombre: vprimernombre,
-    segundonombre: vsegundonombre,
-    primerapellido: vprimerapellido,
-    segundoapellido: vsegundoapellido,
-    username: vusername,
-    password: vpassword,
-    idcargo: vidcargo,
-    fechanacimiento: vfechanacimiento,
-    imagenperfil: vimagenperfil,
-    idoficina: vidoficina,
-    isactive: visactive,
-    createdtime: vcreatedtime,
-    createduser: vcreateduser,
-    updatedtime: vupdatedtime,
-    updateduser: vupdateduser,
-    // Procedimientos
-    getFullName () {
-      return this.primernombre + ' ' + this.segundonombre + ' ' + this.primerapellido + ' ' + this.segundoapellido
+/**
+ * Objeto de instanciacion de LogEvents del sistema.
+ */
+export class Log {
+  /**
+   * Crea un nuevo objeto del tipo 'Log'.
+   *
+   * Eventos del sistema almacenados en un archivo, representaciones abstractas para mostrarlos en pantalla.
+   *
+   * @since 0.0.1
+   * @param {string} vdatetime Hora y fecha obtenidos de la lectura del archivo de LOGS EVENTS formato 'dd-mm-aaaaT##:##:##:####'.
+   * @param {string} vlevel Nivel de importancia: 'debug', 'info', 'trace', 'warn', 'error', 'fatal' o sus equivalentes en mayuscula.
+   * @param {string} vcategory Categoria definida en la configuracion log4js.
+   * @param {string} vnickname Nombre de usuario que realizo el evento o lo invoco.
+   * @param {string} vconn Nombre de la conexion que puede ser: 'NOT-LOGGED' ó 'HOST'::'PORT'::'DATABASE'.
+   * @param {string} vcapturepath Ubicacion de la captura de pantalla del momento en que sucede el objeto.
+   * @param {string} vdescription Descripcion del evento, ayuda a dar contexto sobre lo sucedido en el evento.
+   */
+  constructor (vdatetime, vlevel, vcategory, vnickname, vconn, vcapturepath, vdescription) {
+    if (vnickname === 'NOT-LOGGED') {
+      vnickname = 'SYSTEM'
     }
+    if (vconn === 'NOT-CONN') {
+      vconn = 'SIN CONEXION'
+    }
+    this.datetime = vdatetime
+    this.level = vlevel.toUpperCase()
+    this.category = vcategory.toUpperCase()
+    this.nickname = vnickname.toUpperCase()
+    this.conn = vconn
+    this.capturePath = vcapturepath
+    this.description = vdescription.toUpperCase()
   }
 }
 
-// Usuario del tipo TOKEN
-exports.createUserToken = (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions, ventidad, voperador, vconfig, vgestor) => {
-  return {
-    // Propiedades
-    id: vid,
-    identificacion: videntificacion,
-    tipoidentificacion: vtipoidentificacion,
-    primernombre: vprimernombre,
-    segundonombre: vsegundonombre,
-    primerapellido: vprimerapellido,
-    segundoapellido: vsegundoapellido,
-    username: vusername,
-    cargo: vcargo,
-    fechanacimiento: vfechanacimiento,
-    imagenperfil: 'data:image/png;base64, ' + vimagenperfil.toString('base64').replace('data:image/png;base64, ', ''),
-    oficina: voficina,
-    isactive: visactive,
-    permissions: vpermissions,
-    entidad: ventidad,
-    operador: voperador,
-    config: vconfig,
-    gestor: vgestor,
-    // Procedimientos
-    getFullName () {
-      return this.primernombre + ' ' + this.segundonombre + ' ' + this.primerapellido + ' ' + this.segundoapellido
-    },
-    verifyPermission (namePermission) {
-      let access = false
-      for (var i = 0; i < this.permissions.length; i++) {
-        if (this.permissions[i].name === namePermission) {
-          access = true
-        } else if (this.permissions[i].name === 'ROOT') {
-          access = true
-        }
+/**
+ * Objeto que almacena los datos del usuario, reemplaza 'createUser()' y 'createUserToken()'.
+ */
+export class Usuario {
+  /**
+   * Crea un nuevo usuario del sistema.
+   *
+   * Usuarios autenticados del sistema, con toda su informacion reelevante. Tambien se utiliza como Token del mismo.
+   *
+   * @since 0.0.1
+   * @param {number} vid Numero de la llave en la BD del usuario
+   * @param {string} videntificacion Numero de identificacion del usuario
+   * @param {string} vtipoidentificacion Nombre tipo de identificacion del usuario
+   * @param {string} vprimernombre Primer nombre del usuario
+   * @param {string} vsegundonombre [Opcional] Segundo nombre del usuario
+   * @param {string} vprimerapellido Primer apellido del usuario
+   * @param {string} vsegundoapellido [Opcional] Segundo apellido del usuario
+   * @param {string} vusername Nickname del usuario en cuestion
+   * @param {string} vcargo Nombre del cargo del usuario
+   * @param {string} vfechanacimiento Fecha de nacimiento del usuario en string
+   * @param {string} vimagenperfil Cadena Base64 de la imagen
+   * @param {string} voficina Nombre de la oficina a la que pertenece el usuario
+   * @param {boolean} visactive Define si el usuario esta activo o no
+   * @param {Array<Permiso>} vpermissions Coleccion de tipo 'Permiso' con los permisos que posee el usuario
+   * @param {Entidad} ventidad Objeto con la informacion de la entidad a la que pertenece el usuario
+   * @param {Operador} voperador Objeto con la informacion del operador al que pertenece el usuario
+   * @param {Config} vconfig Objeto con la configuracion del usuario
+   * @param {Array<Gestor>} vgestor Coleccion de tipo 'Gestor' con la informacion de Gestor del usuario
+   */
+  constructor (vid, videntificacion, vtipoidentificacion, vprimernombre, vsegundonombre, vprimerapellido, vsegundoapellido, vusername, vcargo, vfechanacimiento, vimagenperfil, voficina, visactive, vpermissions, ventidad, voperador, vconfig, vgestor) {
+    this.id = vid
+    this.identificacion = videntificacion
+    this.tipoidentificacion = vtipoidentificacion
+    this.primernombre = vprimernombre.toUpperCase()
+    this.segundonombre = vsegundonombre !== '' && null ? vsegundonombre.toUpperCase() : ''
+    this.primerapellido = vprimerapellido.toUpperCase()
+    this.segundoapellido = vsegundoapellido !== '' && null ? vsegundoapellido.toUpperCase() : ''
+    this.username = vusername.toUpperCase()
+    this.cargo = vcargo.toUpperCase()
+    this.fechanacimiento = vfechanacimiento
+    this.imagenperfil = 'data =image/png;base64 ' + vimagenperfil.toString('base64').replace('data =image/png;base64 ', '')
+    this.oficina = voficina.toUpperCase()
+    this.isactive = visactive
+    this.permissions = vpermissions
+    this.entidad = ventidad
+    this.operador = voperador
+    this.config = vconfig
+    this.gestor = vgestor
+  }
+
+  /**
+   * Obtiene el nombre completo de un usuario
+   *
+   * @since 0.0.1
+   */
+  getFullName () {
+    return this.primernombre + (this.segundonombre !== '' ? ' ' + this.segundonombre : '') + ' ' + this.primerapellido + (this.segundoapellido !== '' ? ' ' + this.segundoapellido : '')
+  }
+
+  /**
+   * Evalua si el usuario tiene permiso para reliazar alguna accion
+   *
+   * @since 0.0.1
+   * @param {string} namePermission Nombre del permiso segun Permiso.nombre
+   */
+  verifyPermission (namePermission) {
+    let access = false // booleano de respuesta
+    // recorre los permisos para evaluar si el permiso existe
+    for (var i = 0; i < this.permissions.length; i++) {
+      if (this.permissions[i].name === namePermission) {
+        access = true
+      } else if (this.permissions[i].name === 'ROOT') {
+        access = true
       }
-      return access
     }
+    return access
   }
 }
 
-// Preguntas de seguridad
-exports.createSecurityQuestion = (vid, vquestion, vanswer) => {
-  vanswer = vanswer.toUpperCase()
-  return {
-    id: vid,
-    question: vquestion,
-    answer: vanswer
+/**
+ * Objeto que almacena una pregunta de seguridad del usuario.
+ */
+export class PreguntaSeguridad {
+  /**
+   * Crea una nueva pregunta.
+   *
+   * @since 0.0.1
+   * @param {number} vid Numero de id de la pregunta en la BD.
+   * @param {string} vquestion Pregunta de seguridad.
+   * @param {string} vanswer Respuesta de la pregunta.
+   */
+  constructor (vid, vquestion, vanswer) {
+    this.id = vid
+    this.question = vquestion.toUpperCase()
+    this.answer = vanswer.toUpperCase()
   }
 }
 
-// Preguntas de seguridad coo objeto
-exports.createSecurityQuestionObject = (vid, vquestion) => {
-  return {
-    id: vid,
-    question: vquestion
+/**
+ * Objeto del sistema de 'PreguntaSeguridad'.
+ */
+export class _PreguntaSeguridad {
+  /**
+   * Crea una nueva pregunta sin respuesta como objeto.
+   *
+   * @since 0.0.1
+   * @param {number} vid Numero de id de la pregunta en la BD.
+   * @param {string} vquestion Pregunta de seguridad.
+   */
+  constructor (vid, vquestion) {
+    this.id = vid
+    this.question = vquestion.toUpperCase()
   }
 }
 
-// Informacion de Gestor
-exports.createGestorInfo = (vid, vcodigo, vfirma) => {
-  return {
-    id: vid,
-    codigo: vcodigo,
-    firma: 'data:image/png;base64, ' + vfirma.toString('base64').replace('data:image/png;base64, ', '')
+/**
+ * Objeto del Gestor que almacena informacion de codigo y firma.
+ */
+export class Gestor {
+  /**
+   * Constructor de Gestor
+   *
+   * @since 0.0.1
+   * @param {number} vid Numero de id en la BD
+   * @param {string} vcodigo Codigo del gestor dependiendo del area
+   * @param {string} vfirma Base64 de la firma del gestor
+   */
+  constructor (vid, vcodigo, vfirma) {
+    this.id = vid
+    this.codigo = vcodigo
+    this.firma = 'data:image/png;base64, ' + vfirma.toString('base64').replace('data:image/png;base64, ', '')
   }
 }
 

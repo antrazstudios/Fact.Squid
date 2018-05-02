@@ -181,11 +181,12 @@
   </div>
 </template>
 <script>
+  const objects = require('../../libs/objects')
   export default {
     name: 'view-profile',
     data () {
       return {
-        actualProfile: require('../../libs/objects').createUserToken(0, '', '', '', '', '', '', '', '', '', '', '', false, [], {}, {}, {}, []),
+        actualProfile: new objects.Usuario(0, '', '', '', '', '', '', '', '', '', '', '', false, [], {}, {}, {}, []),
         rulesProfile: {
           primernombre: {
             result: '',

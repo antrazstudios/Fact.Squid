@@ -1,5 +1,5 @@
 const q = require('q')
-
+const objects = require('./objects')
 // -----------------------------------------------------------------------------------------------------------
 exports.testConnection = (hostVar, portVar, userVar, passVar, databaseVar, _callback) => {
   // --------------------------| Description |--------------------------
@@ -134,7 +134,7 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
         gestorInfo = []
         for (let i = 0; i < response.result[0].length; i++) {
           const gestores = response.result[0][i]
-          gestorInfo.push(require('./objects.js').createGestorInfo(gestores.idtb_gestores, gestores.tb_gestores_codigo, gestores.tb_gestores_fd))
+          gestorInfo.push(new objects.Gestor(gestores.idtb_gestores, gestores.tb_gestores_codigo, gestores.tb_gestores_fd))
         }
         // obtener informacion del operador al que se encuentra asociado el usuario
         let operadorData = response.result[1][0]
@@ -146,7 +146,7 @@ exports._database_usersLoginWithNicknameAndPass = (configuracion) => {
         let configData = response.result[3][0]
         confiInfo = require('./objects.js').createConfig(configData.idtb_cnf_so, configData.tb_cnf_so_usepath, configData.tb_cnf_so_path, configData.tb_cnf_so_version, configData.tb_cnf_so_requirehorarios, configData.tb_cnf_so_enabledmaps, configData.tb_cnf_so_notifications, configData.tb_cnf_so_mail_interval_hour, configData.tb_cnf_so_mail_interval_min, configData.tb_cnf_so_mail_interval_sec, configData.tb_cnf_so_security_key16, configData.tb_cnf_so_security_key8)
         // Se obtienen los datos del usuario, y se agregan los permisos obtenidos
-        data.userConsult = require('./objects.js').createUserToken(resultData2[0].idtb_users, resultData2[0].tb_users_identification, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil, resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, data.permissionsConsult, entidadInfo, operadorInfo, confiInfo, gestorInfo)
+        data.userConsult = new objects.Usuario(resultData2[0].idtb_users, resultData2[0].tb_users_identification, resultData2[0].tb_tiposidentificacion_nombre, resultData2[0].tb_users_primernombre, resultData2[0].tb_users_segundonombre, resultData2[0].tb_users_primerapellido, resultData2[0].tb_users_segundoapellido, resultData2[0].tb_users_username, resultData2[0].tb_cargos_nombre, resultData2[0].tb_users_fechanacimiento, resultData2[0].tb_users_imagenperfil, resultData2[0].tb_oficinas_nombre, resultData2[0].tb_users_isactive, data.permissionsConsult, entidadInfo, operadorInfo, confiInfo, gestorInfo)
         deferred.resolve(data)
       }).catch((err) => {
         deferred.reject('Respuesta del servidor => ' + err)
@@ -181,7 +181,7 @@ exports._database_getSecurityQuestions = (username) => {
     // Recorremos con un for todos los resultados arrojados por el servidor
     for (let i = 0; i < rta.result[0].length; i++) {
       const row = rta.result[0][i]
-      data.push(objects.createSecurityQuestion(row.idtb_users_has_tb_users_pseguridadcol, row.tb_users_pseguridad_pregunta, row.tb_users_has_tb_users_pseguridad_respuesta))
+      data.push(new objects.PreguntaSeguridad(row.idtb_users_has_tb_users_pseguridadcol, row.tb_users_pseguridad_pregunta, row.tb_users_has_tb_users_pseguridad_respuesta))
     }
     // Retornamos la informacion allada
     deferred.resolve(data)
@@ -209,7 +209,7 @@ exports._database_getAllSecurityQuestions = () => {
     // Recorremos con un for todos los resultados arrojados por el servidor
     for (let i = 0; i < rta.result.length; i++) {
       const row = rta.result[i]
-      data.push(objects.createSecurityQuestionObject(row.idtb_users_pseguridad, row.tb_users_pseguridad_pregunta))
+      data.push(new objects._PreguntaSeguridad(row.idtb_users_pseguridad, row.tb_users_pseguridad_pregunta))
     }
     // Retornamos la informacion allada
     deferred.resolve(data)

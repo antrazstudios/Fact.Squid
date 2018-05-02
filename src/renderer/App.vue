@@ -383,6 +383,9 @@
       }
     },
     mounted () {
+      // let Objet = require('./libs/prueba').Cosa
+      // let instance = new Objet('un dato')
+      // instance.funcionalidad()
       // Verficacion del tamaño maximo que puede tomar una tabla, si es 0 lo obtiene por calculo desde el tamaño de la visualizacion.
       if (this.maxHeightTable === 0) {
         this.maxHeightTable = this.electronRemote.getCurrentWindow().getSize()[1] - 240
